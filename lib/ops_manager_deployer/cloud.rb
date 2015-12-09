@@ -1,5 +1,5 @@
 class OpsManagerDeployer::Cloud
-  %w{ deploy ommit upgrade }.each do |m|
+  %w{ deploy downgrade upgrade }.each do |m|
     define_method(m) do
       raise NotImplementedError
     end

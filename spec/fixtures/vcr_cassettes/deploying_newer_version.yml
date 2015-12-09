@@ -1,0 +1,191 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Wed, 09 Dec 2015 23:31:28 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"f210870a3f2f2f997996bf014ed55192"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - b9bf8f00-5db4-4d0c-b971-133ba222a8cf
+      X-Runtime:
+      - '0.385119'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"Pivotal_Single_Sign-On_Service","product_version":"1.0.0"},{"name":"p-data-sync","product_version":"1.1.0.27"},{"name":"p-jenkins","product_version":"14.11.01.02"},{"name":"p-rabbitmq","product_version":"1.4.0.0"},{"name":"p-metrics","product_version":"1.4.0.0"},{"name":"cf","product_version":"1.4.3.0"},{"name":"p-mongodb","product_version":"1.4.0.0"},{"name":"p-jenkins","product_version":"15.05.01.05"},{"name":"p-redis","product_version":"1.4.4.0"},{"name":"p-jenkins","product_version":"15.05.01.00"},{"name":"p-jenkins","product_version":"1.3.8.3"},{"name":"p-jenkins","product_version":"15.05.01.07"},{"name":"p-metrics","product_version":"1.4.3.0"},{"name":"cf","product_version":"1.4.1.0"},{"name":"p-gateway-dashboard","product_version":"1.1.0.26"},{"name":"p-jenkins","product_version":"1.3.7.2"},{"name":"cf","product_version":"1.4.5.0"},{"name":"p-jenkins","product_version":"15.05.01.08"},{"name":"cf","product_version":"1.4.2.0"},{"name":"p-jenkins","product_version":"15.05.01.03"},{"name":"microbosh","product_version":"1.4.1.0"},{"name":"p-mysql","product_version":"1.5.0.0"},{"name":"p-push-notifications","product_version":"1.2.1.pcf14.28"},{"name":"microbosh","product_version":"1.4.2.0"}]'
+    http_version:
+  recorded_at: Wed, 09 Dec 2015 23:31:28 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Wed, 09 Dec 2015 23:31:28 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"f210870a3f2f2f997996bf014ed55192"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 8eb5f3e1-7dd4-45af-8394-631bd8dd685a
+      X-Runtime:
+      - '0.351684'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"Pivotal_Single_Sign-On_Service","product_version":"1.0.0"},{"name":"p-data-sync","product_version":"1.1.0.27"},{"name":"p-jenkins","product_version":"14.11.01.02"},{"name":"p-rabbitmq","product_version":"1.4.0.0"},{"name":"p-metrics","product_version":"1.4.0.0"},{"name":"cf","product_version":"1.4.3.0"},{"name":"p-mongodb","product_version":"1.4.0.0"},{"name":"p-jenkins","product_version":"15.05.01.05"},{"name":"p-redis","product_version":"1.4.4.0"},{"name":"p-jenkins","product_version":"15.05.01.00"},{"name":"p-jenkins","product_version":"1.3.8.3"},{"name":"p-jenkins","product_version":"15.05.01.07"},{"name":"p-metrics","product_version":"1.4.3.0"},{"name":"cf","product_version":"1.4.1.0"},{"name":"p-gateway-dashboard","product_version":"1.1.0.26"},{"name":"p-jenkins","product_version":"1.3.7.2"},{"name":"cf","product_version":"1.4.5.0"},{"name":"p-jenkins","product_version":"15.05.01.08"},{"name":"cf","product_version":"1.4.2.0"},{"name":"p-jenkins","product_version":"15.05.01.03"},{"name":"microbosh","product_version":"1.4.1.0"},{"name":"p-mysql","product_version":"1.5.0.0"},{"name":"p-push-notifications","product_version":"1.2.1.pcf14.28"},{"name":"microbosh","product_version":"1.4.2.0"}]'
+    http_version:
+  recorded_at: Wed, 09 Dec 2015 23:31:28 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Wed, 09 Dec 2015 23:31:29 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"f210870a3f2f2f997996bf014ed55192"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - af990a75-a524-4ece-987c-b97ffecc2b24
+      X-Runtime:
+      - '0.337048'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"Pivotal_Single_Sign-On_Service","product_version":"1.0.0"},{"name":"p-data-sync","product_version":"1.1.0.27"},{"name":"p-jenkins","product_version":"14.11.01.02"},{"name":"p-rabbitmq","product_version":"1.4.0.0"},{"name":"p-metrics","product_version":"1.4.0.0"},{"name":"cf","product_version":"1.4.3.0"},{"name":"p-mongodb","product_version":"1.4.0.0"},{"name":"p-jenkins","product_version":"15.05.01.05"},{"name":"p-redis","product_version":"1.4.4.0"},{"name":"p-jenkins","product_version":"15.05.01.00"},{"name":"p-jenkins","product_version":"1.3.8.3"},{"name":"p-jenkins","product_version":"15.05.01.07"},{"name":"p-metrics","product_version":"1.4.3.0"},{"name":"cf","product_version":"1.4.1.0"},{"name":"p-gateway-dashboard","product_version":"1.1.0.26"},{"name":"p-jenkins","product_version":"1.3.7.2"},{"name":"cf","product_version":"1.4.5.0"},{"name":"p-jenkins","product_version":"15.05.01.08"},{"name":"cf","product_version":"1.4.2.0"},{"name":"p-jenkins","product_version":"15.05.01.03"},{"name":"microbosh","product_version":"1.4.1.0"},{"name":"p-mysql","product_version":"1.5.0.0"},{"name":"p-push-notifications","product_version":"1.2.1.pcf14.28"},{"name":"microbosh","product_version":"1.4.2.0"}]'
+    http_version:
+  recorded_at: Wed, 09 Dec 2015 23:31:29 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Wed, 09 Dec 2015 23:31:29 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"f210870a3f2f2f997996bf014ed55192"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 02759dae-ca07-494c-8933-0609af585050
+      X-Runtime:
+      - '0.319659'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"Pivotal_Single_Sign-On_Service","product_version":"1.0.0"},{"name":"p-data-sync","product_version":"1.1.0.27"},{"name":"p-jenkins","product_version":"14.11.01.02"},{"name":"p-rabbitmq","product_version":"1.4.0.0"},{"name":"p-metrics","product_version":"1.4.0.0"},{"name":"cf","product_version":"1.4.3.0"},{"name":"p-mongodb","product_version":"1.4.0.0"},{"name":"p-jenkins","product_version":"15.05.01.05"},{"name":"p-redis","product_version":"1.4.4.0"},{"name":"p-jenkins","product_version":"15.05.01.00"},{"name":"p-jenkins","product_version":"1.3.8.3"},{"name":"p-jenkins","product_version":"15.05.01.07"},{"name":"p-metrics","product_version":"1.4.3.0"},{"name":"cf","product_version":"1.4.1.0"},{"name":"p-gateway-dashboard","product_version":"1.1.0.26"},{"name":"p-jenkins","product_version":"1.3.7.2"},{"name":"cf","product_version":"1.4.5.0"},{"name":"p-jenkins","product_version":"15.05.01.08"},{"name":"cf","product_version":"1.4.2.0"},{"name":"p-jenkins","product_version":"15.05.01.03"},{"name":"microbosh","product_version":"1.4.1.0"},{"name":"p-mysql","product_version":"1.5.0.0"},{"name":"p-push-notifications","product_version":"1.2.1.pcf14.28"},{"name":"microbosh","product_version":"1.4.2.0"}]'
+    http_version:
+  recorded_at: Wed, 09 Dec 2015 23:31:29 GMT
+recorded_with: VCR 3.0.0

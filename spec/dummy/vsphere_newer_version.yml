@@ -6,7 +6,7 @@ cloud:
   provider: vsphere
   opts:
     ova_path: path/to/ops-manager.ova
-    version: 1.4.2.0
+    version: 1.4.3.0
     portgroup: 'dummy-potgroup'
     name: 'ops-manager'
     netmask: '255.255.255.0'
