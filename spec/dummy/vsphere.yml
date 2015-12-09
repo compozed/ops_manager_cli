@@ -1,0 +1,17 @@
+---
+ip: '1.2.3.4'
+password: 'daveisawesome'
+cloud:
+  provider: vsphere
+  opts:
+    ova_path: path/to/ops-manager.ova
+    portgroup: 'dummy-potgroup'
+    name: 'ops-manager'
+    netmask: '255.255.255.0'
+    gateway: '1.2.3.1'
+    dns: '8.8.8.8'
+    target: 'vi://VM_VCENTER_USER:VM_VCENTER_PASSWORD@VM_VCENTER/VM_DATACENTER/host/VM_CLUSTER'
+    ntp_servers:
+    - clock1.example.com
+    - clock2.example.com
+    - clock3.example.com
