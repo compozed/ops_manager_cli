@@ -2,9 +2,12 @@ require "ops_manager_deployer/version"
 require "ops_manager_deployer/vsphere"
 require "net/https"
 require "uri"
+require "json"
+require "yaml"
 
 class OpsManagerDeployer
   attr_writer :cloud
+
   def initialize(conf_file)
     @conf_file = conf_file
   end
@@ -13,7 +16,7 @@ class OpsManagerDeployer
     return @cloud unless @cloud.nil?
     case provider
     when 'vsphere'
-        @cloud = Vsphere.new cloud_opts
+      @cloud = Vsphere.new(conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), cloud_opts)
     end
   end
 
@@ -31,24 +34,29 @@ class OpsManagerDeployer
   end
 
   def current_version
-    uri = URI.parse("https://#{conf.fetch('ip')}/api/products")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    request = Net::HTTP::Get.new(uri.request_uri)
-
-    request.basic_auth(conf.fetch('username'), conf.fetch('password'))
-    http.request(request)
-    '1.4.2.0'
+    current_products.select{ |i| i.fetch('name') == 'microbosh' }
+      .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
   rescue Errno::ETIMEDOUT
     nil
   end
+
 
   def new_version
     cloud_opts.fetch('version')
   end
 
   private
+  def current_products
+    uri = URI.parse("https://#{conf.fetch('ip')}/api/products")
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    get = Net::HTTP::Get.new(uri.request_uri)
+
+    get.basic_auth(conf.fetch('username'), conf.fetch('password'))
+    JSON.parse(http.request(get).body)
+  end
+
   def provider
     cloud_config.fetch('provider')
   end
@@ -62,6 +70,6 @@ class OpsManagerDeployer
   end
 
   def conf
-    @conf ||= YAML.load_file(@conf_file)
+    @conf ||= ::YAML.load_file(@conf_file)
   end
 end

@@ -1,0 +1,5 @@
+#!/usr/bin/env ruby
+
+require 'ops_manager_deployer'
+OpsManagerDeployer.new(ARGV[1]).run
+
