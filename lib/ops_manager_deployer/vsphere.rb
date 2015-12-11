@@ -12,7 +12,9 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
 
   def deploy
     deploy_ova
-    create_user
+      until( create_user.code.to_i == 200) do
+      puts '.' ; sleep 1
+    end
   end
 
 
@@ -31,11 +33,13 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
     request = Net::HTTP::Post.new(uri.request_uri )
-                                  request.body="user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}"
+    request.body="user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}"
     logger.info("User creation request: #{request.inspect}")
     response = http.request(request)
     logger.info("User creation response: #{response.inspect}")
     logger.info("User creation response body: #{response.body}")
+    logger.info("User creation response code: #{response.code}")
+    response
   end
 
   def opts ; @opts end
