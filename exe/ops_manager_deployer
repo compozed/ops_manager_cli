@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
 require 'ops_manager_deployer'
-OpsManagerDeployer.new(ARGV[1]).run
+puts 'Usage: ops_manager_deployer path/to/config.yml' unless ARGV.first
+OpsManagerDeployer.new(ARGV.first).run
 

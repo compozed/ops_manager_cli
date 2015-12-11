@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 describe OpsManagerDeployer::Vsphere do
-  let(:conf_file){'vsphere.yml'}
+  let(:conf_file){'~/workspace/deployments/lab-nb99/ops-manager/ops_manager_deployer.yml'}
   let(:conf){ YAML.load_file(conf_file) }
   let(:opts){ conf.fetch('cloud').fetch('opts') }
   let(:vsphere){ described_class.new(conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), opts) }
@@ -9,6 +9,10 @@ describe OpsManagerDeployer::Vsphere do
 
   it 'should inherit from cloud' do
     expect(described_class).to be < OpsManagerDeployer::Cloud
+  end
+
+  it 'should include logging' do
+    expect(vsphere).to be_kind_of(OpsManagerDeployer::Logging)
   end
 
   describe 'deploy' do
@@ -21,18 +25,17 @@ describe OpsManagerDeployer::Vsphere do
     end
 
     it 'should create the first user' do
-      VCR.turned_off do
-        allow(vsphere).to receive(:deploy_ova)
-        stub_request(:post, "https://#{conf['ip']}/api/users").
-          with(:body => {"user"=>"{\"user_name\"=>\"#{conf['username']}\", \"password\"=>\"#{conf['password']}\", \"password_confirmantion\"=>\"#{conf['password']}\"}"},
-               :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'Content-Type'=>'application/x-www-form-urlencoded', 'User-Agent'=>'Ruby'}).
-          to_return(:status => 200, :body => "", :headers => {})
-
+        VCR.use_cassette 'create first user2' do
+        # allow(vsphere).to receive(:deploy_ova)
         vsphere.deploy
-
-        expect(WebMock).to have_requested(:post, "https://#{conf['ip']}/api/users").
-          with { |req| req.body == "user=%7B%22user_name%22%3D%3E%22#{conf['username']}%22%2C+%22password%22%3D%3E%22#{conf['password']}%22%2C+%22password_confirmantion%22%3D%3E%22#{conf['password']}%22%7D" }
       end
     end
+
+    it 'banana' do
+      VCR.use_cassette 'create first user' do
+        allow(vsphere).to receive(:deploy_ova)
+        vsphere.deploy
+        end
+      end
   end
 end
