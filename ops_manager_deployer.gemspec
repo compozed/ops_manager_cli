@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "vcr"
   spec.add_development_dependency "webmock"
   spec.add_dependency "yaml"
+  spec.add_dependency "rvc"
 end

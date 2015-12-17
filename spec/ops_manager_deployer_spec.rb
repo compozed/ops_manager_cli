@@ -4,6 +4,8 @@ require 'yaml'
 describe OpsManagerDeployer do
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
+  let(:current_version){ '1.4.2.0' }
+  let(:current_vm_name){ "#{conf.fetch('name')}-#{current_version}"}
   let(:ops_manager_deployer){ described_class.new(conf_file) }
 
   it 'has a version number' do
@@ -11,19 +13,19 @@ describe OpsManagerDeployer do
   end
 
   describe 'when initializing' do
-    it 'should set cloud to OpsManagerDeployer::Vsphere' do
-      expect(ops_manager_deployer.cloud).to be_kind_of(OpsManagerDeployer::Vsphere)
+    it 'should set deployment to OpsManagerDeployer::Vsphere' do
+      expect(ops_manager_deployer.deployment).to be_kind_of(OpsManagerDeployer::Vsphere)
     end
 
     it 'initialize with vsphere with provided configurations' do
-      opts = conf.fetch('cloud').fetch('opts')
+      opts = conf.fetch('deployment').fetch('opts')
       expect(OpsManagerDeployer::Vsphere).to receive(:new).with(conf.fetch('ip'), conf.fetch('username') , conf.fetch('password') , opts)
-      ops_manager_deployer.cloud
+      ops_manager_deployer.deployment
     end
   end
 
   describe 'run' do
-    before { ops_manager_deployer.cloud = double('cloud').as_null_object }
+    before { ops_manager_deployer.deployment = double('deployment').as_null_object }
 
     describe 'when no ops-manager has been deployed' do
       before do
@@ -35,14 +37,14 @@ describe OpsManagerDeployer do
       end
 
       it 'performs a deployment' do
-        expect(ops_manager_deployer.cloud).to receive(:deploy)
+        expect(ops_manager_deployer.deployment).to receive(:deploy)
         expect do
           ops_manager_deployer.run
         end.to output(/No OpsManager deployed at #{conf.fetch('ip')}. Deploying .../).to_stdout
       end
 
       it 'does not performs an upgrade' do
-        expect(ops_manager_deployer.cloud).to_not receive(:upgrade)
+        expect(ops_manager_deployer.deployment).to_not receive(:upgrade)
         expect do
           ops_manager_deployer.run
         end.to output(/No OpsManager deployed at #{conf.fetch('ip')}. Deploying .../).to_stdout
@@ -58,7 +60,7 @@ describe OpsManagerDeployer do
 
       it 'does not performs a deployment' do
         VCR.use_cassette 'deploying same version' do
-          expect(ops_manager_deployer.cloud).to_not receive(:deploy)
+          expect(ops_manager_deployer.deployment).to_not receive(:deploy)
           expect do
             ops_manager_deployer.run
           end.to output(/OpsManager at #{conf.fetch('ip')} version is already #{ops_manager_deployer.new_version}. Skiping .../).to_stdout
@@ -67,7 +69,7 @@ describe OpsManagerDeployer do
 
       it 'does not performs an upgrade' do
         VCR.use_cassette 'deploying same version' do
-          expect(ops_manager_deployer.cloud).to_not receive(:upgrade)
+          expect(ops_manager_deployer.deployment).to_not receive(:upgrade)
           expect do
             ops_manager_deployer.run
           end.to output(/OpsManager at #{conf.fetch('ip')} version is already #{ops_manager_deployer.new_version}. Skiping .../).to_stdout
@@ -80,19 +82,19 @@ describe OpsManagerDeployer do
 
       it 'performs an upgrade' do
         VCR.use_cassette 'deploying newer version' do
-          expect(ops_manager_deployer.cloud).to receive(:upgrade)
+          expect(ops_manager_deployer.deployment).to receive(:upgrade).with(current_vm_name)
           expect do
             ops_manager_deployer.run
-          end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager_deployer.current_version}. Upgrading to #{ops_manager_deployer.new_version}.../).to_stdout
+          end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager_deployer.deployment.current_version}. Upgrading to #{ops_manager_deployer.new_version}.../).to_stdout
         end
       end
 
       it 'does not performs a deployment' do
         VCR.use_cassette 'deploying newer version' do
-          expect(ops_manager_deployer.cloud).to_not receive(:deploy)
+          expect(ops_manager_deployer.deployment).to_not receive(:deploy)
           expect do
             ops_manager_deployer.run
-          end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager_deployer.current_version}. Upgrading to #{ops_manager_deployer.new_version}.../).to_stdout
+          end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager_deployer.deployment.current_version}. Upgrading to #{ops_manager_deployer.new_version}.../).to_stdout
         end
       end
     end

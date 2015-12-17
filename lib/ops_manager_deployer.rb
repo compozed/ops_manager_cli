@@ -6,17 +6,17 @@ require "json"
 require "yaml"
 
 class OpsManagerDeployer
-  attr_writer :cloud
+  attr_writer :deployment
 
   def initialize(conf_file)
     @conf_file = conf_file
   end
 
-  def cloud
-    return @cloud unless @cloud.nil?
+  def deployment
+    return @deployment unless @deployment.nil?
     case provider
     when 'vsphere'
-      @cloud = Vsphere.new(conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), cloud_opts)
+      @deployment = Vsphere.new(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), deployment_opts)
     end
   end
 
@@ -24,52 +24,38 @@ class OpsManagerDeployer
       case
       when current_version.nil?
         puts "No OpsManager deployed at #{conf.fetch('ip')}. Deploying ..."
-        cloud.deploy
+        deployment.deploy
       when current_version < new_version then
         puts "OpsManager at #{conf.fetch('ip')} version is #{current_version}. Upgrading to #{new_version}.../"
-        cloud.upgrade
+        deployment.upgrade
       else
         puts "OpsManager at #{conf.fetch('ip')} version is already #{new_version}. Skiping ..."
       end
   end
 
-  def current_version
-    current_products.select{ |i| i.fetch('name') == 'microbosh' }
-      .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
-  rescue Errno::ETIMEDOUT
-    nil
-  end
-
-
   def new_version
-    cloud_opts.fetch('version')
+    deployment_opts.fetch('version')
   end
 
   private
-  def current_products
-    uri = URI.parse("https://#{conf.fetch('ip')}/api/products")
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    get = Net::HTTP::Get.new(uri.request_uri)
-
-    get.basic_auth(conf.fetch('username'), conf.fetch('password'))
-    JSON.parse(http.request(get).body)
+  def current_version
+    deployment.current_version
   end
 
   def provider
-    cloud_config.fetch('provider')
+    deployment_config.fetch('provider')
   end
 
-  def cloud_config
-    @cloud_config ||= conf.fetch('cloud')
+  def deployment_config
+    @deployment_config ||= conf.fetch('deployment')
   end
 
-  def cloud_opts
-    @cloud_opts ||= cloud_config.fetch('opts')
+  def deployment_opts
+    @deployment_opts ||= deployment_config.fetch('opts')
   end
 
   def conf
     @conf ||= ::YAML.load_file(@conf_file)
   end
+
 end

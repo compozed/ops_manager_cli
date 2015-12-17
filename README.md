@@ -21,7 +21,7 @@ Or install it yourself as:
 ## Usage
 
     git clone github.com/compozed/ops_manager_deployer  && cd ops_manager_deployer
-    # Edit the example for the cloud that you want to perform a deployment on:
+    # Edit the example for the deployment that you want to perform a deployment on:
     cp spec/dummy/YOUR_CLOUD_PROVIDER.yml conf.yml && vim conf.yml
 
 Once you have edited you configs you can run a deployment:

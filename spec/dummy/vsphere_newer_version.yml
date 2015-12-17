@@ -2,7 +2,8 @@
 ip: '1.2.3.4'
 username: 'foo'
 password: 'bar'
-cloud:
+name: 'ops-manager'
+deployment:
   provider: vsphere
   opts:
     ova_path: path/to/ops-manager.ova
@@ -12,7 +13,12 @@ cloud:
     netmask: '255.255.255.0'
     gateway: '1.2.3.1'
     dns: '8.8.8.8'
-    target: 'vi://VM_VCENTER_USER:VM_VCENTER_PASSWORD@VM_VCENTER/VM_DATACENTER/host/VM_CLUSTER'
+    vcenter:
+      username: VM_VCENTER_USER
+      password: VM_VCENTER_PASSWORD
+      host: VM_VCENTER
+      datacenter: VM_DATACENTER
+      cluster: VM_CLUSTER
     ntp_servers:
     - clock1.example.com
     - clock2.example.com

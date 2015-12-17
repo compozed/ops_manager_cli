@@ -1,12 +1,12 @@
-require "ops_manager_deployer/cloud"
+require "ops_manager_deployer/deployment"
 require "uri"
 require "ops_manager_deployer/logging"
 
-class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
+class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   include OpsManagerDeployer::Logging
 
-  def initialize(ip, username, password, opts)
-    @ip, @username, @password, @opts = ip, username, password, opts
+  def initialize(name, ip, username, password, opts)
+    @name, @ip, @username, @password, @opts = name, ip, username, password, opts
   end
 
   def deploy
@@ -17,8 +17,20 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
   end
 
   def upgrade
+    puts 'banana 1'
     get_installation_assets
+    puts 'banana 2'
     get_installation_settings
+    puts 'banana 3'
+    stop_current_vm
+    puts 'banana 4'
+    deploy
+  end
+
+
+  private
+  def stop_current_vm
+    `echo 'vm.shutdown_guest /#{@opts['vcenter']['host']}/#{@opts['vcenter']['datacenter']}/vms/#{current_vm_name}' | rvc #{@opts['vcenter']['username']}:#{@opts['vcenter']['password']}@#{@opts['vcenter']['host']}`
   end
 
   def get_installation_assets
@@ -33,10 +45,10 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
     end
   end
 
-  private
   def deploy_ova
     logger.info 'Starts ova deployment'
-    cmd = "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{@opts['portgroup']}\" --name=#{@opts['name']} -ds=#{@opts['datastore']} --prop:ip0=#{@ip} --prop:netmask0=#{@opts['netmask']}  --prop:gateway=#{@opts['gateway']} --prop:DNS=#{@opts['dns']} --prop:ntp_servers=#{@opts['ntp_servers'].join(',')} --prop:admin_password=#{@password} #{@opts['ova_path']} #{@opts['target']}"
+    target= "vi://#{@opts['vcenter']['username']}:#{@opts['vcenter']['password']}@#{@opts['vcenter']['host']}/#{@opts['vcenter']['datacenter']}/host/#{@opts['vcenter']['cluster']}"
+    cmd = "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{@opts['portgroup']}\" --name=#{current_vm_name} -ds=#{@opts['datastore']} --prop:ip0=#{@ip} --prop:netmask0=#{@opts['netmask']}  --prop:gateway=#{@opts['gateway']} --prop:DNS=#{@opts['dns']} --prop:ntp_servers=#{@opts['ntp_servers'].join(',')} --prop:admin_password=#{@password} #{@opts['ova_path']} #{target}"
     logger.info cmd
     puts `#{cmd}`
     logger.info 'Finished ova deployment'
@@ -72,5 +84,6 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Cloud
 
     http.request(request)
   end
+
 end
 
