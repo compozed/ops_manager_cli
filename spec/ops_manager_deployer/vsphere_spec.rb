@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe OpsManagerDeployer::Vsphere do
-  # let(:conf_file){"#{ENV['HOME']}/workspace/deployments/lab-nb99/ops-manager/ops_manager_deployer.yml"}
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
   let(:opts){ conf.fetch('cloud').fetch('opts') }
@@ -32,5 +31,37 @@ describe OpsManagerDeployer::Vsphere do
         vsphere.deploy
       end
     end
+  end
+
+  describe 'upgrade' do
+    before{ `rm -rf assets *.zip installation_settings.json` }
+
+    it 'should download installation_assets' do
+      allow(vsphere).to receive(:get_installation_settings)
+
+      VCR.use_cassette 'installation assets download' do
+        vsphere.upgrade
+        zipfile = "installation_assets_#{conf.fetch('ip')}.zip"
+        expect(File).to exist(zipfile)
+        `unzip #{zipfile} -d assets`
+        expect(File).to exist("assets/deployments/bosh-deployments.yml")
+        expect(File).to exist("assets/installation.yml")
+        expect(File).to exist("assets/metadata/microbosh.yml")
+      end
+    end
+
+    it 'should download installation_settings' do
+      expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
+
+      VCR.use_cassette 'installation settings download' do
+        vsphere.upgrade
+        expect( JSON.parse(File.read('installation_settings.json'))).to eq(expected_json)
+      end
+    end
+
+    it 'should stops current vm to release IP'
+    it 'should deploy' # reuse and test
+    it 'should upload installation_assets'
+    it 'should upload installation_settings'
   end
 end

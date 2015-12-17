@@ -1,0 +1,195 @@
+{
+  "guid": "7e8e1c14af2f696cc0a9",
+  "installation_schema_version": "1.5",
+  "infrastructure": {
+    "type": "vsphere",
+    "vm_password_type": "bosh_default",
+    "director_configuration": {
+      "resurrector_enabled": true,
+      "ntp_servers": [
+        "clock1.example.com",
+        "clock2.example.com",
+        "clock3.example.com"
+      ],
+      "blobstore_type": "local",
+      "database_type": "internal"
+    },
+    "networks": [
+      {
+        "guid": "726f31317f3cd292007e",
+        "name": "ops-manager",
+        "iaas_network_identifier": "shared-services",
+        "subnet": "1.2.3.0/23",
+        "dns": "1.2.3.4",
+        "gateway": "1.2.3.1",
+        "reserved_ip_ranges": "1.2.3.1-1.2.3.62, 1.2.3.64-1.2.3.254"
+      }
+    ],
+    "availability_zones": [
+      {
+        "guid": "726f3131466f617a310a",
+        "name": "az1",
+        "cluster": "VB02-CF003",
+        "resource_pool": "az1-rp"
+      },
+      {
+        "guid": "726f3131466f617a320a",
+        "name": "az2",
+        "cluster": "VB02-CF004",
+        "resource_pool": "az2-rp"
+      }
+    ],
+    "iaas_configuration": {
+      "datacenter": "RO-CF-02",
+      "vcenter_ip": "1.1.1.1",
+      "vcenter_username": "dave",
+      "vcenter_password": "isawesome",
+      "datastores": [
+        "VB01",
+        "VB02",
+        "VB03"
+      ],
+      "microbosh_vm_folder": "vms",
+      "microbosh_template_folder": "templates",
+      "microbosh_disk_path": "disk"
+    }
+  },
+  "products": [
+    {
+      "guid": "microbosh-9b6fc5940334026515a3",
+      "installation_name": "microbosh-9b6fc5940334026515a3",
+      "product_version": "1.5.5.0",
+      "singleton_availability_zone_reference": "726f3131466f617a310a",
+      "ips": {
+        "director-part-97f9dc80c7097823954c": [
+          "1.2.3.3"
+        ]
+      },
+      "stemcell": {
+        "infrastructure": "vsphere",
+        "hypervisor": "esxi",
+        "os": "ubuntu-trusty",
+        "version": "3062",
+        "file": "bosh-stemcell-3062-vsphere-esxi-ubuntu-trusty-go_agent.tgz",
+        "name": "bosh-vsphere-esxi-ubuntu-trusty-go_agent"
+      },
+      "jobs": [
+        {
+          "guid": "director-e6d0122d768bcd6a12a9",
+          "installation_name": "director",
+          "properties": [
+            {
+              "value": {
+                "identity": "vcap",
+                "salt": "dummy",
+                "password": "secret"
+              },
+              "identifier": "vm_credentials"
+            },
+            {
+              "value": {
+                "identity": "vcap",
+                "password": "secret"
+              },
+              "identifier": "agent_credentials"
+            },
+            {
+              "value": {
+                "identity": "registry",
+                "password": "secret"
+              },
+              "identifier": "registry_credentials"
+            },
+            {
+              "value": {
+                "identity": "director",
+                "password": "secret"
+              },
+              "identifier": "director_credentials"
+            },
+            {
+              "value": {
+                "identity": "nats",
+                "password": "secret"
+              },
+              "identifier": "nats_credentials"
+            },
+            {
+              "value": {
+                "identity": "redis",
+                "password": "secret"
+              },
+              "identifier": "redis_credentials"
+            },
+            {
+              "value": {
+                "identity": "postgres",
+                "password": "secret"
+              },
+              "identifier": "postgres_credentials"
+            },
+            {
+              "value": {
+                "identity": "blobstore",
+                "password": "secret"
+              },
+              "identifier": "blobstore_credentials"
+            },
+            {
+              "value": {
+                "identity": "health_monitor",
+                "password": "secret"
+              },
+              "identifier": "health_monitor_credentials"
+            },
+            {
+              "value": {
+                "private_key_pem": "-----BEGIN RSA PRIVATE KEY-----\n-----END RSA PRIVATE KEY-----\n",
+                "csr_pem": "-----BEGIN CERTIFICATE REQUEST-----\n-----END CERTIFICATE REQUEST-----\n",
+                "cert_pem": "-----BEGIN CERTIFICATE-----\n-----END CERTIFICATE-----\n"
+              },
+              "identifier": "director_ssl"
+            }
+          ],
+          "instances": [
+            {
+              "value": 1,
+              "identifier": "instances"
+            }
+          ],
+          "resources": [
+            {
+              "value": 8192,
+              "identifier": "ram"
+            },
+            {
+              "value": 25600,
+              "identifier": "ephemeral_disk"
+            },
+            {
+              "value": 40960,
+              "identifier": "persistent_disk"
+            },
+            {
+              "value": 2,
+              "identifier": "cpu"
+            }
+          ],
+          "partitions": [
+            {
+              "job_reference": "director-e6d0122d768bcd6a12a9",
+              "guid": "director-part-97f9dc80c7097823954c",
+              "installation_name": "director-partition-726f3131466f617a310a",
+              "instance_count": 1,
+              "availability_zone_reference": "726f3131466f617a310a"
+            }
+          ],
+          "identifier": "director"
+        }
+      ],
+      "infrastructure_network_reference": "726f31317f3cd292007e",
+      "deployment_network_reference": "726f31317f3cd292007e",
+      "identifier": "microbosh"
+    }
+  ]
+}
