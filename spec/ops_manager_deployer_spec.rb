@@ -4,37 +4,31 @@ require 'yaml'
 describe OpsManagerDeployer do
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
-  let(:current_version){ '1.4.2.0' }
+  let(:opts){ conf.fetch('deployment').fetch('opts') }
   let(:current_vm_name){ "#{conf.fetch('name')}-#{current_version}"}
-  let(:ops_manager_deployer){ described_class.new(conf_file) }
+  let(:current_version){ '1.4.2.0' }
+  let(:ops_manager_deployer) do
+    described_class.new(conf_file).tap do |o|
+      o.deployment = deployment
+    end
+  end
+  let(:deployment){ double('deployment',current_version: current_version ).as_null_object }
 
   it 'has a version number' do
     expect(OpsManagerDeployer::VERSION).not_to be nil
   end
 
   describe 'when initializing' do
-    it 'should set deployment to OpsManagerDeployer::Vsphere' do
-      expect(ops_manager_deployer.deployment).to be_kind_of(OpsManagerDeployer::Vsphere)
-    end
-
     it 'initialize with vsphere with provided configurations' do
       opts = conf.fetch('deployment').fetch('opts')
-      expect(OpsManagerDeployer::Vsphere).to receive(:new).with(conf.fetch('ip'), conf.fetch('username') , conf.fetch('password') , opts)
+      expect(OpsManagerDeployer::Vsphere).to receive(:new).with(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username') , conf.fetch('password') , opts)
       ops_manager_deployer.deployment
     end
   end
 
   describe 'run' do
-    before { ops_manager_deployer.deployment = double('deployment').as_null_object }
-
     describe 'when no ops-manager has been deployed' do
-      before do
-        expect_any_instance_of(Net::HTTP).to receive(:request).and_raise(Errno::ETIMEDOUT)
-      end
-
-      it 'current version should be nil' do
-        expect(ops_manager_deployer.current_version).to be_nil
-      end
+      let(:current_version){ nil }
 
       it 'performs a deployment' do
         expect(ops_manager_deployer.deployment).to receive(:deploy)
@@ -52,11 +46,7 @@ describe OpsManagerDeployer do
     end
 
     describe 'when ops-manager has been deployed and current and desired version match' do
-      it 'current version should eq new version' do
-        VCR.use_cassette 'deploying same version' do
-        expect(ops_manager_deployer.current_version).to eq(ops_manager_deployer.new_version)
-        end
-      end
+      let(:current_version){ opts.fetch('version') }
 
       it 'does not performs a deployment' do
         VCR.use_cassette 'deploying same version' do
@@ -82,7 +72,7 @@ describe OpsManagerDeployer do
 
       it 'performs an upgrade' do
         VCR.use_cassette 'deploying newer version' do
-          expect(ops_manager_deployer.deployment).to receive(:upgrade).with(current_vm_name)
+          expect(ops_manager_deployer.deployment).to receive(:upgrade)
           expect do
             ops_manager_deployer.run
           end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager_deployer.deployment.current_version}. Upgrading to #{ops_manager_deployer.new_version}.../).to_stdout

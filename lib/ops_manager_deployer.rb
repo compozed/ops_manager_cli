@@ -6,29 +6,27 @@ require "json"
 require "yaml"
 
 class OpsManagerDeployer
-  attr_writer :deployment
+  attr_accessor :deployment
 
   def initialize(conf_file)
     @conf_file = conf_file
-  end
 
-  def deployment
-    return @deployment unless @deployment.nil?
     case provider
     when 'vsphere'
       @deployment = Vsphere.new(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), deployment_opts)
     end
   end
 
+
   def run
       case
-      when current_version.nil?
+      when deployment.current_version.nil?
         puts "No OpsManager deployed at #{conf.fetch('ip')}. Deploying ..."
         deployment.deploy
-      when current_version < new_version then
-        puts "OpsManager at #{conf.fetch('ip')} version is #{current_version}. Upgrading to #{new_version}.../"
+      when deployment.current_version < new_version then
+        puts "OpsManager at #{conf.fetch('ip')} version is #{deployment.current_version}. Upgrading to #{new_version}.../"
         deployment.upgrade
-      else
+      when deployment.current_version ==  new_version then
         puts "OpsManager at #{conf.fetch('ip')} version is already #{new_version}. Skiping ..."
       end
   end
@@ -38,9 +36,6 @@ class OpsManagerDeployer
   end
 
   private
-  def current_version
-    deployment.current_version
-  end
 
   def provider
     deployment_config.fetch('provider')

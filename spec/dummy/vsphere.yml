@@ -6,8 +6,8 @@ name: 'ops-manager'
 deployment:
   provider: vsphere
   opts:
-    ova_path: path/to/ops-manager.ova
-    version: 1.4.2.0
+    ova_path: ops-manager.ova
+    version: 1.6.4.0 #~~~~!!!
     portgroup: 'dummy-potgroup'
     netmask: '255.255.255.0'
     gateway: '1.2.3.1'
@@ -15,7 +15,7 @@ deployment:
     vcenter:
       username: VM_VCENTER_USER
       password: VM_VCENTER_PASSWORD
-      host: VM_VCENTER
+      host: 1.2.3.2
       datacenter: VM_DATACENTER
       cluster: VM_CLUSTER
     ntp_servers:

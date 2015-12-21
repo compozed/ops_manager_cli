@@ -1,4 +1,9 @@
 class OpsManagerDeployer::Deployment
+  attr_accessor :name, :ip, :username, :password, :opts
+
+  def initialize(name, ip, username, password)
+    @name, @ip, @username, @password = name, ip, username, password
+  end
   %w{ deploy downgrade upgrade }.each do |m|
     define_method(m) do
       raise NotImplementedError
@@ -6,7 +11,6 @@ class OpsManagerDeployer::Deployment
   end
 
 
-  private
   def current_version
     @current_version ||= current_products.select{ |i| i.fetch('name') == 'microbosh' }
       .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
@@ -14,9 +18,9 @@ class OpsManagerDeployer::Deployment
     nil
   end
 
+  private
   def current_products
     @current_products ||= get_products
-
   end
 
   def current_vm_name
@@ -31,6 +35,8 @@ class OpsManagerDeployer::Deployment
     get = Net::HTTP::Get.new(uri.request_uri)
 
     get.basic_auth(@username, @password)
-    JSON.parse(http.request(get).body)
+    res = JSON.parse(http.request(get).body)
+    logger.info "products found: #{res}"
+    return res
   end
 end

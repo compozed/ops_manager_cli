@@ -3,10 +3,19 @@ require 'spec_helper'
 describe OpsManagerDeployer::Vsphere do
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
+  let(:vcenter_username){ vcenter.fetch('username') }
+  let(:vcenter_password){ vcenter.fetch('password') }
+  let(:vcenter_datacenter){ vcenter.fetch('datacenter') }
+  let(:vcenter_cluster){ vcenter.fetch('cluster') }
+  let(:vcenter_host){ vcenter.fetch('host') }
+  let(:name){ conf.fetch('name') }
+  let(:username){ conf.fetch('username') }
+  let(:password){ conf.fetch('password') }
+  let(:vcenter){ opts.fetch('vcenter') }
   let(:opts){ conf.fetch('deployment').fetch('opts') }
   let(:current_version){ '1.4.2.0' }
-  let(:current_vm_name){ "#{conf.fetch('name')}-#{current_version}"}
-  let(:vsphere){ described_class.new(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), opts) }
+  let(:current_vm_name){ "#{name}-#{vsphere.current_version}"}
+  let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
 
 
   it 'should inherit from deployment' do
@@ -18,7 +27,7 @@ describe OpsManagerDeployer::Vsphere do
   end
 
   describe 'deploy' do
-    let(:target){'vi://VM_VCENTER_USER:VM_VCENTER_PASSWORD@VM_VCENTER/VM_DATACENTER/host/VM_CLUSTER'}
+    let(:target){"vi://#{vcenter_username}:#{vcenter_password}@#{vcenter_host}/#{vcenter_datacenter}/host/#{vcenter_cluster}"}
 
     it 'should run ovftools successfully' do
       VCR.turned_off do
@@ -39,19 +48,19 @@ describe OpsManagerDeployer::Vsphere do
   end
 
   describe 'upgrade' do
-
     before  do
-        allow(vsphere).to receive(:current_version).and_return(current_version)
+      allow(vsphere).to receive(:current_version).and_call_original
       `rm -rf assets *.zip installation_settings.json`
     end
 
     it 'should download installation_assets' do
       allow(vsphere).to receive(:get_installation_settings)
+      allow(vsphere).to receive(:stop_current_vm)
       allow(vsphere).to receive(:deploy)
 
       VCR.use_cassette 'installation assets download' do
         vsphere.upgrade
-        zipfile = "installation_assets_#{conf.fetch('ip')}.zip"
+        zipfile = "installation_assets.zip"
         expect(File).to exist(zipfile)
         `unzip #{zipfile} -d assets`
         expect(File).to exist("assets/deployments/bosh-deployments.yml")
@@ -62,6 +71,8 @@ describe OpsManagerDeployer::Vsphere do
 
     it 'should download installation_settings' do
       allow(vsphere).to receive(:deploy)
+      allow(vsphere).to receive(:stop_current_vm)
+      allow(vsphere).to receive(:get_installation_assets)
       expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
 
       VCR.use_cassette 'installation settings download' do
@@ -74,8 +85,14 @@ describe OpsManagerDeployer::Vsphere do
       allow(vsphere).to receive(:get_installation_settings)
       allow(vsphere).to receive(:get_installation_assets)
       allow(vsphere).to receive(:deploy)
-        expect(vsphere).to receive(:`).with("echo 'vm.shutdown_guest /VM_VCENTER/VM_DATACENTER/vms/#{current_vm_name}' | rvc VM_VCENTER_USER:VM_VCENTER_PASSWORD@VM_VCENTER")
+      VCR.use_cassette 'stopping vm' do
+        expect(RbVmomi::VIM).to receive(:connect).with({ host: vcenter_host, user: vcenter_username , password: vcenter_password , insecure: true}).and_call_original
+        expect_any_instance_of(RbVmomi::VIM::ServiceInstance).to receive(:find_datacenter).with(vcenter_datacenter).and_call_original
+        expect_any_instance_of(RbVmomi::VIM::Datacenter).to receive(:find_vm).with(current_vm_name).and_call_original
+        expect_any_instance_of(RbVmomi::VIM::VirtualMachine).to receive(:PowerOffVM_Task).and_call_original
+        # vm.PowerOnVM_Task.wait_for_completion
         vsphere.upgrade
+      end
     end
 
     it 'should deploy' do # reuse and test

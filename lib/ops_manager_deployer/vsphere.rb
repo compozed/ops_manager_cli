@@ -1,4 +1,5 @@
 require "ops_manager_deployer/deployment"
+require 'rbvmomi'
 require "uri"
 require "ops_manager_deployer/logging"
 
@@ -17,24 +18,27 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   end
 
   def upgrade
-    puts 'banana 1'
     get_installation_assets
-    puts 'banana 2'
     get_installation_settings
-    puts 'banana 3'
     stop_current_vm
-    puts 'banana 4'
     deploy
   end
 
 
   private
   def stop_current_vm
-    `echo 'vm.shutdown_guest /#{@opts['vcenter']['host']}/#{@opts['vcenter']['datacenter']}/vms/#{current_vm_name}' | rvc #{@opts['vcenter']['username']}:#{@opts['vcenter']['password']}@#{@opts['vcenter']['host']}`
+    dc = vim.serviceInstance.find_datacenter(vcenter.fetch('datacenter'))
+    logger.info "finding vm: #{current_vm_name}"
+    vm = dc.find_vm(current_vm_name) or fail "VM not found"
+    vm.PowerOffVM_Task.wait_for_completion
+  end
+
+  def vim
+    RbVmomi::VIM.connect host: vcenter.fetch('host'), user: vcenter.fetch('username'), password: vcenter.fetch('password'), insecure: true
   end
 
   def get_installation_assets
-    open("installation_assets_#{@ip}.zip", "wb") do |file|
+    open("installation_assets.zip", "wb") do |file|
       file.write(get("/api/installation_asset_collection").body)
     end
   end
@@ -83,6 +87,10 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     end
 
     http.request(request)
+  end
+
+  def vcenter
+    opts.fetch('vcenter')
   end
 
 end
