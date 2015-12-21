@@ -27,6 +27,7 @@ class OpsManagerDeployer::Deployment
     @current_vm_name ||= "#{@name}-#{current_version}"
   end
 
+
   def get_products
     uri = URI.parse("https://#{@ip}/api/products")
     http = Net::HTTP.new(uri.host, uri.port)

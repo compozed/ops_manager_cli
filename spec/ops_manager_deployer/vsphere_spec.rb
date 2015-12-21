@@ -15,6 +15,7 @@ describe OpsManagerDeployer::Vsphere do
   let(:opts){ conf.fetch('deployment').fetch('opts') }
   let(:current_version){ '1.4.2.0' }
   let(:current_vm_name){ "#{name}-#{vsphere.current_version}"}
+  let(:new_vm_name){ "#{name}-#{opts.fetch('version')}"}
   let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
 
 
@@ -33,7 +34,7 @@ describe OpsManagerDeployer::Vsphere do
       VCR.turned_off do
         allow(vsphere).to receive(:current_version).and_return(current_version)
         allow(vsphere).to receive(:create_user).and_return(double(code: 200))
-        expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{current_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{conf['ip']} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{conf['password']} #{opts['ova_path']} #{target}")
+        expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{conf['ip']} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{conf['password']} #{opts['ova_path']} #{target}")
         vsphere.deploy
       end
     end
@@ -96,7 +97,6 @@ describe OpsManagerDeployer::Vsphere do
     end
 
     it 'should deploy' do # reuse and test
-
       allow(vsphere).to receive(:get_installation_settings)
       allow(vsphere).to receive(:get_installation_assets)
       allow(vsphere).to receive(:stop_current_vm)

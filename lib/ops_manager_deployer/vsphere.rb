@@ -52,7 +52,7 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   def deploy_ova
     logger.info 'Starts ova deployment'
     target= "vi://#{@opts['vcenter']['username']}:#{@opts['vcenter']['password']}@#{@opts['vcenter']['host']}/#{@opts['vcenter']['datacenter']}/host/#{@opts['vcenter']['cluster']}"
-    cmd = "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{@opts['portgroup']}\" --name=#{current_vm_name} -ds=#{@opts['datastore']} --prop:ip0=#{@ip} --prop:netmask0=#{@opts['netmask']}  --prop:gateway=#{@opts['gateway']} --prop:DNS=#{@opts['dns']} --prop:ntp_servers=#{@opts['ntp_servers'].join(',')} --prop:admin_password=#{@password} #{@opts['ova_path']} #{target}"
+    cmd = "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{@opts['portgroup']}\" --name=#{new_vm_name} -ds=#{@opts['datastore']} --prop:ip0=#{@ip} --prop:netmask0=#{@opts['netmask']}  --prop:gateway=#{@opts['gateway']} --prop:DNS=#{@opts['dns']} --prop:ntp_servers=#{@opts['ntp_servers'].join(',')} --prop:admin_password=#{@password} #{@opts['ova_path']} #{target}"
     logger.info cmd
     puts `#{cmd}`
     logger.info 'Finished ova deployment'
@@ -93,5 +93,8 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     opts.fetch('vcenter')
   end
 
+  def new_vm_name
+    @new_vm_name ||= "#{@name}-#{opts.fetch('version')}"
+  end
 end
 
