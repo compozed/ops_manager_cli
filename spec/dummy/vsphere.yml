@@ -7,7 +7,7 @@ deployment:
   provider: vsphere
   opts:
     ova_path: ops-manager.ova
-    version: 1.6.4.0 #~~~~!!!
+    version: 1.5.5.0 #~~~~!!!
     portgroup: 'dummy-potgroup'
     netmask: '255.255.255.0'
     gateway: '1.2.3.1'

@@ -1,4 +1,6 @@
+require "ops_manager_deployer/logging"
 class OpsManagerDeployer::Deployment
+  include OpsManagerDeployer::Logging
   attr_accessor :name, :ip, :username, :password, :opts
 
   def initialize(name, ip, username, password)
@@ -18,26 +20,54 @@ class OpsManagerDeployer::Deployment
     nil
   end
 
+  def create_user
+     if new_version =~/1.5/
+            body= "user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}"
+            uri= "/api/users"
+          elsif new_version=~/1.6/
+            body= "setup[user_name]=#{@username}&setup[password]=#{@password}&setup[password_confirmantion]=#{@password}&setup[eula_accepted]=true"
+            uri= "/api/setup"
+          end
+
+    res = post(uri, body: body)
+    logger.info("performing post to #{uri} with body: #{body} res: #{res}")
+    res
+  end
+
   private
   def current_products
-    @current_products ||= get_products
+    @current_products ||= JSON.parse(get("/api/products").body)
+    logger.info "products found: #{@current_products}"
+    return @current_products
   end
 
   def current_vm_name
     @current_vm_name ||= "#{@name}-#{current_version}"
   end
 
+  def get(uri)
+    http_request(uri, :get)
+  end
 
-  def get_products
-    uri = URI.parse("https://#{@ip}/api/products")
+  def post(uri, opts)
+    http_request(uri, :post, opts)
+  end
+
+  def http_request(uri, method, opts=nil)
+    uri = URI.parse("https://#{@ip}#{uri}")
+
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
     http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    get = Net::HTTP::Get.new(uri.request_uri)
+    case method
+    when :get
+      request = Net::HTTP::Get.new(uri.request_uri)
+      request.basic_auth(@username, @password)
+    when :post
+      request = Net::HTTP::Post.new(uri.request_uri )
+      request.body=opts.fetch( :body )
+    end
 
-    get.basic_auth(@username, @password)
-    res = JSON.parse(http.request(get).body)
-    logger.info "products found: #{res}"
-    return res
+    http.request(request)
   end
 end

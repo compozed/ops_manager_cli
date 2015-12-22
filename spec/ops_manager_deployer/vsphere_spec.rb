@@ -14,6 +14,7 @@ describe OpsManagerDeployer::Vsphere do
   let(:vcenter){ opts.fetch('vcenter') }
   let(:opts){ conf.fetch('deployment').fetch('opts') }
   let(:current_version){ '1.4.2.0' }
+  let(:new_version){ opts.fetch('version') }
   let(:current_vm_name){ "#{name}-#{vsphere.current_version}"}
   let(:new_vm_name){ "#{name}-#{opts.fetch('version')}"}
   let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
@@ -91,7 +92,6 @@ describe OpsManagerDeployer::Vsphere do
         expect_any_instance_of(RbVmomi::VIM::ServiceInstance).to receive(:find_datacenter).with(vcenter_datacenter).and_call_original
         expect_any_instance_of(RbVmomi::VIM::Datacenter).to receive(:find_vm).with(current_vm_name).and_call_original
         expect_any_instance_of(RbVmomi::VIM::VirtualMachine).to receive(:PowerOffVM_Task).and_call_original
-        # vm.PowerOnVM_Task.wait_for_completion
         vsphere.upgrade
       end
     end
@@ -108,4 +108,5 @@ describe OpsManagerDeployer::Vsphere do
     it 'should upload installation_assets'
     it 'should upload installation_settings'
   end
+
 end

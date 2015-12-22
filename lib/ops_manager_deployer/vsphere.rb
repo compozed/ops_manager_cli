@@ -13,7 +13,7 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   def deploy
     deploy_ova
     until( create_user.code.to_i == 200) do
-      puts '.' ; sleep 1
+      print '.' ; sleep 1
     end
   end
 
@@ -22,8 +22,13 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     get_installation_settings
     stop_current_vm
     deploy
+    # upload_installation_assets
+    # upload_installation_settings
   end
 
+  def new_version
+    opts.fetch('version')
+  end
 
   private
   def stop_current_vm
@@ -34,7 +39,7 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   end
 
   def vim
-    RbVmomi::VIM.connect host: vcenter.fetch('host'), user: vcenter.fetch('username'), password: vcenter.fetch('password'), insecure: true
+    RbVmomi::VIM.connect host: vcenter.fetch('host'), user: URI.unescape(vcenter.fetch('username')), password: URI.unescape(vcenter.fetch('password')), insecure: true
   end
 
   def get_installation_assets
@@ -58,36 +63,6 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     logger.info 'Finished ova deployment'
   end
 
-  def create_user
-    post("/api/users",
-         body: "user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}")
-  end
-
-  def get(uri)
-    http_request(uri, :get)
-  end
-
-  def post(uri, opts)
-    http_request(uri, :post, opts)
-  end
-
-  def http_request(uri, method, opts=nil)
-    uri = URI.parse("https://#{@ip}#{uri}")
-
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    case method
-    when :get
-      request = Net::HTTP::Get.new(uri.request_uri)
-      request.basic_auth(@username, @password)
-    when :post
-      request = Net::HTTP::Post.new(uri.request_uri )
-      request.body=opts.fetch( :body )
-    end
-
-    http.request(request)
-  end
 
   def vcenter
     opts.fetch('vcenter')
