@@ -22,7 +22,7 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     get_installation_settings
     stop_current_vm
     deploy
-    # upload_installation_assets
+    upload_installation_assets
     # upload_installation_settings
   end
 
@@ -30,6 +30,22 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     opts.fetch('version')
   end
 
+  def get_installation_assets
+    open("installation_assets.zip", "wb") do |file|
+      file.write(get("/api/installation_asset_collection").body)
+    end
+  end
+
+  def upload_installation_assets
+    res = post("/api/installation_asset_collection", body: "installation[file]=%40#{Dir.pwd.gsub('/', '%2F')}%C4installation_assets.zip&password=#{@password}" )
+    logger.info "Installation assets upload res: #{res.body}"
+  end
+
+  def get_installation_settings
+    open("installation_settings.json", "wb") do |file|
+      file.write(get("/api/installation_settings").body)
+    end
+  end
   private
   def stop_current_vm
     dc = vim.serviceInstance.find_datacenter(vcenter.fetch('datacenter'))
@@ -42,17 +58,6 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
     RbVmomi::VIM.connect host: vcenter.fetch('host'), user: URI.unescape(vcenter.fetch('username')), password: URI.unescape(vcenter.fetch('password')), insecure: true
   end
 
-  def get_installation_assets
-    open("installation_assets.zip", "wb") do |file|
-      file.write(get("/api/installation_asset_collection").body)
-    end
-  end
-
-  def get_installation_settings
-    open("installation_settings.json", "wb") do |file|
-      file.write(get("/api/installation_settings").body)
-    end
-  end
 
   def deploy_ova
     logger.info 'Starts ova deployment'

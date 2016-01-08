@@ -65,7 +65,10 @@ class OpsManagerDeployer::Deployment
       request.basic_auth(@username, @password)
     when :post
       request = Net::HTTP::Post.new(uri.request_uri )
-      request.body=opts.fetch( :body )
+      request.basic_auth(@username, @password)
+      body = opts.fetch( :body )
+      request.body= body
+      logger.info "Post to #{uri} with body #{ body }"
     end
 
     http.request(request)

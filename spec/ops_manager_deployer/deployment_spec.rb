@@ -7,6 +7,8 @@ describe OpsManagerDeployer::Deployment do
   let(:ip){ '1.2.3.4' }
   let(:username){ 'foo' }
   let(:password){ 'bar' }
+  let(:base_uri){ 'https://foo:bar@1.2.3.4' }
+
   let(:deployment){ described_class.new(name, ip, username, password) }
 
   %w{ deploy downgrade upgrade }.each do |m|
@@ -47,7 +49,7 @@ describe OpsManagerDeployer::Deployment do
     describe 'when version 1.5.x' do
       let(:new_version){ '1.5.5.0' }
       let(:body){ "user[user_name]=foo&user[password]=bar&user[password_confirmantion]=bar"}
-      let(:uri){ "https://1.2.3.4/api/users" }
+      let(:uri){ "#{base_uri}/api/users" }
 
       it "should successfully create first user" do
         VCR.turned_off do
@@ -58,7 +60,7 @@ describe OpsManagerDeployer::Deployment do
 
     describe 'when version 1.6.x' do
       let(:new_version){ '1.6.4' }
-      let(:uri){ "https://1.2.3.4/api/setup" }
+      let(:uri){ "#{base_uri}/api/setup" }
       let(:body){ "setup[user_name]=foo&setup[password]=bar&setup[password_confirmantion]=bar&setup[eula_accepted]=true" }
 
       it "should successfully setup first user" do

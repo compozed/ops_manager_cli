@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe OpsManagerDeployer::Vsphere do
+  let(:assets_zipfile){ "installation_assets.zip" }
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
   let(:vcenter_username){ vcenter.fetch('username') }
@@ -41,9 +42,9 @@ describe OpsManagerDeployer::Vsphere do
     end
 
     it 'should create the first user' do
-        VCR.use_cassette 'create first user', record: :none do
+      VCR.use_cassette 'create first user', record: :none do
         allow(vsphere).to receive(:deploy_ova)
-          expect(vsphere).to receive(:create_user).twice.and_call_original
+        expect(vsphere).to receive(:create_user).twice.and_call_original
         vsphere.deploy
       end
     end
@@ -59,12 +60,12 @@ describe OpsManagerDeployer::Vsphere do
       allow(vsphere).to receive(:get_installation_settings)
       allow(vsphere).to receive(:stop_current_vm)
       allow(vsphere).to receive(:deploy)
+      allow(vsphere).to receive(:upload_installation_assets)
 
       VCR.use_cassette 'installation assets download' do
         vsphere.upgrade
-        zipfile = "installation_assets.zip"
-        expect(File).to exist(zipfile)
-        `unzip #{zipfile} -d assets`
+        expect(File).to exist(assets_zipfile)
+        `unzip #{assets_zipfile} -d assets`
         expect(File).to exist("assets/deployments/bosh-deployments.yml")
         expect(File).to exist("assets/installation.yml")
         expect(File).to exist("assets/metadata/microbosh.yml")
@@ -75,6 +76,8 @@ describe OpsManagerDeployer::Vsphere do
       allow(vsphere).to receive(:deploy)
       allow(vsphere).to receive(:stop_current_vm)
       allow(vsphere).to receive(:get_installation_assets)
+      allow(vsphere).to receive(:upload_installation_assets)
+
       expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
 
       VCR.use_cassette 'installation settings download' do
@@ -87,6 +90,8 @@ describe OpsManagerDeployer::Vsphere do
       allow(vsphere).to receive(:get_installation_settings)
       allow(vsphere).to receive(:get_installation_assets)
       allow(vsphere).to receive(:deploy)
+      allow(vsphere).to receive(:upload_installation_assets)
+
       VCR.use_cassette 'stopping vm' do
         expect(RbVmomi::VIM).to receive(:connect).with({ host: vcenter_host, user: vcenter_username , password: vcenter_password , insecure: true}).and_call_original
         expect_any_instance_of(RbVmomi::VIM::ServiceInstance).to receive(:find_datacenter).with(vcenter_datacenter).and_call_original
@@ -101,12 +106,25 @@ describe OpsManagerDeployer::Vsphere do
       allow(vsphere).to receive(:get_installation_assets)
       allow(vsphere).to receive(:stop_current_vm)
       expect(vsphere).to receive(:deploy)
+      allow(vsphere).to receive(:upload_installation_assets)
 
       vsphere.upgrade
     end
 
-    it 'should upload installation_assets'
-    it 'should upload installation_settings'
+    pending 'should upload installation_assets' do
+      # VCR.use_cassette 'uploading assets' do
+        # `cp ../fixtures/installation_assets.zip .`
+        # vsphere.upload_installation_assets
+        # `rm -f *.zip`
+        # vsphere.get_installation_assets
+        # #work
+        # expect(File).to exist(assets_zipfile)
+        # `unzip #{assets_zipfile} -d assets`
+        # expect(File).to exist("assets/deployments/bosh-deployments.yml")
+        # expect(File).to exist("assets/installation.yml")
+        # expect(File).to exist("assets/metadata/microbosh.yml")
+      # end
+    end
   end
 
 end

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: post
-    uri: https://1.2.3.4/api/users
+    uri: https://foo:bar@1.2.3.4/api/users
     body:
       encoding: UTF-8
       string: user[user_name]=foo&user[password]=bar&user[password_confirmantion]=bar
@@ -36,7 +36,7 @@ http_interactions:
   recorded_at: Fri, 11 Dec 2015 23:04:43 GMT
 - request:
     method: post
-    uri: https://1.2.3.4/api/users
+    uri: https://foo:bar@1.2.3.4/api/users
     body:
       encoding: UTF-8
       string: user[user_name]=foo&user[password]=bar&user[password_confirmantion]=bar
