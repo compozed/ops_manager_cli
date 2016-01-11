@@ -111,20 +111,25 @@ describe OpsManagerDeployer::Vsphere do
       vsphere.upgrade
     end
 
-    pending 'should upload installation_assets' do
-      # VCR.use_cassette 'uploading assets' do
-        # `cp ../fixtures/installation_assets.zip .`
-        # vsphere.upload_installation_assets
-        # `rm -f *.zip`
-        # vsphere.get_installation_assets
-        # #work
-        # expect(File).to exist(assets_zipfile)
-        # `unzip #{assets_zipfile} -d assets`
-        # expect(File).to exist("assets/deployments/bosh-deployments.yml")
-        # expect(File).to exist("assets/installation.yml")
-        # expect(File).to exist("assets/metadata/microbosh.yml")
-      # end
+    # For updating VCR casset you need to:
+    # - point spec/dummy/vsphere.yml to existing vanilla ops-manager
+    it 'should upload installation_assets' do
+      VCR.use_cassette 'uploading assets' do
+        expect do
+          `rm ../dummy/installation_assets.zip`
+          `cp ../fixtures/installation_assets.zip .`
+          vsphere.upload_installation_assets
+        end.to change{ vsphere.get_installation_assets.code.to_i }.from(500).to(200)
+      end
+    end
+
+    pending 'should upload installation_settings' do
+      VCR.use_cassette 'uploading settings' do
+        `rm ../dummy/installation_settings.json`
+          `cp ../fixtures/installation_settings_for_upload.json installation_settings.json`
+          res = vsphere.upload_installation_settings
+          expect(res.code.to_i).to eq(200)
+      end
     end
   end
-
 end

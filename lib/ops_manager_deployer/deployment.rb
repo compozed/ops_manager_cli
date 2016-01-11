@@ -1,4 +1,6 @@
 require "ops_manager_deployer/logging"
+require "net/http/post/multipart"
+
 class OpsManagerDeployer::Deployment
   include OpsManagerDeployer::Logging
   attr_accessor :name, :ip, :username, :password, :opts
@@ -21,13 +23,13 @@ class OpsManagerDeployer::Deployment
   end
 
   def create_user
-     if new_version =~/1.5/
-            body= "user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}"
-            uri= "/api/users"
-          elsif new_version=~/1.6/
-            body= "setup[user_name]=#{@username}&setup[password]=#{@password}&setup[password_confirmantion]=#{@password}&setup[eula_accepted]=true"
-            uri= "/api/setup"
-          end
+    if new_version =~/1.5/
+      body= "user[user_name]=#{@username}&user[password]=#{@password}&user[password_confirmantion]=#{@password}"
+      uri= "/api/users"
+    elsif new_version=~/1.6/
+      body= "setup[user_name]=#{@username}&setup[password]=#{@password}&setup[password_confirmantion]=#{@password}&setup[eula_accepted]=true"
+      uri= "/api/setup"
+    end
 
     res = post(uri, body: body)
     logger.info("performing post to #{uri} with body: #{body} res: #{res}")
@@ -53,6 +55,11 @@ class OpsManagerDeployer::Deployment
     http_request(uri, :post, opts)
   end
 
+  def multipart_post(uri, opts)
+    http_request(uri, :multipart_post, opts)
+  end
+
+
   def http_request(uri, method, opts=nil)
     uri = URI.parse("https://#{@ip}#{uri}")
 
@@ -69,6 +76,9 @@ class OpsManagerDeployer::Deployment
       body = opts.fetch( :body )
       request.body= body
       logger.info "Post to #{uri} with body #{ body }"
+    when :multipart_post
+      request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
+      request.basic_auth(@username, @password)
     end
 
     http.request(request)

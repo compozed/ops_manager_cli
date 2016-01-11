@@ -2,6 +2,7 @@ require "ops_manager_deployer/deployment"
 require 'rbvmomi'
 require "uri"
 require "ops_manager_deployer/logging"
+require "byebug"
 
 class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   include OpsManagerDeployer::Logging
@@ -31,21 +32,45 @@ class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
   end
 
   def get_installation_assets
-    open("installation_assets.zip", "wb") do |file|
-      file.write(get("/api/installation_asset_collection").body)
+    res = get("/api/installation_asset_collection")
+    if res.code.to_i == 200
+      open("installation_assets.zip", "wb") do |file|
+        file.write(res.body)
+      end
     end
+    res
   end
 
   def upload_installation_assets
-    res = post("/api/installation_asset_collection", body: "installation[file]=%40#{Dir.pwd.gsub('/', '%2F')}%C4installation_assets.zip&password=#{@password}" )
-    logger.info "Installation assets upload res: #{res.body}"
+    zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
+    res = multipart_post( "/api/installation_asset_collection",
+      :password => @password,
+      "installation[file]" => zip
+    )
+    res
+  end
+
+  def upload_installation_settings
+    # json is Yaml compatible
+    yml = UploadIO.new("#{Dir.pwd}/installation_settings.json", 'application/x-yaml')
+    res = multipart_post( "/api/installation_settings",
+      :password => @password,
+      "installation[file]" => yml
+    )
+    puts res.body
+    res
   end
 
   def get_installation_settings
-    open("installation_settings.json", "wb") do |file|
-      file.write(get("/api/installation_settings").body)
+    res = get("/api/installation_settings")
+    if res.code.to_i == 200
+      open("installation_settings.json", "wb") do |file|
+        file.write(res.body)
+      end
     end
+    res
   end
+
   private
   def stop_current_vm
     dc = vim.serviceInstance.find_datacenter(vcenter.fetch('datacenter'))
