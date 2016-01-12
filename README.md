@@ -1,6 +1,10 @@
 # OpsManagerDeployer
 
-Performs Ops Manager deployments.
+Performs Ops Manager deployments (vsphere support only).
+
+## Pre-requisites
+
+ - `ovftools` installed (available in user PATH) on the machine where the following process will be executed
 
 ## Installation
 
