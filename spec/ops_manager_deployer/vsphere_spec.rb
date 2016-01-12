@@ -116,19 +116,10 @@ describe OpsManagerDeployer::Vsphere do
     it 'should upload installation_assets' do
       VCR.use_cassette 'uploading assets' do
         expect do
-          `rm ../dummy/installation_assets.zip`
+          `rm installation_assets.zip`
           `cp ../fixtures/installation_assets.zip .`
           vsphere.upload_installation_assets
         end.to change{ vsphere.get_installation_assets.code.to_i }.from(500).to(200)
-      end
-    end
-
-    pending 'should upload installation_settings' do
-      VCR.use_cassette 'uploading settings' do
-        `rm ../dummy/installation_settings.json`
-          `cp ../fixtures/installation_settings_for_upload.json installation_settings.json`
-          res = vsphere.upload_installation_settings
-          expect(res.code.to_i).to eq(200)
       end
     end
   end

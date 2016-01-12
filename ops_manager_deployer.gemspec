@@ -24,5 +24,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "webmock"
   spec.add_dependency "rbvmomi"
   spec.add_dependency "multipart-post"
-  spec.add_dependency "byebug"
+  spec.add_dependency "colorize"
 end

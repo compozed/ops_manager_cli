@@ -32,14 +32,12 @@ class OpsManagerDeployer::Deployment
     end
 
     res = post(uri, body: body)
-    logger.info("performing post to #{uri} with body: #{body} res: #{res}")
     res
   end
 
   private
   def current_products
     @current_products ||= JSON.parse(get("/api/products").body)
-    logger.info "products found: #{@current_products}"
     return @current_products
   end
 
@@ -47,40 +45,58 @@ class OpsManagerDeployer::Deployment
     @current_vm_name ||= "#{@name}-#{current_version}"
   end
 
-  def get(uri)
-    http_request(uri, :get)
+  def get(endpoint, opts = {})
+    uri =  URI.parse("https://#{@ip}#{endpoint}")
+    http = http_for(uri)
+    request = Net::HTTP::Get.new(uri.request_uri)
+    request.basic_auth(@username, @password)
+
+    if opts[:write_to]
+      begin
+        f = open(opts.fetch(:write_to), "wb")
+        http.request(request) do |res|
+          res.read_body do |segment|
+            f.write(segment)
+          end
+        end
+      ensure
+        f.close
+      end
+    else
+      http.request(request)
+    end
+
   end
 
-  def post(uri, opts)
-    http_request(uri, :post, opts)
-  end
-
-  def multipart_post(uri, opts)
-    http_request(uri, :multipart_post, opts)
-  end
-
-
-  def http_request(uri, method, opts=nil)
-    uri = URI.parse("https://#{@ip}#{uri}")
-
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-    case method
-    when :get
-      request = Net::HTTP::Get.new(uri.request_uri)
-      request.basic_auth(@username, @password)
-    when :post
-      request = Net::HTTP::Post.new(uri.request_uri )
+  def post(endpoint, opts)
+      uri =  URI.parse("https://#{@ip}#{endpoint}")
+      http = http_for(uri)
+      request = Net::HTTP::Post.new(uri.request_uri)
       request.basic_auth(@username, @password)
       body = opts.fetch( :body )
       request.body= body
-      logger.info "Post to #{uri} with body #{ body }"
-    when :multipart_post
-      request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
-      request.basic_auth(@username, @password)
-    end
+      http.request(request).tap do |res|
+        logger.info("performing post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
+        logger.info("post response body #{res.body}")
+      end
+  end
 
-    http.request(request)
+  def multipart_post(endpoint, opts)
+    uri = URI.parse("https://#{@ip}#{endpoint}")
+    http = http_for(uri)
+    request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
+    request.basic_auth(@username, @password)
+    http.request(request).tap do |res|
+      logger.info("performing multipart_post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
+      logger.info("post response body #{res.body}")
+    end
+  end
+
+  def http_for(uri)
+    Net::HTTP.new(uri.host, uri.port).tap do |http|
+      http.use_ssl = true
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      http.read_timeout = 1200
+    end
   end
 end

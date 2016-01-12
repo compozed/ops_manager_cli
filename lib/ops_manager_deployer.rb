@@ -1,5 +1,6 @@
 require "ops_manager_deployer/version"
 require "ops_manager_deployer/vsphere"
+require "colorize"
 require "net/https"
 require "uri"
 require "json"
@@ -21,13 +22,13 @@ class OpsManagerDeployer
   def run
       case
       when deployment.current_version.nil?
-        puts "No OpsManager deployed at #{conf.fetch('ip')}. Deploying ..."
+        puts "No OpsManager deployed at #{conf.fetch('ip')}. Deploying ...".green
         deployment.deploy
       when deployment.current_version < new_version then
-        puts "OpsManager at #{conf.fetch('ip')} version is #{deployment.current_version}. Upgrading to #{new_version}.../"
+        puts "OpsManager at #{conf.fetch('ip')} version is #{deployment.current_version}. Upgrading to #{new_version}.../".green
         deployment.upgrade
       when deployment.current_version ==  new_version then
-        puts "OpsManager at #{conf.fetch('ip')} version is already #{new_version}. Skiping ..."
+        puts "OpsManager at #{conf.fetch('ip')} version is already #{new_version}. Skiping ...".green
       end
   end
 
