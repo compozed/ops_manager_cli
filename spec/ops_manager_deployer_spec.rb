@@ -90,7 +90,7 @@ describe OpsManagerDeployer do
     end
 
     describe 'when desired version < existing version' do
-    it 'performs a downgrade'
+    xit 'performs a downgrade'
     end
   end
 end

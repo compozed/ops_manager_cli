@@ -20,7 +20,6 @@ describe OpsManagerDeployer::Vsphere do
   let(:new_vm_name){ "#{name}-#{opts.fetch('version')}"}
   let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
 
-
   it 'should inherit from deployment' do
     expect(described_class).to be < OpsManagerDeployer::Deployment
   end
@@ -32,20 +31,25 @@ describe OpsManagerDeployer::Vsphere do
   describe 'deploy' do
     let(:target){"vi://#{vcenter_username}:#{vcenter_password}@#{vcenter_host}/#{vcenter_datacenter}/host/#{vcenter_cluster}"}
 
+    it 'Should perform in the right order' do
+      %i( deploy_ova create_first_user).each do |m|
+        expect(vsphere).to receive(m).ordered
+      end
+      vsphere.deploy
+    end
+
     it 'should run ovftools successfully' do
       VCR.turned_off do
         allow(vsphere).to receive(:current_version).and_return(current_version)
-        allow(vsphere).to receive(:create_user).and_return(double(code: 200))
         expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{conf['ip']} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{conf['password']} #{opts['ova_path']} #{target}")
-        vsphere.deploy
+        vsphere.deploy_ova
       end
     end
 
     it 'should create the first user' do
       VCR.use_cassette 'create first user', record: :none do
-        allow(vsphere).to receive(:deploy_ova)
         expect(vsphere).to receive(:create_user).twice.and_call_original
-        vsphere.deploy
+        vsphere.create_first_user
       end
     end
   end
@@ -56,14 +60,17 @@ describe OpsManagerDeployer::Vsphere do
       `rm -rf assets *.zip installation_settings.json`
     end
 
-    it 'should download installation_assets' do
-      allow(vsphere).to receive(:get_installation_settings)
-      allow(vsphere).to receive(:stop_current_vm)
-      allow(vsphere).to receive(:deploy)
-      allow(vsphere).to receive(:upload_installation_assets)
+    it 'Should perform in the right order' do
+      %i( get_installation_assets get_installation_settings
+         stop_current_vm deploy upload_installation_assets ).each do |m|
+        expect(vsphere).to receive(m).ordered
+      end
+      vsphere.upgrade
+    end
 
+    it 'should download installation_assets' do
       VCR.use_cassette 'installation assets download' do
-        vsphere.upgrade
+        vsphere.get_installation_assets
         expect(File).to exist(assets_zipfile)
         `unzip #{assets_zipfile} -d assets`
         expect(File).to exist("assets/deployments/bosh-deployments.yml")
@@ -73,15 +80,10 @@ describe OpsManagerDeployer::Vsphere do
     end
 
     it 'should download installation_settings' do
-      allow(vsphere).to receive(:deploy)
-      allow(vsphere).to receive(:stop_current_vm)
-      allow(vsphere).to receive(:get_installation_assets)
-      allow(vsphere).to receive(:upload_installation_assets)
-
       expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
 
       VCR.use_cassette 'installation settings download' do
-        vsphere.upgrade
+        vsphere.get_installation_settings
         expect( JSON.parse(File.read('installation_settings.json'))).to eq(expected_json)
       end
     end
