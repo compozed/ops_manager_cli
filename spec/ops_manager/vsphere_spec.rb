@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe OpsManagerDeployer::Vsphere do
+describe OpsManager::Vsphere do
   let(:assets_zipfile){ "installation_assets.zip" }
   let(:conf_file){'vsphere.yml'}
   let(:conf){ YAML.load_file(conf_file) }
@@ -21,11 +21,11 @@ describe OpsManagerDeployer::Vsphere do
   let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
 
   it 'should inherit from deployment' do
-    expect(described_class).to be < OpsManagerDeployer::Deployment
+    expect(described_class).to be < OpsManager::Deployment
   end
 
   it 'should include logging' do
-    expect(vsphere).to be_kind_of(OpsManagerDeployer::Logging)
+    expect(vsphere).to be_kind_of(OpsManager::Logging)
   end
 
   describe 'deploy' do

@@ -1,5 +1,5 @@
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
-require 'ops_manager_deployer'
+require 'ops_manager'
 require 'vcr'
 require 'webmock/rspec'
 

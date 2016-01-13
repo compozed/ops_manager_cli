@@ -1,9 +1,9 @@
 require 'spec_helper'
-require 'ops_manager_deployer/logging'
+require 'ops_manager/logging'
 
-describe OpsManagerDeployer::Logging do
+describe OpsManager::Logging do
   class Foo
-    include OpsManagerDeployer::Logging
+    include OpsManager::Logging
   end
 
   describe 'Foo#logger' do
@@ -18,18 +18,18 @@ describe OpsManagerDeployer::Logging do
     end
 
     it 'should output logs to a file' do
-      OpsManagerDeployer::Logging.logger=nil
-      expect(Logger).to receive(:new).with('ops_manager_deployer.log')
-      OpsManagerDeployer::Logging.logger
+      OpsManager::Logging.logger=nil
+      expect(Logger).to receive(:new).with('ops_manager.log')
+      OpsManager::Logging.logger
     end
 
     describe 'when DEBUG=true' do
       before { ENV['DEBUG']= 'true' }
 
       it 'should output logs to a file' do
-        OpsManagerDeployer::Logging.logger=nil
+        OpsManager::Logging.logger=nil
         expect(Logger).to receive(:new).with(STDOUT)
-        OpsManagerDeployer::Logging.logger
+        OpsManager::Logging.logger
       end
 
       after{ ENV.delete('DEBUG') }

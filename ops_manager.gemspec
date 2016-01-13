@@ -1,13 +1,13 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'ops_manager_deployer/version'
+require 'ops_manager/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "ops_manager_deployer"
-  spec.version       = OpsManagerDeployer::VERSION
-  spec.authors       = ["Alan Moran"]
-  spec.email         = ["bonzofenix@gmail.com"]
+  spec.name          = "ops_manager"
+  spec.version       = OpsManager::VERSION
+  spec.authors       = ["Alan Moran", "Satheesh Uppalapati"]
+  spec.email         = ["bonzofenix@gmail.com", "satheesh.uppalapati@gmail.com"]
 
   spec.summary       = %q{ Performs Ops Manager deployments.  }
   spec.license       = "MIT"

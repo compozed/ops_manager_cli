@@ -1,12 +1,12 @@
-require "ops_manager_deployer/version"
-require "ops_manager_deployer/vsphere"
+require "ops_manager/version"
+require "ops_manager/vsphere"
 require "colorize"
 require "net/https"
 require "uri"
 require "json"
 require "yaml"
 
-class OpsManagerDeployer
+class OpsManager
   attr_accessor :deployment
 
   def initialize(conf_file)

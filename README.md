@@ -1,4 +1,4 @@
-# OpsManagerDeployer
+# OpsManager
 
 Performs Ops Manager deployments (vsphere support only).
 
@@ -11,7 +11,7 @@ Performs Ops Manager deployments (vsphere support only).
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'ops_manager_deployer'
+gem 'ops_manager'
 ```
 
 And then execute:
@@ -20,18 +20,33 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install ops_manager_deployer
+    $ gem install ops_manager
 
 ## Usage
 
-    git clone github.com/compozed/ops_manager_deployer  && cd ops_manager_deployer
+### Deploy Ops Manager
+
+    git clone github.com/compozed/ops_manager  && cd ops_manager
     # Edit the example for the deployment that you want to perform a deployment on:
     cp spec/dummy/YOUR_CLOUD_PROVIDER.yml conf.yml && vim conf.yml
 
 Once you have edited you configs you can run a deployment:
 
-    ops_manager_deployer conf.yml
+    ./ops_manager deploy -c conf.yml
 
+### Provision stemcell
+
+    ./ops_manager provision stemcell -p ./path/to/stemcell -t target -u username -p password
+
+### Deploy product
+
+- Upload a tile( Skip if exists)
+- Enable that tile as an available product
+- performs an deploy if the product was never deployed 
+- performs an upgrade if the product olready exists and its old
+- Apply changes if the tile already exists
+
+    ./ops_manager deploy product -c conf.yml 
 
 ## Development
 
@@ -41,7 +56,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/compozed/ops_manager_deployer. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
+Bug reports and pull requests are welcome on GitHub at https://github.com/compozed/ops_manager. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
 
 
 ## License

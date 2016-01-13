@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'yaml'
-require "ops_manager_deployer/deployment"
+require "ops_manager/deployment"
 
-describe OpsManagerDeployer::Deployment do
+describe OpsManager::Deployment do
   let(:name){ 'ops-manager' }
   let(:ip){ '1.2.3.4' }
   let(:username){ 'foo' }

@@ -1,8 +1,8 @@
-require "ops_manager_deployer/logging"
+require "ops_manager/logging"
 require "net/http/post/multipart"
 
-class OpsManagerDeployer::Deployment
-  include OpsManagerDeployer::Logging
+class OpsManager::Deployment
+  include OpsManager::Logging
   attr_accessor :name, :ip, :username, :password, :opts
 
   def initialize(name, ip, username, password)

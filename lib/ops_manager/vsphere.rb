@@ -1,10 +1,10 @@
-require "ops_manager_deployer/deployment"
+require "ops_manager/deployment"
 require 'rbvmomi'
 require "uri"
-require "ops_manager_deployer/logging"
+require "ops_manager/logging"
 
-class OpsManagerDeployer::Vsphere < OpsManagerDeployer::Deployment
-  include OpsManagerDeployer::Logging
+class OpsManager::Vsphere < OpsManager::Deployment
+  include OpsManager::Logging
 
   def initialize(name, ip, username, password, opts)
     @name, @ip, @username, @password, @opts = name, ip, username, password, opts
