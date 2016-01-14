@@ -1,6 +1,4 @@
 #!/usr/bin/env ruby
 
 require 'ops_manager'
-puts 'Usage: ops_manager path/to/config.yml' unless ARGV.first
-OpsManager.new(ARGV.first).run
-
+OpsManager::Cli.run ARGV

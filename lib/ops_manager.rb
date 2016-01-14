@@ -1,11 +1,3 @@
-require "ops_manager/version"
-require "ops_manager/vsphere"
-require "colorize"
-require "net/https"
-require "uri"
-require "json"
-require "yaml"
-
 class OpsManager
   attr_accessor :deployment
 
@@ -19,7 +11,7 @@ class OpsManager
   end
 
 
-  def run
+  def deploy
       case
       when deployment.current_version.nil?
         puts "No OpsManager deployed at #{conf.fetch('ip')}. Deploying ...".green
@@ -53,5 +45,13 @@ class OpsManager
   def conf
     @conf ||= ::YAML.load_file(@conf_file)
   end
-
 end
+
+require "ops_manager/version"
+require "ops_manager/vsphere"
+require "ops_manager/cli"
+require "colorize"
+require "net/https"
+require "uri"
+require "json"
+require "yaml"

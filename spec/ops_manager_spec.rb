@@ -26,21 +26,21 @@ describe OpsManager do
     end
   end
 
-  describe 'run' do
+  describe 'deploy' do
     describe 'when no ops-manager has been deployed' do
       let(:current_version){ nil }
 
       it 'performs a deployment' do
         expect(ops_manager.deployment).to receive(:deploy)
         expect do
-          ops_manager.run
+          ops_manager.deploy
         end.to output(/No OpsManager deployed at #{conf.fetch('ip')}. Deploying .../).to_stdout
       end
 
       it 'does not performs an upgrade' do
         expect(ops_manager.deployment).to_not receive(:upgrade)
         expect do
-          ops_manager.run
+          ops_manager.deploy
         end.to output(/No OpsManager deployed at #{conf.fetch('ip')}. Deploying .../).to_stdout
       end
     end
@@ -52,7 +52,7 @@ describe OpsManager do
         VCR.use_cassette 'deploying same version' do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
-            ops_manager.run
+            ops_manager.deploy
           end.to output(/OpsManager at #{conf.fetch('ip')} version is already #{ops_manager.new_version}. Skiping .../).to_stdout
         end
       end
@@ -61,7 +61,7 @@ describe OpsManager do
         VCR.use_cassette 'deploying same version' do
           expect(ops_manager.deployment).to_not receive(:upgrade)
           expect do
-            ops_manager.run
+            ops_manager.deploy
           end.to output(/OpsManager at #{conf.fetch('ip')} version is already #{ops_manager.new_version}. Skiping .../).to_stdout
         end
       end
@@ -74,7 +74,7 @@ describe OpsManager do
         VCR.use_cassette 'deploying newer version' do
           expect(ops_manager.deployment).to receive(:upgrade)
           expect do
-            ops_manager.run
+            ops_manager.deploy
           end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager.new_version}.../).to_stdout
         end
       end
@@ -83,7 +83,7 @@ describe OpsManager do
         VCR.use_cassette 'deploying newer version' do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
-            ops_manager.run
+            ops_manager.deploy
           end.to output(/OpsManager at #{conf.fetch('ip')} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager.new_version}.../).to_stdout
         end
       end
