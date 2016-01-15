@@ -6,7 +6,7 @@ class OpsManager
 
     case provider
     when 'vsphere'
-      @deployment = Vsphere.new(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username'), conf.fetch('password'), deployment_opts)
+      @deployment = Vsphere.new(conf.fetch('name'), target, username, password, deployment_opts)
     end
   end
 
@@ -25,6 +25,11 @@ class OpsManager
     conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
     conf.merge!(opts)
     File.open(conf_file_path, 'w'){|f| f.write(conf.to_yaml) }
+  end
+
+  def self.get_conf(key)
+    conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
+    conf.fetch(key)
   end
 
   def deploy
@@ -51,7 +56,7 @@ class OpsManager
   end
 
   def deployment_config
-    @deployment_config ||= conf.fetch('deployment')
+    @deployment_config ||= conf
   end
 
   def deployment_opts
@@ -62,8 +67,15 @@ class OpsManager
   end
 
   def target
-    @target ||= conf.fetch('ip')
+    self.class.get_conf(:target)
+  end
 
+  def username
+    self.class.get_conf(:username)
+  end
+
+  def password
+    self.class.get_conf(:password)
   end
 
   def self.ops_manager_dir

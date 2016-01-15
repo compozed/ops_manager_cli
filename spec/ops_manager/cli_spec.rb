@@ -24,7 +24,7 @@ describe OpsManager::Cli do
 
   # ./ops_manager deploy -c conf.yml
   describe "deploy" do
-    let(:args) { %w(deploy vsphere.yml) }
+    let(:args) { %w(deploy ops_manager_deployment.yml) }
 
     it "should call OpsManager.deploy" do
       expect_any_instance_of(OpsManager).to receive(:deploy)

@@ -2,8 +2,11 @@ require 'spec_helper'
 
 describe OpsManager::Vsphere do
   let(:assets_zipfile){ "installation_assets.zip" }
-  # let(:conf_file){'ops_manager_deployment.yml'}
-  let(:conf_file){'vsphere.yml'}
+  let(:conf_file){'ops_manager_deployment.yml'}
+  let(:name){ conf.fetch('name') }
+  let(:target){ OpsManager.get_conf :target }
+  let(:username){ OpsManager.get_conf :username }
+  let(:password){ OpsManager.get_conf :password }
 
   let(:conf){ YAML.load_file(conf_file) }
   let(:vcenter_username){ vcenter.fetch('username') }
@@ -11,16 +14,18 @@ describe OpsManager::Vsphere do
   let(:vcenter_datacenter){ vcenter.fetch('datacenter') }
   let(:vcenter_cluster){ vcenter.fetch('cluster') }
   let(:vcenter_host){ vcenter.fetch('host') }
-  let(:name){ conf.fetch('name') }
-  let(:username){ conf.fetch('username') }
-  let(:password){ conf.fetch('password') }
   let(:vcenter){ opts.fetch('vcenter') }
-  let(:opts){ conf.fetch('deployment').fetch('opts') }
+  let(:opts){ conf.fetch('opts') }
   let(:current_version){ '1.4.2.0' }
   let(:new_version){ opts.fetch('version') }
   let(:current_vm_name){ "#{name}-#{vsphere.current_version}"}
   let(:new_vm_name){ "#{name}-#{opts.fetch('version')}"}
-  let(:vsphere){ described_class.new(name, conf.fetch('ip'), username, password, opts) }
+  let(:vsphere){ described_class.new(name, target, username, password, opts) }
+
+  before do
+    OpsManager.target('1.2.3.4')
+    OpsManager.login('foo', 'bar')
+  end
 
   it 'should inherit from deployment' do
     expect(described_class).to be < OpsManager::Deployment
@@ -31,7 +36,7 @@ describe OpsManager::Vsphere do
   end
 
   describe 'deploy' do
-    let(:target){"vi://#{vcenter_username}:#{vcenter_password}@#{vcenter_host}/#{vcenter_datacenter}/host/#{vcenter_cluster}"}
+    let(:vcenter_target){"vi://#{vcenter_username}:#{vcenter_password}@#{vcenter_host}/#{vcenter_datacenter}/host/#{vcenter_cluster}"}
 
     it 'Should perform in the right order' do
       %i( deploy_ova create_first_user).each do |m|
@@ -43,7 +48,7 @@ describe OpsManager::Vsphere do
     it 'should run ovftools successfully' do
       VCR.turned_off do
         allow(vsphere).to receive(:current_version).and_return(current_version)
-        expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{conf['ip']} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{conf['password']} #{opts['ova_path']} #{target}")
+        expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{target} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{password} #{opts['ova_path']} #{vcenter_target}")
         vsphere.deploy_ova
       end
     end
