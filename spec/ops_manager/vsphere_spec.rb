@@ -2,7 +2,9 @@ require 'spec_helper'
 
 describe OpsManager::Vsphere do
   let(:assets_zipfile){ "installation_assets.zip" }
+  # let(:conf_file){'ops_manager_deployment.yml'}
   let(:conf_file){'vsphere.yml'}
+
   let(:conf){ YAML.load_file(conf_file) }
   let(:vcenter_username){ vcenter.fetch('username') }
   let(:vcenter_password){ vcenter.fetch('password') }

@@ -14,11 +14,97 @@ describe OpsManager do
   end
   let(:deployment){ double('deployment',current_version: current_version ).as_null_object }
 
+  let(:ops_manager_dir){ "#{ENV['HOME']}/.ops_manager" }
+  let(:conf_file_path) { "#{ops_manager_dir}/conf.yml" }
+  let(:ops_manager_conf){ { target: 'IP', username: 'foo', password: 'bar' } }
+
+  before { ENV['HOME'] = ENV['PWD'] } # dummy
+
+
   it 'has a version number' do
     expect(OpsManager::VERSION).not_to be nil
   end
 
+  describe '@target' do
+    describe 'when ~/.ops_manager/conf.yml exists' do
+      before do
+        Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
+        File.open(conf_file_path, 'w'){|f| f.write(ops_manager_conf.to_yaml) }
+      end
+
+      it 'should override target' do
+        expect do
+          OpsManager.target('1.2.3.4')
+        end.to change{
+          YAML.load_file(conf_file_path).fetch(:target )
+        }.from("IP").to('1.2.3.4')
+      end
+
+      it 'should keep other configurations' do
+        expect do
+          OpsManager.target('1.2.3.4')
+        end.not_to change{ YAML.load_file(conf_file_path).keys }
+      end
+    end
+
+    describe 'when ~/.ops_manager/conf.yml does not exists' do
+      before{ `rm -rf #{ops_manager_dir}` }
+
+      it 'should store ip in $HOME/.ops_manager/conf.yml' do
+        expect do
+          OpsManager.target('1.2.3.4')
+        end.to change{ File.exists?(conf_file_path) }.to(true)
+        expect(YAML.load_file(conf_file_path).fetch(:target)).to eq('1.2.3.4')
+      end
+    end
+  end
+
+  describe '@login' do
+    describe 'when ~/.ops_manager/conf.yml exists' do
+      before do
+        Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
+        File.open(conf_file_path, 'w'){|f| f.write(ops_manager_conf.to_yaml) }
+      end
+
+      it 'should override username' do
+        expect do
+          OpsManager.login( 'luke', 'daveisawesome')
+        end.to change{
+          YAML.load_file(conf_file_path).fetch(:username)
+        }.from('foo').to('luke')
+      end
+
+      it 'should override password' do
+        expect do
+          OpsManager.login( 'luke', 'daveisawesome')
+        end.to change{
+          YAML.load_file(conf_file_path).fetch(:password)
+        }.from('bar').to('daveisawesome')
+      end
+
+
+      it 'should keep other configurations' do
+        expect do
+          OpsManager.login( 'luke', 'daveisawesome')
+        end.not_to change{ YAML.load_file(conf_file_path).keys }
+      end
+    end
+
+    describe 'when ~/.ops_manager/conf.yml does not exists' do
+      before{ `rm -rf #{ops_manager_dir}` }
+
+      it 'should store ip in $HOME/.ops_manager/conf.yml' do
+        expect do
+          OpsManager.login( 'luke', 'daveisawesome')
+        end.to change{ File.exists?(conf_file_path) }.to(true)
+        expect(YAML.load_file(conf_file_path).fetch(:username)).to eq('luke')
+        expect(YAML.load_file(conf_file_path).fetch(:password)).to eq('daveisawesome')
+      end
+    end
+  end
+
   describe 'when initializing' do
+
     it 'initialize with vsphere with provided configurations' do
       opts = conf.fetch('deployment').fetch('opts')
       expect(OpsManager::Vsphere).to receive(:new).with(conf.fetch('name'), conf.fetch('ip'), conf.fetch('username') , conf.fetch('password') , opts)
@@ -90,7 +176,7 @@ describe OpsManager do
     end
 
     describe 'when desired version < existing version' do
-    xit 'performs a downgrade'
+      xit 'performs a downgrade'
     end
   end
 end

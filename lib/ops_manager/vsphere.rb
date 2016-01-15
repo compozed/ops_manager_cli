@@ -85,5 +85,8 @@ class OpsManager::Vsphere < OpsManager::Deployment
   def new_vm_name
     @new_vm_name ||= "#{@name}-#{opts.fetch('version')}"
   end
+  def opts
+    @opts
+  end
 end
 

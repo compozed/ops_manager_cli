@@ -3,7 +3,7 @@ require "net/http/post/multipart"
 
 class OpsManager::Deployment
   include OpsManager::Logging
-  attr_accessor :name, :ip, :username, :password, :opts
+  attr_accessor :name, :ip, :username, :password
 
   def initialize(name, ip, username, password)
     @name, @ip, @username, @password = name, ip, username, password
