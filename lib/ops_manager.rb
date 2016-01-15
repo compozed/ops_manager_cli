@@ -1,15 +1,6 @@
 class OpsManager
   attr_accessor :deployment
 
-  def initialize(conf_file)
-    @conf_file = conf_file
-
-    case provider
-    when 'vsphere'
-      @deployment = Vsphere.new(conf.fetch('name'), target, username, password, deployment_opts)
-    end
-  end
-
   def self.target(target)
     set_conf(target: target)
   end
@@ -32,7 +23,13 @@ class OpsManager
     conf.fetch(key)
   end
 
-  def deploy
+  def deploy(ops_manager_deployment_file)
+    @ops_manager_deployment_file = ops_manager_deployment_file
+
+    case provider
+    when 'vsphere'
+      @deployment ||= Vsphere.new(ops_manager_deployment_conf.fetch('name'), target, username, password, deployment_opts)
+    end
     case
     when deployment.current_version.nil?
       puts "No OpsManager deployed at #{target}. Deploying ...".green
@@ -50,20 +47,16 @@ class OpsManager
   end
 
   private
-
   def provider
-    deployment_config.fetch('provider')
-  end
-
-  def deployment_config
-    @deployment_config ||= conf
+    ops_manager_deployment_conf.fetch('provider')
   end
 
   def deployment_opts
-    @deployment_opts ||= deployment_config.fetch('opts')
+    @deployment_opts ||= ops_manager_deployment_conf.fetch('opts')
   end
-  def conf
-    @conf ||= ::YAML.load_file(@conf_file)
+
+  def ops_manager_deployment_conf
+    @ops_manager_deployment_conf ||= ::YAML.load_file(@ops_manager_deployment_file)
   end
 
   def target

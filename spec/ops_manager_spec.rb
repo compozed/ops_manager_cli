@@ -2,17 +2,17 @@ require 'spec_helper'
 require 'yaml'
 
 describe OpsManager do
-  let(:conf_file){'ops_manager_deployment.yml'}
-  let(:conf){ YAML.load_file(conf_file) }
-  let(:opts){ conf.fetch('opts') }
-  let(:current_vm_name){ "#{conf.fetch('name')}-#{current_version}"}
+  let(:ops_manager_deployment_file){'ops_manager_deployment.yml'}
+  let(:ops_manager_deployment_conf){ YAML.load_file(ops_manager_deployment_file) }
+  let(:opts){ ops_manager_deployment_conf.fetch('opts') }
+  let(:current_vm_name){ "#{ops_manager_deployment_conf.fetch('name')}-#{current_version}"}
   let(:target){ OpsManager.get_conf :target }
   let(:username){ OpsManager.get_conf :username }
   let(:password){ OpsManager.get_conf :password }
 
   let(:current_version){ '1.4.2.0' }
   let(:ops_manager) do
-    described_class.new(conf_file).tap do |o|
+    described_class.new.tap do |o|
       o.deployment = deployment
     end
   end
@@ -111,14 +111,6 @@ describe OpsManager do
     end
   end
 
-  describe 'when initializing' do
-
-    it 'initialize with vsphere with provided configurations' do
-      expect(OpsManager::Vsphere).to receive(:new).with(conf.fetch('name'), target, username , password , opts)
-      ops_manager.deployment
-    end
-  end
-
   describe 'deploy' do
     describe 'when no ops-manager has been deployed' do
       let(:current_version){ nil }
@@ -126,14 +118,14 @@ describe OpsManager do
       it 'performs a deployment' do
         expect(ops_manager.deployment).to receive(:deploy)
         expect do
-          ops_manager.deploy
+          ops_manager.deploy(ops_manager_deployment_file)
         end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
       end
 
       it 'does not performs an upgrade' do
         expect(ops_manager.deployment).to_not receive(:upgrade)
         expect do
-          ops_manager.deploy
+          ops_manager.deploy(ops_manager_deployment_file)
         end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
       end
     end
@@ -145,8 +137,8 @@ describe OpsManager do
         VCR.use_cassette 'deploying same version' do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
-            ops_manager.deploy
-          end.to output(/OpsManager at #{target} version is already #{ops_manager.new_version}. Skiping .../).to_stdout
+            ops_manager.deploy(ops_manager_deployment_file)
+          end.to output(/OpsManager at #{target} version is already #{opts.fetch('version')}. Skiping .../).to_stdout
         end
       end
 
@@ -154,21 +146,21 @@ describe OpsManager do
         VCR.use_cassette 'deploying same version' do
           expect(ops_manager.deployment).to_not receive(:upgrade)
           expect do
-            ops_manager.deploy
-          end.to output(/OpsManager at #{target} version is already #{ops_manager.new_version}. Skiping .../).to_stdout
+            ops_manager.deploy(ops_manager_deployment_file)
+          end.to output(/OpsManager at #{target} version is already #{opts.fetch('version')}. Skiping .../).to_stdout
         end
       end
     end
 
     describe 'when current version is older than new version' do
-      let(:conf_file){'vsphere_newer_version.yml'}
+      let(:ops_manager_deployment_file){'vsphere_newer_version.yml'}
 
       it 'performs an upgrade' do
         VCR.use_cassette 'deploying newer version' do
           expect(ops_manager.deployment).to receive(:upgrade)
           expect do
-            ops_manager.deploy
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager.new_version}.../).to_stdout
+          ops_manager.deploy(ops_manager_deployment_file)
+          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{opts.fetch('version')}.../).to_stdout
         end
       end
 
@@ -176,8 +168,8 @@ describe OpsManager do
         VCR.use_cassette 'deploying newer version' do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
-            ops_manager.deploy
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager.new_version}.../).to_stdout
+            ops_manager.deploy(ops_manager_deployment_file)
+          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{opts.fetch('version')}.../).to_stdout
         end
       end
     end

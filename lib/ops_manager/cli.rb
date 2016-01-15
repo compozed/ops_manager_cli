@@ -24,7 +24,7 @@ class OpsManager
     class Deploy < Clamp::Command
       parameter "OPS_MANAGER_CONFIG", "opsManager cloud config file", required: true
       def execute
-        OpsManager.new(@ops_manager_config).deploy
+        OpsManager.new.deploy(@ops_manager_config)
       end
     end
 
