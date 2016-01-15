@@ -1,26 +1,27 @@
 class OpsManager
   attr_accessor :deployment
 
-  def self.target(target)
-    set_conf(target: target)
-  end
+  class << self
+    def target(target)
+      set_conf(target: target)
+    end
 
+    def login(username, password)
+      set_conf(username: username, password: password)
+    end
 
-  def self.login(username, password)
-    set_conf(username: username, password: password)
-  end
+    def set_conf(opts)
+      conf = {}
+      Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
+      conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
+      conf.merge!(opts)
+      File.open(conf_file_path, 'w'){|f| f.write(conf.to_yaml) }
+    end
 
-  def self.set_conf(opts)
-    conf = {}
-    Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
-    conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-    conf.merge!(opts)
-    File.open(conf_file_path, 'w'){|f| f.write(conf.to_yaml) }
-  end
-
-  def self.get_conf(key)
-    conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-    conf.fetch(key)
+    def get_conf(key)
+      conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
+      conf.fetch(key)
+    end
   end
 
   def deploy(ops_manager_deployment_file)
