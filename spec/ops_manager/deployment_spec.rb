@@ -49,7 +49,7 @@ describe OpsManager::Deployment do
   end
 
   describe 'get_installation_assets' do
-    before{ `rm installation_assets.zip` }
+    before{ `rm -r installation_assets.zip assets` }
 
     it 'should download successfully' do
       VCR.use_cassette 'installation assets download' do

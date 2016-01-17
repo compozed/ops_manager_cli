@@ -6,7 +6,6 @@ describe OpsManager::Vsphere do
   let(:target){ OpsManager.get_conf :target }
   let(:username){ OpsManager.get_conf :username }
   let(:password){ OpsManager.get_conf :password }
-
   let(:conf){ YAML.load_file(conf_file) }
   let(:vcenter_username){ vcenter.fetch('username') }
   let(:vcenter_password){ vcenter.fetch('password') }

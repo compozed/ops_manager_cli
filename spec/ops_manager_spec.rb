@@ -153,9 +153,11 @@ describe OpsManager do
     end
 
     describe 'when current version is older than new version' do
-      let(:ops_manager_deployment_file){'vsphere_newer_version.yml'}
+      # let(:ops_manager_deployment_file){'vsphere_newer_version.yml'}
 
       it 'performs an upgrade' do
+        allow(ops_manager).to receive(:version).and_return('1.4.3.0')
+
         VCR.use_cassette 'deploying newer version' do
           expect(ops_manager.deployment).to receive(:upgrade)
           expect do
