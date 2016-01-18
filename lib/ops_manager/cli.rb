@@ -32,7 +32,7 @@ class OpsManager
       parameter "PRODUCT_CONFIG", "opsManager product config file", required: true
 
       def execute
-        OpsManager::Product.new(@product_config).deploy
+        OpsManager.new.deploy_product(@product_config)
       end
     end
 

@@ -24,41 +24,43 @@ class OpsManager
     end
   end
 
-  def deploy(ops_manager_deployment_file)
-    @ops_manager_deployment_file = ops_manager_deployment_file
+  def deploy(conf_file)
+    conf = ::YAML.load_file(conf_file)
+    name = conf.fetch('name')
+    version = conf.fetch('version')
+    provider=conf.fetch('provider')
+    opts = conf.fetch('opts')
 
     case provider
     when 'vsphere'
-      @deployment ||= Vsphere.new(ops_manager_deployment_conf.fetch('name'), target, username, password, deployment_opts)
+      @deployment ||= Vsphere.new(name, version, opts)
     end
     case
     when deployment.current_version.nil?
       puts "No OpsManager deployed at #{target}. Deploying ...".green
       deployment.deploy
-    when deployment.current_version < new_version then
-      puts "OpsManager at #{target} version is #{deployment.current_version}. Upgrading to #{new_version}.../".green
+    when deployment.current_version < version then
+      puts "OpsManager at #{target} version is #{deployment.current_version}. Upgrading to #{version}.../".green
       deployment.upgrade
-    when deployment.current_version ==  new_version then
-      puts "OpsManager at #{target} version is already #{new_version}. Skiping ...".green
+    when deployment.current_version ==  version then
+      puts "OpsManager at #{target} version is already #{version}. Skiping ...".green
     end
   end
 
-  def new_version
-    deployment_opts.fetch('version')
+
+  def deploy_product(conf_file)
+    conf = ::YAML.load_file(conf_file)
+    name = conf.fetch('name')
+    filepath = conf.fetch('filepath')
+    product = OpsManager::Product.new(name, filepath)
+    product.deploy
   end
+
+  # def new_version
+    # deployment_opts.fetch('version')
+  # end
 
   private
-  def provider
-    ops_manager_deployment_conf.fetch('provider')
-  end
-
-  def deployment_opts
-    @deployment_opts ||= ops_manager_deployment_conf.fetch('opts')
-  end
-
-  def ops_manager_deployment_conf
-    @ops_manager_deployment_conf ||= ::YAML.load_file(@ops_manager_deployment_file)
-  end
 
   def target
     self.class.get_conf(:target)

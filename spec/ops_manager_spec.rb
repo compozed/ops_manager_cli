@@ -4,6 +4,7 @@ require 'yaml'
 describe OpsManager do
   let(:ops_manager_deployment_file){'ops_manager_deployment.yml'}
   let(:ops_manager_deployment_conf){ YAML.load_file(ops_manager_deployment_file) }
+  let(:product_deployment_file){'product_deployment.yml'}
   let(:opts){ ops_manager_deployment_conf.fetch('opts') }
   let(:current_vm_name){ "#{ops_manager_deployment_conf.fetch('name')}-#{current_version}"}
   let(:target){ OpsManager.get_conf :target }
@@ -111,6 +112,13 @@ describe OpsManager do
     end
   end
 
+  describe 'deploy_product' do
+    it 'should execute a product deploy' do
+      expect_any_instance_of(OpsManager::Product).to receive(:deploy)
+      ops_manager.deploy_product(product_deployment_file)
+    end
+  end
+
   describe 'deploy' do
     describe 'when no ops-manager has been deployed' do
       let(:current_version){ nil }
@@ -131,14 +139,14 @@ describe OpsManager do
     end
 
     describe 'when ops-manager has been deployed and current and desired version match' do
-      let(:current_version){ opts.fetch('version') }
+      let(:current_version){ ops_manager_deployment_conf.fetch('version') }
 
       it 'does not performs a deployment' do
         VCR.use_cassette 'deploying same version' do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
             ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is already #{opts.fetch('version')}. Skiping .../).to_stdout
+          end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
         end
       end
 
@@ -147,7 +155,7 @@ describe OpsManager do
           expect(ops_manager.deployment).to_not receive(:upgrade)
           expect do
             ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is already #{opts.fetch('version')}. Skiping .../).to_stdout
+          end.to output(/OpsManager at #{target} version is already #{current_version} Skiping .../).to_stdout
         end
       end
     end
@@ -162,7 +170,7 @@ describe OpsManager do
           expect(ops_manager.deployment).to receive(:upgrade)
           expect do
           ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{opts.fetch('version')}.../).to_stdout
+          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager_deployment_conf.fetch('version')}.../).to_stdout
         end
       end
 
@@ -171,7 +179,7 @@ describe OpsManager do
           expect(ops_manager.deployment).to_not receive(:deploy)
           expect do
             ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{opts.fetch('version')}.../).to_stdout
+          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager_deployment_conf.fetch('version')}.../).to_stdout
         end
       end
     end

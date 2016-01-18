@@ -2,3 +2,5 @@
 *.ova
 *.json
 *.zip
+assets
+.byebug_history

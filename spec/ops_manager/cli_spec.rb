@@ -26,8 +26,8 @@ describe OpsManager::Cli do
   describe "deploy" do
     let(:args) { %w(deploy ops_manager_deployment.yml) }
 
-    it "should call OpsManager.deploy" do
-      expect_any_instance_of(OpsManager).to receive(:deploy)
+    it "should call ops_manager.deploy" do
+      expect_any_instance_of(OpsManager).to receive(:deploy).with('ops_manager_deployment.yml')
       cli.run(`pwd`, args)
     end
   end
@@ -37,9 +37,8 @@ describe OpsManager::Cli do
   describe "deploy-product" do
     let(:args) { %w(deploy-product product.yml) }
 
-    it "should call OpsManager::Product.deploy" do
-      expect(OpsManager::Product).to receive(:new).with('product.yml').and_call_original
-      expect_any_instance_of(OpsManager::Product).to receive(:deploy)
+    it "should call ops_manager.deploy_product" do
+      expect_any_instance_of(OpsManager).to receive(:deploy_product).with('product.yml')
       cli.run(`pwd`, args)
     end
   end

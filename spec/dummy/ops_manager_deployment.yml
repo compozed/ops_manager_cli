@@ -1,9 +1,9 @@
 ---
 name: 'ops-manager'
 provider: vsphere
+version: 1.5.5.0 #~~~~!!!
 opts:
   ova_path: ops-manager.ova
-  version: 1.5.5.0 #~~~~!!!
   portgroup: 'dummy-portgroup'
   netmask: '255.255.255.0'
   gateway: '1.2.3.1'

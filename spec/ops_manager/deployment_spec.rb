@@ -4,13 +4,19 @@ require "ops_manager/deployment"
 
 describe OpsManager::Deployment do
   let(:name){ 'ops-manager' }
-  let(:ip){ '1.2.3.4' }
+  let(:target){ '1.2.3.4' }
   let(:version){'1.5.5.0'}
   let(:username){ 'foo' }
   let(:password){ 'bar' }
   let(:base_uri){ 'https://foo:bar@1.2.3.4' }
 
   let(:deployment){ described_class.new(name, version) }
+
+  before do
+    ENV['HOME'] = ENV['PWD']
+    OpsManager.target(target)
+    OpsManager.login(username, password)
+  end
 
   %w{ stop_current_vm deploy_vm }.each do |m|
     describe m do
@@ -92,7 +98,7 @@ describe OpsManager::Deployment do
   end
 
   describe 'new' do
-    %w{ name version ip username password}.each do |p|
+    %w{ name version }.each do |p|
       it "should set #{p}" do
         expect(deployment.send(p)).to eq(send(p))
       end

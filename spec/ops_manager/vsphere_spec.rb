@@ -3,6 +3,7 @@ require 'spec_helper'
 describe OpsManager::Vsphere do
   let(:conf_file){'ops_manager_deployment.yml'}
   let(:name){ conf.fetch('name') }
+  let(:version){ conf.fetch('version') }
   let(:target){ OpsManager.get_conf :target }
   let(:username){ OpsManager.get_conf :username }
   let(:password){ OpsManager.get_conf :password }
@@ -15,10 +16,9 @@ describe OpsManager::Vsphere do
   let(:vcenter){ opts.fetch('vcenter') }
   let(:opts){ conf.fetch('opts') }
   let(:current_version){ '1.4.2.0' }
-  let(:new_version){ opts.fetch('version') }
   let(:current_vm_name){ "#{name}-#{vsphere.current_version}"}
-  let(:new_vm_name){ "#{name}-#{opts.fetch('version')}"}
-  let(:vsphere){ described_class.new(name, target, username, password, opts) }
+  let(:new_vm_name){ "#{name}-#{version}"}
+  let(:vsphere){ described_class.new(name, version, opts) }
 
   before do
     OpsManager.target('1.2.3.4')
