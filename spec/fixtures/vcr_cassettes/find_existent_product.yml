@@ -1,0 +1,50 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Mon, 18 Jan 2016 23:24:00 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"36eabd1540de73dfbced8fcb5c0a2c49"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 58a9ec72-a876-4ac0-b841-7f544ed31a02
+      X-Runtime:
+      - '0.222956'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"p-bosh","product_version":"1.5.5.0"},{"name":"cf","product_version":"1.5.4.0"},{"name":"p-bosh","product_version":"1.6.6.0"}]'
+    http_version:
+  recorded_at: Mon, 18 Jan 2016 23:23:51 GMT
+recorded_with: VCR 3.0.1

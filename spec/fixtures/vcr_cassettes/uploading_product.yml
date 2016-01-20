@@ -1,0 +1,191 @@
+---
+http_interactions:
+- request:
+    method: delete
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Tue, 19 Jan 2016 23:07:24 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"99914b932bd37a50b983c5e7c90ae93b"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 053393ea-96dd-418b-8cf7-1f84d3697849
+      X-Runtime:
+      - '0.561608'
+    body:
+      encoding: UTF-8
+      string: "{}"
+    http_version:
+  recorded_at: Tue, 19 Jan 2016 23:07:16 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Tue, 19 Jan 2016 23:07:25 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"36eabd1540de73dfbced8fcb5c0a2c49"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 13afc155-877d-4a8d-b554-5e659608f7e7
+      X-Runtime:
+      - '0.217485'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"p-bosh","product_version":"1.5.5.0"},{"name":"cf","product_version":"1.5.4.0"},{"name":"p-bosh","product_version":"1.6.6.0"}]'
+    http_version:
+  recorded_at: Tue, 19 Jan 2016 23:07:16 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Tue, 19 Jan 2016 23:07:25 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"36eabd1540de73dfbced8fcb5c0a2c49"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - aec125c3-7563-4d29-b459-5b8974b71167
+      X-Runtime:
+      - '0.198128'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"p-bosh","product_version":"1.5.5.0"},{"name":"cf","product_version":"1.5.4.0"},{"name":"p-bosh","product_version":"1.6.6.0"}]'
+    http_version:
+  recorded_at: Tue, 19 Jan 2016 23:07:16 GMT
+- request:
+    method: get
+    uri: https://foo:bar@1.2.3.4/api/products
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - "*/*"
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Tue, 19 Jan 2016 23:07:29 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"9efb85584458620ed21f18384fd5fd27"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - bc23f4c8-c9b7-488b-8c58-cc86e4b3683b
+      X-Runtime:
+      - '0.208954'
+    body:
+      encoding: UTF-8
+      string: '[{"name":"p-bosh","product_version":"1.5.5.0"},{"name":"example-product","product_version":"1.6.2.0"},{"name":"cf","product_version":"1.5.4.0"},{"name":"p-bosh","product_version":"1.6.6.0"}]'
+    http_version:
+  recorded_at: Tue, 19 Jan 2016 23:07:21 GMT
+recorded_with: VCR 3.0.1

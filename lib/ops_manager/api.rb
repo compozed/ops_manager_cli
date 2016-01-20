@@ -1,8 +1,17 @@
 require 'byebug'
-class OpsManager
-  module API
+require "ops_manager/logging"
+require "net/http/post/multipart"
+require "rest-client"
 
-    private
+class OpsManager
+  class API
+    include OpsManager::Logging
+    attr_reader :target, :username, :password
+
+    def initialize(target, username, password)
+      @target, @username, @password = target, username, password
+    end
+
     def get(endpoint, opts = {})
       uri = uri_for(endpoint)
       http = http_for(uri)
@@ -23,7 +32,6 @@ class OpsManager
       else
         http.request(request)
       end
-
     end
 
     def post(endpoint, opts)
@@ -39,6 +47,7 @@ class OpsManager
       end
     end
 
+
     def multipart_post(endpoint, opts)
       uri = uri_for(endpoint)
       http = http_for(uri)
@@ -49,6 +58,15 @@ class OpsManager
         logger.info("post response body #{res.body}")
       end
     end
+
+    def delete(endpoint, opts = {})
+      uri = uri_for(endpoint)
+      http = http_for(uri)
+      request = Net::HTTP::Delete.new(uri.request_uri)
+      request.basic_auth(username, password)
+        http.request(request)
+    end
+    private
 
     def http_for(uri)
       Net::HTTP.new(uri.host, uri.port).tap do |http|
@@ -62,16 +80,5 @@ class OpsManager
       URI.parse("https://#{target}#{endpoint}")
     end
 
-    def target
-      @target ||= OpsManager.get_conf(:target)
-    end
-
-    def username
-      @username ||= OpsManager.get_conf(:username)
-    end
-
-    def password
-      @password ||= OpsManager.get_conf(:password)
-    end
   end
 end

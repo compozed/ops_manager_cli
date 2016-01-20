@@ -16,6 +16,11 @@ RSpec.configure do |config|
    # $stdout = @orig_stdout
    # $stderr = @orig_stderr
   # end
+  config.before do
+    ENV['HOME'] = ENV['PWD']
+    OpsManager.target( ENV['TARGET'] || '1.2.3.4')
+    OpsManager.login( ENV['USERNAME'] || 'foo', ENV['PASSWORD'] || 'bar')
+  end
 
   config.before :suite do
     Dir.chdir('spec/dummy')

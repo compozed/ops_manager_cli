@@ -7,3 +7,4 @@
 /pkg/
 /spec/reports/
 /tmp/
+.ops_manager

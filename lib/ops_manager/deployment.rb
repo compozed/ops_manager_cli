@@ -1,10 +1,6 @@
-require "ops_manager/logging"
 require "ops_manager/api"
-require "net/http/post/multipart"
 
 class OpsManager::Deployment
-  include OpsManager::Logging
-  include OpsManager::API
   attr_accessor :name, :version
 
   def initialize(name,  version)
@@ -41,14 +37,14 @@ class OpsManager::Deployment
 
   def get_installation_assets
     puts '====> Download installation assets...'.green
-    get("/api/installation_asset_collection",
+    api.get("/api/installation_asset_collection",
        write_to: "installation_assets.zip")
   end
 
   def upload_installation_assets
     puts '====> Uploading installation assets...'.green
     zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
-    multipart_post( "/api/installation_asset_collection",
+    api.multipart_post( "/api/installation_asset_collection",
       :password => @password,
       "installation[file]" => zip
     )
@@ -56,7 +52,7 @@ class OpsManager::Deployment
 
   def get_installation_settings
     puts '====> Downloading installation settings...'.green
-    get("/api/installation_settings",
+    api.get("/api/installation_settings",
        write_to: "installation_settings.json")
   end
 
@@ -80,13 +76,24 @@ class OpsManager::Deployment
       uri= "/api/setup"
     end
 
-    res = post(uri, body: body)
+    res = api.post(uri, body: body)
     res
   end
 
   private
+    def target
+      @target ||= OpsManager.get_conf(:target)
+    end
+
+    def username
+      @username ||= OpsManager.get_conf(:username)
+    end
+
+    def password
+      @password ||= OpsManager.get_conf(:password)
+    end
   def current_products
-    @current_products ||= JSON.parse(get("/api/products").body)
+    @current_products ||= JSON.parse(api.get("/api/products").body)
     return @current_products
   end
 
@@ -94,4 +101,7 @@ class OpsManager::Deployment
     @current_vm_name ||= "#{@name}-#{current_version}"
   end
 
+  def api
+    @api ||= OpsManager::API.new(target, username, password)
+  end
 end

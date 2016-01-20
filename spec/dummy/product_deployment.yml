@@ -1,3 +1,4 @@
 ---
-name: 'cf'
-filepath: 'product.pivotal'
+name: 'example-product'
+version: '1.6.2.0'
+filepath: 'example-product-1.6.2.pivotal'
