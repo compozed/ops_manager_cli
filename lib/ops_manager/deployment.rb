@@ -38,29 +38,10 @@ class OpsManager::Deployment
   end
 
 
-  def get_installation_assets
-    puts '====> Download installation assets...'.green
-    get("/api/installation_asset_collection",
-       write_to: "installation_assets.zip")
-  end
-
-  def upload_installation_assets
-    puts '====> Uploading installation assets...'.green
-    zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
-    multipart_post( "/api/installation_asset_collection",
-      :password => @password,
-      "installation[file]" => zip
-    )
-  end
-
-  def get_installation_settings
-    puts '====> Downloading installation settings...'.green
-    get("/api/installation_settings",
-       write_to: "installation_settings.json")
-  end
 
   def current_version
-    @current_version ||= current_products.select{ |i| i.fetch('name') == 'microbosh' }
+    products = JSON.parse(get_products.body)
+    @current_version ||= products.select{ |i| i.fetch('name') == 'microbosh' }
       .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
   rescue Errno::ETIMEDOUT
     nil
@@ -72,22 +53,6 @@ class OpsManager::Deployment
 
 
   private
-    def target
-      @target ||= OpsManager.get_conf(:target)
-    end
-
-    def username
-      @username ||= OpsManager.get_conf(:username)
-    end
-
-    def password
-      @password ||= OpsManager.get_conf(:password)
-    end
-  def current_products
-    @current_products ||= JSON.parse(get("/api/products").body)
-    return @current_products
-  end
-
   def current_vm_name
     @current_vm_name ||= "#{@name}-#{current_version}"
   end

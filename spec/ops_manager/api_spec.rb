@@ -12,13 +12,57 @@ describe OpsManager::API do
     allow(api).to receive(:`) if OpsManager.get_conf(:target) == '1.2.3.4'
   end
 
+  describe 'upload_installation_assets' do
+    before do
+      `rm installation_assets.zip`
+      `cp ../fixtures/installation_assets.zip .`
+    end
+
+    it 'should upload successfully' do
+      VCR.use_cassette 'uploading assets' do
+        expect do
+          api.upload_installation_assets
+        end.to change{ api.get_installation_assets.code.to_i }.from(500).to(200)
+      end
+    end
+  end
+
+  describe 'get_installation_settings' do
+    before{ `rm installation_settings.zip` }
+
+    it 'should download successfully' do
+      expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
+
+      VCR.use_cassette 'installation settings download' do
+        api.get_installation_settings
+        expect( JSON.parse(File.read('installation_settings.json'))).to eq(expected_json)
+      end
+    end
+  end
+
+
+  describe 'get_installation_assets' do
+    before{ `rm -r installation_assets.zip assets` }
+
+    it 'should download successfully' do
+      VCR.use_cassette 'installation assets download' do
+        api.get_installation_assets
+        expect(File).to exist("installation_assets.zip" )
+        `unzip installation_assets.zip -d assets`
+        expect(File).to exist("assets/deployments/bosh-deployments.yml")
+        expect(File).to exist("assets/installation.yml")
+        expect(File).to exist("assets/metadata/microbosh.yml")
+      end
+    end
+  end
+
   describe '#create_user' do
-  let(:base_uri){ 'https://foo:bar@1.2.3.4' }
+    let(:base_uri){ 'https://foo:bar@1.2.3.4' }
     before do
       stub_request(:post, uri).
         with(:body => body,
              :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}).
-      to_return(:status => 200, :body => "", :headers => {})
+        to_return(:status => 200, :body => "", :headers => {})
     end
 
     describe 'when version 1.5.x' do
@@ -48,11 +92,9 @@ describe OpsManager::API do
 
   describe "#trigger_installation" do
     subject(:response) do
-      res = nil
       VCR.use_cassette 'trigger install process' do
-        res = api.trigger_installation
+        api.trigger_installation
       end
-      res
     end
 
     it 'should be successfull' do
@@ -66,11 +108,9 @@ describe OpsManager::API do
 
   describe "#get_installation" do
     subject(:response) do
-      res = nil
-        VCR.use_cassette 'getting installation status' do
-        res = api.get_installation(10)
+      VCR.use_cassette 'getting installation status' do
+        api.get_installation(10)
       end
-      res
     end
 
     it 'should be successfull' do
@@ -96,16 +136,19 @@ describe OpsManager::API do
   describe "#upgrade_product_installation" do
     let(:name){ 'example-product' }
     let(:product){ OpsManager::Product.new(name) }
-        let(:guid) {product.installation.guid }
+    let(:guid) {product.installation.guid }
     let(:version){ '1.6.2.0' }
 
-    it 'Should change version of installation' do
+    let(:response) do
       VCR.use_cassette 'upgrade product installation' do
-        expect do
-          api.upgrade_product_installation(guid, version)
-        end.to change{ product.installation.version }.from('1.6.1.0').to('1.6.2.0')
+        api.upgrade_product_installation(guid, version)
       end
     end
+
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
+
   end
 
   describe "#upload_product" do
@@ -120,13 +163,18 @@ describe OpsManager::API do
   end
 
   describe "#get_products" do
-    it "list available products" do
+    let(:response) do
       VCR.use_cassette 'listing products' do
-        expect(api).to receive(:get).and_call_original
-        products = api.get_products
-        expect(products).to be_a(Array)
-        expect(products).not_to be_empty
+        api.get_products
       end
+    end
+
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
+
+    it "should include products in its body" do
+      expect(parsed_response).to be_a(Array)
     end
   end
 end

@@ -31,9 +31,9 @@ describe OpsManager::Product do
   describe "#available_versions"
 
   describe "Product.exists?" do
-    let(:products){ [{'name' => 'cf', 'product_version' => '1'}] }
+    let(:products_response){ double(body: [{'name' => 'cf', 'product_version' => '1'}].to_json )}
 
-    before { allow_any_instance_of(OpsManager::Product).to receive(:get_products).and_return(products) }
+    before { allow_any_instance_of(OpsManager::Product).to receive(:get_products).and_return(products_response) }
 
     describe 'when product exists' do
       it "should be true" do

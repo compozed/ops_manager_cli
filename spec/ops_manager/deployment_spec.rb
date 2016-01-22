@@ -8,7 +8,6 @@ describe OpsManager::Deployment do
 
   let(:deployment){ described_class.new(name, version) }
 
-
   %w{ stop_current_vm deploy_vm }.each do |m|
     describe m do
       it 'should raise not implemented error'  do
@@ -41,49 +40,6 @@ describe OpsManager::Deployment do
       VCR.use_cassette 'create first user', record: :none do
         expect(deployment).to receive(:create_user).twice.and_call_original
         deployment.create_first_user
-      end
-    end
-  end
-
-  describe 'get_installation_assets' do
-    before{ `rm -r installation_assets.zip assets` }
-
-    it 'should download successfully' do
-      VCR.use_cassette 'installation assets download' do
-        deployment.get_installation_assets
-        expect(File).to exist("installation_assets.zip" )
-        `unzip installation_assets.zip -d assets`
-        expect(File).to exist("assets/deployments/bosh-deployments.yml")
-        expect(File).to exist("assets/installation.yml")
-        expect(File).to exist("assets/metadata/microbosh.yml")
-      end
-    end
-  end
-
-  describe 'get_installation_settings' do
-    before{ `rm installation_settings.zip` }
-
-    it 'should download successfully' do
-      expected_json = JSON.parse(File.read('../fixtures/pretty_installation_settings.json'))
-
-      VCR.use_cassette 'installation settings download' do
-        deployment.get_installation_settings
-        expect( JSON.parse(File.read('installation_settings.json'))).to eq(expected_json)
-      end
-    end
-  end
-
-  describe 'upload_installation_assets' do
-    before do
-      `rm installation_assets.zip`
-      `cp ../fixtures/installation_assets.zip .`
-    end
-
-    it 'should upload successfully' do
-      VCR.use_cassette 'uploading assets' do
-        expect do
-          deployment.upload_installation_assets
-        end.to change{ deployment.get_installation_assets.code.to_i }.from(500).to(200)
       end
     end
   end

@@ -38,7 +38,8 @@ class OpsManager
 
 
     def self.exists?(name, version)
-      !!self.new.get_products.find{ |o| o['name'] == name && o['product_version'] == version }
+      res = JSON.parse(self.new.get_products.body)
+      !!res.find{ |o| o['name'] == name && o['product_version'] == version }
     end
   end
 end

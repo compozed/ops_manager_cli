@@ -29,7 +29,6 @@ class OpsManager::Vsphere < OpsManager::Deployment
   end
 
   private
-
   def vim
     RbVmomi::VIM.connect host: @opts['vcenter']['host'], user: URI.unescape(@opts['vcenter']['username']), password: URI.unescape(@opts['vcenter']['password']), insecure: true
   end

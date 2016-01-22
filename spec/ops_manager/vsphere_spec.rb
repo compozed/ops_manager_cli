@@ -36,17 +36,16 @@ describe OpsManager::Vsphere do
   describe 'deploy_vm' do
     let(:vcenter_target){"vi://#{vcenter_username}:#{vcenter_password}@#{vcenter_host}/#{vcenter_datacenter}/host/#{vcenter_cluster}"}
 
-
     it 'should run ovftools successfully' do
-      VCR.turned_off do
-        allow(vsphere).to receive(:current_version).and_return(current_version)
-        expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{target} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{password} #{opts['ova_path']} #{vcenter_target}")
-        vsphere.deploy_vm
-      end
+      allow(vsphere).to receive(:current_version).and_return(current_version)
+      expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{target} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{password} #{opts['ova_path']} #{vcenter_target}")
+      vsphere.deploy_vm
     end
   end
 
   describe 'stop_current_vm' do
+    before { allow(vsphere).to receive(:current_version).and_return(current_version) }
+
     it 'should stops current vm to release IP' do
       VCR.use_cassette 'stopping vm' do
         expect(RbVmomi::VIM).to receive(:connect).with({ host: vcenter_host, user: vcenter_username , password: vcenter_password , insecure: true}).and_call_original

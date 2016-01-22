@@ -7,18 +7,40 @@ class OpsManager
   module API
     include OpsManager::Logging
 
-  def create_user(version)
-    if version =~/1.5/
-      body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
-      uri= "/api/users"
-    elsif version=~/1.6/
-      body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
-      uri= "/api/setup"
+    def create_user(version)
+      if version =~/1.5/
+        body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
+        uri= "/api/users"
+      elsif version=~/1.6/
+        body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
+        uri= "/api/setup"
+      end
+
+      res = post(uri, body: body)
+      res
     end
 
-    res = post(uri, body: body)
-    res
+  def get_installation_settings
+    puts '====> Downloading installation settings...'.green
+    get("/api/installation_settings",
+       write_to: "installation_settings.json")
   end
+
+    def upload_installation_assets
+      puts '====> Uploading installation assets...'.green
+      zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
+      multipart_post( "/api/installation_asset_collection",
+                     :password => @password,
+                     "installation[file]" => zip
+                    )
+    end
+
+
+    def get_installation_assets
+      puts '====> Download installation assets...'.green
+      get("/api/installation_asset_collection",
+          write_to: "installation_assets.zip")
+    end
 
     def delete_products
       delete('/api/products')
@@ -44,7 +66,7 @@ class OpsManager
     end
 
     def get_products
-      JSON.parse( get('/api/products').body )
+      get('/api/products')
     end
 
     def get(endpoint, opts = {})
@@ -111,7 +133,7 @@ class OpsManager
       http = http_for(uri)
       request = Net::HTTP::Delete.new(uri.request_uri)
       request.basic_auth(username, password)
-        http.request(request)
+      http.request(request)
     end
     private
 
