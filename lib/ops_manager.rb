@@ -36,6 +36,7 @@ class OpsManager
       @deployment ||= Vsphere.new(name, version, opts)
     end
     case
+
     when deployment.current_version.nil?
       puts "No OpsManager deployed at #{target}. Deploying ...".green
       deployment.deploy
@@ -53,16 +54,11 @@ class OpsManager
     name = conf.fetch('name')
     version = conf.fetch('version')
     filepath = conf.fetch('filepath')
-    product = OpsManager::Product.new(name, version, filepath)
-    product.deploy
+    product = OpsManager::Product.new(name)
+    product.deploy(version, filepath)
   end
 
-  # def new_version
-    # deployment_opts.fetch('version')
-  # end
-
   private
-
   def target
     self.class.get_conf(:target)
   end

@@ -155,7 +155,7 @@ describe OpsManager do
           expect(ops_manager.deployment).to_not receive(:upgrade)
           expect do
             ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is already #{current_version} Skiping .../).to_stdout
+          end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
         end
       end
     end

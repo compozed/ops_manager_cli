@@ -1,6 +1,9 @@
 require "ops_manager/api"
 
 class OpsManager::Deployment
+
+  include OpsManager::API
+
   attr_accessor :name, :version
 
   def initialize(name,  version)
@@ -20,7 +23,7 @@ class OpsManager::Deployment
 
   def create_first_user
     puts '====> Creating initial user...'.green
-    until( create_user.code.to_i == 200) do
+    until( create_user(version).code.to_i == 200) do
       print '.'.green ; sleep 1
     end
   end
@@ -37,14 +40,14 @@ class OpsManager::Deployment
 
   def get_installation_assets
     puts '====> Download installation assets...'.green
-    api.get("/api/installation_asset_collection",
+    get("/api/installation_asset_collection",
        write_to: "installation_assets.zip")
   end
 
   def upload_installation_assets
     puts '====> Uploading installation assets...'.green
     zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
-    api.multipart_post( "/api/installation_asset_collection",
+    multipart_post( "/api/installation_asset_collection",
       :password => @password,
       "installation[file]" => zip
     )
@@ -52,7 +55,7 @@ class OpsManager::Deployment
 
   def get_installation_settings
     puts '====> Downloading installation settings...'.green
-    api.get("/api/installation_settings",
+    get("/api/installation_settings",
        write_to: "installation_settings.json")
   end
 
@@ -67,18 +70,6 @@ class OpsManager::Deployment
     @new_vm_name ||= "#{@name}-#{@version}"
   end
 
-  def create_user
-    if version =~/1.5/
-      body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
-      uri= "/api/users"
-    elsif version=~/1.6/
-      body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
-      uri= "/api/setup"
-    end
-
-    res = api.post(uri, body: body)
-    res
-  end
 
   private
     def target
@@ -93,15 +84,11 @@ class OpsManager::Deployment
       @password ||= OpsManager.get_conf(:password)
     end
   def current_products
-    @current_products ||= JSON.parse(api.get("/api/products").body)
+    @current_products ||= JSON.parse(get("/api/products").body)
     return @current_products
   end
 
   def current_vm_name
     @current_vm_name ||= "#{@name}-#{current_version}"
-  end
-
-  def api
-    @api ||= OpsManager::API.new(target, username, password)
   end
 end

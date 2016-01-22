@@ -2,75 +2,66 @@ require 'spec_helper'
 require 'ops_manager/product'
 
 describe OpsManager::Product do
-  let(:product){ described_class.new(name, version, filepath) }
-  let(:name){  'example-product' }
-  let(:filepath) { 'example-product-1.6.2.pivotal' }
+  let(:product){ described_class.new(name) }
+  let(:name){ 'example-product' }
+  let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:version){ '1.6.2.0' }
+  let(:guid) { 'example-product-abc123' }
+  let(:product_installation){ OpsManager::ProductInstallation.new(guid, version) }
 
+  before do
+    `rm #{filepath} ; cp ../fixtures/#{filepath} .`
+  end
 
   describe "#initialize" do
-    %w(name version filepath).each do |attr|
+    %w(name).each do |attr|
       it "sets the #{attr}" do
         expect(product.send(attr)).to eq(send(attr))
       end
     end
   end
 
+  describe "#installation" do
+    it "should look for its ProductInstallation" do
+      expect(OpsManager::ProductInstallation).to receive(:find).with(name)
+      product.installation
+    end
+  end
+
+  describe "#available_versions"
+
   describe "Product.exists?" do
+    let(:products){ [{'name' => 'cf', 'product_version' => '1'}] }
+
+    before { allow_any_instance_of(OpsManager::Product).to receive(:get_products).and_return(products) }
+
     describe 'when product exists' do
       it "should be true" do
-        VCR.use_cassette 'find existent product' do
-          expect(OpsManager::Product.exists?('cf','1.5.4.0')).to eq(true)
-        end
+        expect(OpsManager::Product.exists?('cf','1')).to eq(true)
       end
     end
 
     describe 'when product does not exists' do
       it "should be false" do
-        VCR.use_cassette 'find non existent product' do
-          expect(OpsManager::Product.exists?('cf','1.6')).to eq(false)
-        end
+        expect(OpsManager::Product.exists?('cf','2')).to eq(false)
       end
     end
   end
 
   describe "#upgrade" do
-    it 'Should perform in the right order' do
-      %i( upload perform_upgrade).each do |m|
-        expect(product).to receive(m).ordered
-      end
-      product.upgrade
-    end
-  end
-
-  describe "#perform_upgrade" do
-  end
-
-  describe '#delete_unused_products' do
-    it 'deletes product tile successfully' do
-      VCR.use_cassette 'deleting product' do
-        product.upload
-        expect do
-          product.delete_unused_products
-        end.to change{ OpsManager::Product.exists?(name, version ) }.to(false)
-      end
-    end
-  end
-
-  describe "#upload" do
-    before do
-      `rm #{filepath} ; cp ../fixtures/#{filepath} .`
-    end
+    let(:filepath) { 'example-product-1.6.2.pivotal' }
 
     describe "when product does not exist" do
-      it "uploads product tile successfully" do
-        allow(product).to receive(:`) if OpsManager.get_conf(:target) == '1.2.3.4'
-        VCR.use_cassette 'uploading product' do
-          product.delete_unused_products
-          expect do
-            product.upload
-          end.to change{ OpsManager::Product.exists?(name, version ) }.to(true)
-        end
+      before do
+        allow(described_class).to receive(:exists?).and_return(false)
+      end
+
+      it "uploads product" do
+        allow(product).to receive(:installation).and_return(product_installation)
+        allow(product).to receive(:upgrade_product_installation).with(guid, version)
+        allow(product).to receive(:trigger_installation)
+        expect(product).to receive(:upload_product)
+        product.upgrade(version, filepath)
       end
     end
 
@@ -80,13 +71,33 @@ describe OpsManager::Product do
       end
 
       it 'should skip product upload' do
-        expect(product).not_to receive(:`)
-        product.upload
+        allow(product).to receive(:installation).and_return(product_installation)
+        allow(product).to receive(:upgrade_product_installation).with(guid, version)
+        allow(product).to receive(:trigger_installation)
+        expect(product).not_to receive(:upload_product)
+        product.upgrade(version, filepath)
       end
+    end
+
+    it 'should perform a version upgrade' do
+      allow(product).to receive(:upload)
+      allow(product).to receive(:installation).and_return(product_installation)
+      allow(product).to receive(:trigger_installation)
+      expect(product).to receive(:upgrade_product_installation).with(guid, version)
+      product.upgrade(version, filepath)
+    end
+
+    it 'should trigger installation' do
+      allow(product).to receive(:upload)
+      allow(product).to receive(:installation).and_return(product_installation)
+      allow(product).to receive(:upgrade_product_installation)
+      expect(product).to receive(:trigger_installation)
+      product.upgrade(version, filepath)
     end
   end
 
-  describe "deploy" do
+
+  describe "#deploy" do
     describe "when is the first time that it gets deployed" do
       it "upload new product"
       it "should add new product" #check on this
@@ -99,9 +110,9 @@ describe OpsManager::Product do
 
       before { product.perform_deploy }
 
-      xit 'should perform an upgrade' do
+      it 'should perform an upgrade' do
         expect_any_instance_of(OpsManager::Product).to receive(:upgrade)
-        product.deploy
+        product.deploy(version, filepath)
       end
     end
 

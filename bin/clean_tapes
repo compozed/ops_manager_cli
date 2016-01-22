@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+echo 'Replacing sensitive data in the source file with dummy data'
+
+USAGE="Usage ./clean_tapes SENSITIVE_INFO DUMMY_INFO"
+
+if [[ $# -ne 2 ]]; then
+  echo "Illegal number of parameters"
+  echo $USAGE
+  exit
+fi
+
+pattern=$1
+replacement=$2
+
+pushd spec/fixtures/vcr_cassettes/
+  ack -l $pattern | xargs perl -pi -E "s/$pattern/$replacement/g"
+popd
+
