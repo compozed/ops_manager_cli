@@ -2,12 +2,12 @@ require 'spec_helper'
 
 describe OpsManager::Vsphere do
   let(:conf_file){'ops_manager_deployment.yml'}
+  let(:conf){ YAML.load_file(conf_file) }
   let(:name){ conf.fetch('name') }
   let(:version){ conf.fetch('version') }
-  let(:target){ OpsManager.get_conf :target }
-  let(:username){ OpsManager.get_conf :username }
-  let(:password){ OpsManager.get_conf :password }
-  let(:conf){ YAML.load_file(conf_file) }
+  let(:target){ conf.fetch('ip') }
+  let(:username){ conf.fetch('username') }
+  let(:password){ conf.fetch('password') }
   let(:vcenter_username){ vcenter.fetch('username') }
   let(:vcenter_password){ vcenter.fetch('password') }
   let(:vcenter_datacenter){ vcenter.fetch('datacenter') }

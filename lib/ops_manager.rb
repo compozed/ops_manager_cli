@@ -3,24 +3,27 @@ class OpsManager
 
   class << self
     def target(target)
-      set_conf(target: target)
+      set_conf(:target, target)
     end
 
     def login(username, password)
-      set_conf(username: username, password: password)
+      set_conf(:username, username)
+      set_conf( :password, password)
     end
 
-    def set_conf(opts)
+    def set_conf(key, val)
       conf = {}
       Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
       conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-      conf.merge!(opts)
+      puts "Changing #{key} to #{val}".yellow unless conf[key].nil?
+      conf[key] = val
       File.open(conf_file_path, 'w'){|f| f.write(conf.to_yaml) }
     end
 
     def get_conf(key)
+      conf = {}
       conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-      conf.fetch(key)
+      conf[ key ]
     end
   end
 
@@ -28,13 +31,16 @@ class OpsManager
     conf = ::YAML.load_file(conf_file)
     name = conf.fetch('name')
     version = conf.fetch('version')
-    provider=conf.fetch('provider')
+    provider = conf.fetch('provider')
+    username = conf.fetch('username')
+    password = conf.fetch('password')
+    target = conf.fetch('ip')
     opts = conf.fetch('opts')
 
-    case provider
-    when 'vsphere'
-      @deployment ||= Vsphere.new(name, version, opts)
-    end
+    self.class.set_conf(:target, target)
+    self.class.set_conf(:username, username)
+    self.class.set_conf(:password, password)
+      @deployment ||= const_get(provider).new(name, version, opts)
     case
 
     when deployment.current_version.nil?

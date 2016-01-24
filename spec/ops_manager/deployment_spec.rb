@@ -5,8 +5,15 @@ require "ops_manager/deployment"
 describe OpsManager::Deployment do
   let(:name){ 'ops-manager' }
   let(:version){'1.5.5.0'}
-
   let(:deployment){ described_class.new(name, version) }
+
+  describe 'new' do
+    %w{ name version }.each do |p|
+      it "should set #{p}" do
+        expect(deployment.send(p)).to eq(send(p))
+      end
+    end
+  end
 
   %w{ stop_current_vm deploy_vm }.each do |m|
     describe m do
@@ -40,24 +47,6 @@ describe OpsManager::Deployment do
       VCR.use_cassette 'create first user', record: :none do
         expect(deployment).to receive(:create_user).twice.and_call_original
         deployment.create_first_user
-      end
-    end
-  end
-
-  describe 'new' do
-    %w{ name version }.each do |p|
-      it "should set #{p}" do
-        expect(deployment.send(p)).to eq(send(p))
-      end
-    end
-  end
-
-  describe 'current_version' do
-    describe 'when there is no ops manager' do
-      before { allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(Errno::ETIMEDOUT) }
-
-      it 'should be nil' do
-        expect(deployment.current_version).to be_nil
       end
     end
   end

@@ -20,11 +20,11 @@ class OpsManager
       res
     end
 
-  def get_installation_settings
-    puts '====> Downloading installation settings...'.green
-    get("/api/installation_settings",
-       write_to: "installation_settings.json")
-  end
+    def get_installation_settings
+      puts '====> Downloading installation settings...'.green
+      get("/api/installation_settings",
+          write_to: "installation_settings.json")
+    end
 
     def upload_installation_assets
       puts '====> Uploading installation assets...'.green
@@ -35,7 +35,6 @@ class OpsManager
                     )
     end
 
-
     def get_installation_assets
       puts '====> Download installation assets...'.green
       get("/api/installation_asset_collection",
@@ -43,10 +42,12 @@ class OpsManager
     end
 
     def delete_products
+      puts '====> Deleating unused products...'.green
       delete('/api/products')
     end
 
     def trigger_installation
+      puts '====> Applying changes...'.green
       post('/api/installation')
     end
 
@@ -55,11 +56,12 @@ class OpsManager
     end
 
     def upgrade_product_installation(guid, version)
+      puts "====> Bumping product installation #{guid} version to #{version}...".green
       put("/api/installation_settings/products/#{guid}", to_version: version)
     end
 
     def upload_product(filepath)
-      file = "#{Dir.pwd}/#{filepath}"
+      file = "#{filepath}"
       cmd = "curl -k \"https://#{target}/api/products\" -F 'product[file]=@#{file}' -X POST -u #{username}:#{password}"
       logger.info "running cmd: #{cmd}"
       puts `#{cmd}`
@@ -135,6 +137,14 @@ class OpsManager
       request.basic_auth(username, password)
       http.request(request)
     end
+
+    def current_version
+      products = JSON.parse(get_products.body)
+      @current_version ||= products.select{ |i| i.fetch('name') == 'microbosh' }
+        .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
+    rescue Errno::ETIMEDOUT
+      nil
+    end
     private
 
     def http_for(uri)
@@ -160,6 +170,5 @@ class OpsManager
     def password
       @password ||= OpsManager.get_conf(:password)
     end
-
   end
 end

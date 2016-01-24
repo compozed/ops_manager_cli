@@ -4,12 +4,15 @@ require 'ops_manager/api'
 describe OpsManager::API do
   class Foo ; include OpsManager::API; end
   let(:api){ Foo.new }
+  let(:target){ '1.2.3.4' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:parsed_response){ JSON.parse(response.body) }
 
   before do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
-    allow(api).to receive(:`) if OpsManager.get_conf(:target) == '1.2.3.4'
+    OpsManager.target( ENV['TARGET'] || target)
+    OpsManager.login( ENV['USERNAME'] || 'foo', ENV['PASSWORD'] || 'bar')
+    allow(api).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
   describe 'upload_installation_assets' do
@@ -175,6 +178,16 @@ describe OpsManager::API do
 
     it "should include products in its body" do
       expect(parsed_response).to be_a(Array)
+    end
+  end
+
+  describe 'current_version' do
+    describe 'when there is no ops manager' do
+      before { allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(Errno::ETIMEDOUT) }
+
+      it 'should be nil' do
+        expect(api.current_version).to be_nil
+      end
     end
   end
 end

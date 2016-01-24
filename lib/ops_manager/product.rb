@@ -1,7 +1,6 @@
 require 'ops_manager/api'
 require 'ops_manager/product_installation'
 require "ops_manager/logging"
-require 'byebug'
 
 class OpsManager
   class Product
@@ -24,13 +23,15 @@ class OpsManager
     end
 
     def deploy(version, filepath)
-      upgrade
+      upgrade(version, filepath)
     end
 
     def upgrade(version, filepath)
+      puts "====> Upgrading #{name} version from #{installation.version} to #{version}...".green
       upload(version, filepath)
       upgrade_product_installation(installation.guid, version)
       trigger_installation
+      puts "====> Finish!".green
     end
 
     def perform_deploy

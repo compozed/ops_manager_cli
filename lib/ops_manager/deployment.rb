@@ -39,21 +39,13 @@ class OpsManager::Deployment
 
 
 
-  def current_version
-    products = JSON.parse(get_products.body)
-    @current_version ||= products.select{ |i| i.fetch('name') == 'microbosh' }
-      .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
-  rescue Errno::ETIMEDOUT
-    nil
-  end
 
   def new_vm_name
-    @new_vm_name ||= "#{@name}-#{@version}"
+    @new_vm_name ||= "#{name}-#{version}"
   end
-
 
   private
   def current_vm_name
-    @current_vm_name ||= "#{@name}-#{current_version}"
+    @current_vm_name ||= "#{name}-#{current_version}"
   end
 end

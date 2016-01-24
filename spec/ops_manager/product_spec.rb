@@ -49,6 +49,7 @@ describe OpsManager::Product do
   end
 
   describe "#upgrade" do
+    let(:product_installation){ OpsManager::ProductInstallation.new(guid, '1.6.0.0') }
     let(:filepath) { 'example-product-1.6.2.pivotal' }
 
     describe "when product does not exist" do
@@ -111,7 +112,7 @@ describe OpsManager::Product do
       before { product.perform_deploy }
 
       it 'should perform an upgrade' do
-        expect_any_instance_of(OpsManager::Product).to receive(:upgrade)
+        expect_any_instance_of(OpsManager::Product).to receive(:upgrade).with(version, filepath)
         product.deploy(version, filepath)
       end
     end
