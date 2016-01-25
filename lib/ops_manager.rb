@@ -40,7 +40,7 @@ class OpsManager
     self.class.set_conf(:target, target)
     self.class.set_conf(:username, username)
     self.class.set_conf(:password, password)
-      @deployment ||= const_get(provider).new(name, version, opts)
+    @deployment ||= OpsManager.const_get(provider.capitalize).new(name, version, opts)
     case
 
     when deployment.current_version.nil?

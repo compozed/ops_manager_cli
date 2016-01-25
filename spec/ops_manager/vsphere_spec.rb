@@ -41,6 +41,17 @@ describe OpsManager::Vsphere do
       expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{opts['portgroup']}\" --name=#{new_vm_name} -ds=#{opts['datastore']} --prop:ip0=#{target} --prop:netmask0=#{opts['netmask']}  --prop:gateway=#{opts['gateway']} --prop:DNS=#{opts['dns']} --prop:ntp_servers=#{opts['ntp_servers'].join(',')} --prop:admin_password=#{password} #{opts['ova_path']} #{vcenter_target}")
       vsphere.deploy_vm
     end
+
+    %w{username password}.each do |m|
+      describe "when vcenter_#{m} has unescaped character" do
+        before { opts['vcenter'][m] = "domain\\vcenter_#{m}" }
+
+        it "should URL encode the #{m}" do
+          expect(vsphere).to receive(:`).with(/domain%5Cvcenter_#{m}/)
+          vsphere.deploy_vm
+        end
+      end
+    end
   end
 
   describe 'stop_current_vm' do
