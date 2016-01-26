@@ -24,7 +24,7 @@ class OpsManager
       puts '====> Downloading installation settings...'.green
       get("/api/installation_settings",
           write_to: "installation_settings.json")
-    end
+   end
 
     def upload_installation_assets
       puts '====> Uploading installation assets...'.green
@@ -142,7 +142,7 @@ class OpsManager
       products = JSON.parse(get_products.body)
       @current_version ||= products.select{ |i| i.fetch('name') == 'microbosh' }
         .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
-    rescue Errno::ETIMEDOUT
+    rescue Errno::ETIMEDOUT , Net::HTTPFatalError
       nil
     end
     private

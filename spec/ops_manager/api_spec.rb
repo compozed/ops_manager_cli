@@ -182,11 +182,13 @@ describe OpsManager::API do
   end
 
   describe 'current_version' do
-    describe 'when there is no ops manager' do
-      before { allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(Errno::ETIMEDOUT) }
+    [ Errno::ETIMEDOUT , Net::HTTPFatalError.new( '', '' ) ].each do |error|
+      describe "when there is no ops manager and request errors: #{error}" do
 
-      it 'should be nil' do
-        expect(api.current_version).to be_nil
+        it "should be nil" do
+        allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(error)
+          expect(api.current_version).to be_nil
+        end
       end
     end
   end
