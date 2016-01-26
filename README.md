@@ -4,15 +4,15 @@ Performs Ops Manager deployments (vsphere support only).
 
 ## Pre-requisites
 
- - `ovftools` installed (available in user PATH) on the machine where the following process will be executed
+ - `ovftools` (version 4.1.0 or higher) installed (available in user PATH) on your workstation
 
 ## Installation
 
+**NOTE: this installation process will only work once the gem gets publish and open source.**
+
 Add this line to your application's Gemfile:
 
-```ruby
-gem 'ops_manager'
-```
+    gem 'ops_manager'
 
 And then execute:
 
@@ -24,35 +24,49 @@ Or install it yourself as:
 
 ## Usage
 
-### Deploy Ops Manager
+### Help
 
-    git clone github.com/compozed/ops_manager  && cd ops_manager
-    # Edit the example for the deployment that you want to perform a deployment on:
-    cp spec/dummy/YOUR_CLOUD_PROVIDER.yml conf.yml && vim conf.yml
+prints out available commands with their usage
 
-Once you have edited you configs you can run a deployment:
+    ./ops_manager help
 
-    ./ops_manager deploy -c conf.yml
+### Deploy or upgrade Ops Manager
 
-### Provision stemcell
+It does not require **target** or **login**.
 
-    ./ops_manager provision stemcell -p ./path/to/stemcell -t target -u username -p password
+Once you have created the config you can run a deployment:
 
-### Deploy product
+    ./ops_manager deploy [config/ops_manager_example.yml](spec/dummy/ops_manager_deployment.yml)
 
-- Upload a tile( Skip if exists)
-- Enable that tile as an available product
-- performs an deploy if the product was never deployed 
-- performs an upgrade if the product olready exists and its old
-- Apply changes if the tile already exists
 
-    ./ops_manager deploy product -c conf.yml 
+### Target OpsManager
+
+    ./ops_manager target ops_manager_address
+
+
+### Login in to OpsManager
+
+    ./ops_manager login username password
+
+
+### Upgrade a product
+
+Remember to perform  **target** and **login** before performing an upgrade
+
+    ./ops_manager deploy-product [config/product_example.yml](spec/dummy/ops_manager_deployment.yml)
+
+
+### Provision stemcell(TBD)
+
+    ./ops_manager provision stemcell -p ./path/to/stemcell 
+
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
 To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+
 
 ## Contributing
 
