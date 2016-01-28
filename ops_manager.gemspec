@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'ops_manager/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "ops_manager"
+  spec.name          = "ops_manager_cli"
   spec.version       = OpsManager::VERSION
   spec.authors       = ["Alan Moran", "Satheesh Uppalapati"]
   spec.email         = ["bonzofenix@gmail.com", "satheesh.uppalapati@gmail.com"]
@@ -22,7 +22,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "vcr"
   spec.add_development_dependency "webmock"
-  spec.add_development_dependency "byebug"
   spec.add_dependency "rbvmomi"
   spec.add_dependency "multipart-post"
   spec.add_dependency "colorize"

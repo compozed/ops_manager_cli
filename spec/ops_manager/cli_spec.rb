@@ -1,5 +1,4 @@
 require "spec_helper"
-require "byebug"
 
 describe OpsManager::Cli do
   let(:cli){ described_class }

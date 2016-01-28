@@ -1,7 +1,5 @@
-require 'byebug'
 require "ops_manager/logging"
 require "net/http/post/multipart"
-require "rest-client"
 
 class OpsManager
   module API
