@@ -1,7 +1,7 @@
 FROM ruby:2.3.0
 
 ENV OVFTOOL_VERSION 4.1.0-2459827
-RUN echo $HTTP_PROXY
+
 RUN OVFTOOL_INSTALLER=vmware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle \
   && wget --no-check-certificate -q https://storage.googleapis.com/mortarchive/pub/ovftool/${OVFTOOL_INSTALLER} \
   && wget --no-check-certificate -q https://storage.googleapis.com/mortarchive/pub/ovftool/${OVFTOOL_INSTALLER}.sha256 \
