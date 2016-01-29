@@ -87,7 +87,11 @@ class OpsManager
           f.close
         end
       else
-        http.request(request)
+
+        http.request(request).tap do |res|
+          logger.info("performing get to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
+          logger.info("get response body #{res.body}")
+        end
       end
     end
 
@@ -138,9 +142,9 @@ class OpsManager
 
     def current_version
       products = JSON.parse(get_products.body)
-      @current_version ||= products.select{ |i| i.fetch('name') == 'microbosh' }
+      @current_version ||= products.select{ |i| i.fetch('name') == 'p-bosh' }
         .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
-    rescue Errno::ETIMEDOUT , Net::HTTPFatalError
+    rescue Errno::ETIMEDOUT , Net::HTTPFatalError, Net::OpenTimeout
       nil
     end
     private
