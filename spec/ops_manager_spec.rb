@@ -10,7 +10,6 @@ describe OpsManager do
   let(:target){ '1.2.3.4' }
   let(:username){ 'foo' }
   let(:password){ 'bar' }
-
   let(:current_version){ '1.4.2.0' }
   let(:ops_manager) do
     described_class.new.tap do |o|

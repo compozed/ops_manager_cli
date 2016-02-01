@@ -14,14 +14,18 @@ class OpsManager
         uri= "/api/setup"
       end
 
-      res = post(uri, body: body)
-      res
+      post(uri, body: body)
+    end
+
+    def upload_installation_settings(filepath)
+      puts '====> Uploading installation settings...'.green
+      yaml = UploadIO.new(filepath, 'text/yaml')
+      multipart_post( "/api/installation_settings",
+                     "installation[file]" => yaml)
     end
 
     def get_installation_settings
-      puts '====> Downloading installation settings...'.green
-      get("/api/installation_settings",
-          write_to: "installation_settings.json")
+      get("/api/installation_settings")
    end
 
     def upload_installation_assets

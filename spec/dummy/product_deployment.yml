@@ -2,3 +2,4 @@
 name: 'example-product'
 version: '1.6.2.0'
 filepath: 'example-product-1.6.2.pivotal'
+installation_settings_file: 'installation_settings.yml'

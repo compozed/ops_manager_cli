@@ -23,6 +23,7 @@ class OpsManager
 
     class Deploy < Clamp::Command
       parameter "OPS_MANAGER_CONFIG", "opsManager config file", required: true
+
       def execute
         OpsManager.new.deploy(@ops_manager_config)
       end
@@ -30,9 +31,10 @@ class OpsManager
 
     class DeployProduct < Clamp::Command
       parameter "PRODUCT_CONFIG", "opsManager product config file", required: true
+      option "--force", :flag, "force deployment" 
 
       def execute
-        OpsManager.new.deploy_product(@product_config)
+        OpsManager.new.deploy_product(@product_config, force?)
       end
     end
 

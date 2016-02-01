@@ -55,13 +55,16 @@ class OpsManager
   end
 
 
-  def deploy_product(conf_file)
+  def deploy_product(conf_file, force = false)
     conf = ::YAML.load_file(conf_file)
     name = conf.fetch('name')
     version = conf.fetch('version')
-    filepath = conf.fetch('filepath')
+    filepath = conf['filepath']
+    installation_settings_file = conf['installation_settings_file']
     product = OpsManager::Product.new(name)
-    product.deploy(version, filepath)
+    product.deploy(version, filepath, installation_settings_file, force)
+
+
   end
 
   private

@@ -3,20 +3,34 @@ require 'ops_manager/api'
 class OpsManager
   class ProductInstallation
     attr_reader :guid, :version
-    include OpsManager::API
 
-    def initialize(guid, version)
-      @guid, @version = guid, version
+    def initialize(guid, version, prepared)
+      @guid, @version, @prepared = guid, version, prepared
     end
 
+    def prepared?
+      @prepared
+    end
 
-    def self.find(name)
-      res = self.new('', '').get('/api/installation_settings')
-      parsed_res = JSON.parse(res.body)
-      products = parsed_res.fetch('products')
-      product = products.select{|o| o.fetch('identifier') == name }.first
+    class << self
+    include OpsManager::API
+      def find(name)
+        is = installation_settings_for(name)
+        new(
+          is.fetch('guid'),
+          is.fetch('product_version'),
+          is.fetch('prepared')
+        ) if is
+      end
 
-      new(product.fetch('guid'), product.fetch('product_version')) if product
+      private
+
+      def installation_settings_for(name)
+        res = get_installation_settings
+        parsed_res = JSON.parse(res.body)
+        products = parsed_res.fetch('products')
+        products.select{|o| o.fetch('identifier') == name }.first
+      end
     end
   end
 end

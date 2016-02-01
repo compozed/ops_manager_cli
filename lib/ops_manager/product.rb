@@ -17,16 +17,25 @@ class OpsManager
       OpsManager::ProductInstallation.find(name)
     end
 
+    def deploy(version, filepath, installation_settings_file, forced = false)
+      case
+      when installation.nil? || forced
+        perform_new_deployment(version, filepath, installation_settings_file)
+      when installation
+        perform_upgrade(version, filepath)
+      end
+    end
+
     def upload(version, filepath)
-      file = "#{Dir.pwd}/#{filepath}"
-      upload_product(file) unless self.class.exists?(name, version)
+      upload_product(filepath) unless self.class.exists?(name, version)
     end
 
-    def deploy(version, filepath)
-      upgrade(version, filepath)
-    end
-
-    def upgrade(version, filepath)
+    # make me private? maybe?
+    def perform_upgrade(version, filepath)
+      unless installation.prepared?
+        puts "====> Skipping as this product has a pending installation!".red
+        return
+      end
       puts "====> Upgrading #{name} version from #{installation.version} to #{version}...".green
       upload(version, filepath)
       upgrade_product_installation(installation.guid, version)
@@ -34,7 +43,11 @@ class OpsManager
       puts "====> Finish!".green
     end
 
-    def perform_deploy
+    def perform_new_deployment(version,  filepath,installation_settings_file)
+      puts "====> Deploying #{name} version #{version}...".green
+      upload(version, filepath)
+      upload_installation_settings(installation_settings_file)
+      trigger_installation
     end
 
 

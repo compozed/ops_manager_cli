@@ -37,8 +37,18 @@ describe OpsManager::Cli do
     let(:args) { %w(deploy-product product.yml) }
 
     it "should call ops_manager.deploy_product" do
-      expect_any_instance_of(OpsManager).to receive(:deploy_product).with('product.yml')
+      expect_any_instance_of(OpsManager).to receive(:deploy_product).with('product.yml', nil)
       cli.run(`pwd`, args)
+    end
+
+    describe "when --force" do
+      let(:args) { %w(deploy-product --force product.yml) }
+
+      it "should call ops_manager.deploy_product with force" do
+        expect_any_instance_of(OpsManager)
+          .to receive(:deploy_product).with('product.yml', true)
+        cli.run(`pwd`, args)
+      end
     end
   end
 
