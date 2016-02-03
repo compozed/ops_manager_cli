@@ -77,7 +77,49 @@ describe OpsManager do
     end
   end
 
+  describe 'target_and_login' do
+    describe 'when config has credentials' do
+      let(:config) do
+        {
+          'target' => target,
+          'username' => username,
+          'password' => password
+        }
+      end
+
+      it 'should target' do
+        expect(OpsManager).to receive(:target).with(target)
+        ops_manager.target_and_login(config)
+      end
+
+      it 'should login' do
+        expect(OpsManager).to receive(:login).with(username, password)
+        ops_manager.target_and_login(config)
+      end
+    end
+  end
+
+  describe 'when config does not have credentials' do
+    let(:config)  {{}}
+
+    it 'should not target' do
+      expect(OpsManager).not_to receive(:target).with(target)
+      ops_manager.target_and_login(config)
+    end
+
+    it 'should not login' do
+      expect(OpsManager).not_to receive(:login).with(username, password)
+      ops_manager.target_and_login(config)
+    end
+  end
+
   describe 'deploy_product' do
+    it 'should target_and_login' do
+      allow_any_instance_of(OpsManager::Product).to receive(:deploy)
+      expect_any_instance_of(OpsManager).to receive(:target_and_login)
+      ops_manager.deploy_product(product_deployment_file)
+    end
+
     it 'should execute a product deploy' do
       expect_any_instance_of(OpsManager::Product).to receive(:deploy)
       ops_manager.deploy_product(product_deployment_file)

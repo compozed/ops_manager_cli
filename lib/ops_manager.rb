@@ -27,6 +27,14 @@ class OpsManager
     end
   end
 
+  def target_and_login(config)
+    username = config['username']
+    password = config['password']
+    target = config['target']
+
+    self.class.target(target) if target
+    self.class.login(username, password) if username && password
+  end
   def deploy(conf_file)
     conf = ::YAML.load_file(conf_file)
     name = conf.fetch('name')
@@ -57,14 +65,13 @@ class OpsManager
 
   def deploy_product(conf_file, force = false)
     conf = ::YAML.load_file(conf_file)
+    target_and_login(conf)
     name = conf.fetch('name')
     version = conf.fetch('version')
     filepath = conf['filepath']
     installation_settings_file = conf['installation_settings_file']
     product = OpsManager::Product.new(name)
     product.deploy(version, filepath, installation_settings_file, force)
-
-
   end
 
   private

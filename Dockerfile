@@ -10,7 +10,7 @@ RUN OVFTOOL_INSTALLER=vmware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle \
   && rm -f ${OVFTOOL_INSTALLER}*
 
 # Installs ops_manager_cli
-COPY ops_manager_cli-0.1.0.gem /tmp/
+COPY pkg/ops_manager_cli-0.1.0.gem /tmp/
 
 RUN gem install /tmp/ops_manager_cli-0.1.0.gem
 

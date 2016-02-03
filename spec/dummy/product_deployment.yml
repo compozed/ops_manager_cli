@@ -1,4 +1,7 @@
 ---
+target: 1.2.3.4 # Optional replacement of ./ops_manager target 1.2.3.4
+username: foo # Optional replacement of ./ops_manager login foo bar
+password: bar # Optional replacement of ./ops_manager login foo bar
 name: 'example-product'
 version: '1.6.2.0'
 filepath: 'example-product-1.6.2.pivotal'
