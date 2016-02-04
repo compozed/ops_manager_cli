@@ -54,7 +54,9 @@ class OpsManager
     end
 
     def get_installation(id)
-      get("/api/installation/#{id}")
+      res = get("/api/installation/#{id}")
+      raise OpsManager::InstallationError.new(res.body) if res.body =~  /error/
+      res
     end
 
     def upgrade_product_installation(guid, version)

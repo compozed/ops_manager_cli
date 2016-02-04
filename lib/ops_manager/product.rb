@@ -49,15 +49,19 @@ class OpsManager
       get_installation_settings({write_to: '/tmp/is.yml'})
       puts `spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
-      trigger_installation
+      id = JSON.parse(trigger_installation.body).fetch('id').to_i
+      wait_for_installation(id)
     end
-
 
     def self.exists?(name, version)
       res = JSON.parse(self.new.get_products.body)
       !!res.find{ |o| o['name'] == name && o['product_version'] == version }
     end
 
-
+    def wait_for_installation(id)
+      while JSON.parse(get_installation(id).body).fetch('status') == 'running'
+        print '.'.green
+      end
+    end
   end
 end

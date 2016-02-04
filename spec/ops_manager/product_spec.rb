@@ -10,6 +10,7 @@ describe OpsManager::Product do
   let(:guid) { 'example-product-abc123' }
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, version, true) }
+    let(:installation_id){ 1234 }
 
   before do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
@@ -63,7 +64,9 @@ describe OpsManager::Product do
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
         s.to receive(:trigger_installation)
+          .and_return(double(body: "{\"id\":\"#{installation_id}\"}"))
         s.to receive(:get_installation_settings)
+        s.to receive(:wait_for_installation)
         s.to receive(:`)
       end
     end
@@ -91,6 +94,24 @@ describe OpsManager::Product do
     it 'should trigger installation' do
       expect(product).to receive(:trigger_installation)
       product.perform_new_deployment(version, filepath,installation_settings_file)
+    end
+
+    it 'should wait for installation' do
+      # allow(product).to receive(:trigger_installation)
+      expect(product).to receive(:wait_for_installation).with(installation_id)
+      product.perform_new_deployment(version, filepath,installation_settings_file)
+    end
+  end
+
+  describe "#wait_for_installation" do
+    let(:success){ double(body: "{\"status\":\"succeess\"}") }
+    let(:running){ double(body: "{\"status\":\"running\"}") }
+
+    it 'returns on success' do
+      expect(product).to receive(:get_installation)
+        .with(installation_id)
+        .and_return( running, running, success)
+      product.wait_for_installation(installation_id)
     end
   end
 
