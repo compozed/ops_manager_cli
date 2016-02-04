@@ -28,11 +28,8 @@ describe OpsManager::Product do
   end
 
   describe "#installation" do
-    before do
-      allow(product).to receive(:installation).and_call_original
-
-    end
     it "should look for its ProductInstallation" do
+      allow(product).to receive(:installation).and_call_original
       expect(OpsManager::ProductInstallation).to receive(:find).with(name)
       product.installation
     end
@@ -66,6 +63,8 @@ describe OpsManager::Product do
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
         s.to receive(:trigger_installation)
+        s.to receive(:get_installation_settings)
+        s.to receive(:`)
       end
     end
 
@@ -74,8 +73,18 @@ describe OpsManager::Product do
       product.perform_new_deployment(version, filepath, installation_settings_file)
     end
 
+    it 'should download current installation setting' do
+      expect(product).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      product.perform_new_deployment(version, filepath, installation_settings_file)
+    end
+
+    it 'should spruce merge current installation settings with product installation settings' do
+      expect(product).to receive(:`).with("spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml")
+      product.perform_new_deployment(version, filepath, installation_settings_file)
+    end
+
     it 'should upload new installation settings' do
-      expect(product).to receive(:upload_installation_settings)
+      expect(product).to receive(:upload_installation_settings).with('/tmp/new_is.yml')
       product.perform_new_deployment(version, filepath,installation_settings_file)
     end
 
@@ -94,13 +103,14 @@ describe OpsManager::Product do
     before do
       allow(product_installation).to receive(:prepared?)
         .and_return(installation_prepared)
-      allow(product).to receive(:upgrade_product_installation)
-        .with(guid, version)
-        allow(product).to receive(:upload_product)
-        allow(product).to receive(:trigger_installation)
+      allow(product).tap do |s|
+        s.to receive(:upgrade_product_installation).with(guid, version)
+        s.to receive(:upload_product)
+        s.to receive(:trigger_installation)
+      end
     end
 
-    describe "when previous installation is prepared" do
+    describe "when current installation is prepared" do
       let(:installation_prepared){ true }
 
       it 'performs a product upload' do

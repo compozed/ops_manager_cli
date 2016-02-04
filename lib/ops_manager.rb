@@ -35,6 +35,7 @@ class OpsManager
     self.class.target(target) if target
     self.class.login(username, password) if username && password
   end
+
   def deploy(conf_file)
     conf = ::YAML.load_file(conf_file)
     name = conf.fetch('name')
@@ -101,6 +102,7 @@ end
 require "ops_manager/version"
 require "ops_manager/vsphere"
 require "ops_manager/cli"
+require "ops_manager/errors"
 require "colorize"
 require "net/https"
 require "uri"

@@ -24,8 +24,8 @@ class OpsManager
                      "installation[file]" => yaml)
     end
 
-    def get_installation_settings
-      get("/api/installation_settings")
+    def get_installation_settings(opts = {})
+      get("/api/installation_settings", opts)
    end
 
     def upload_installation_assets
@@ -59,7 +59,9 @@ class OpsManager
 
     def upgrade_product_installation(guid, version)
       puts "====> Bumping product installation #{guid} version to #{version}...".green
-      put("/api/installation_settings/products/#{guid}", to_version: version)
+      res = put("/api/installation_settings/products/#{guid}", to_version: version)
+      raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
+      res
     end
 
     def upload_product(filepath)

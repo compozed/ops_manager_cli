@@ -154,16 +154,35 @@ describe "#upgrade_product_installation" do
   let(:guid) {product.installation.guid }
   let(:version){ '1.6.2.0' }
 
-  let(:response) do
-    VCR.use_cassette 'upgrade product installation' do
-      api.upgrade_product_installation(guid, version)
+  describe "when it applies sucessfully" do
+    let(:response) do
+      VCR.use_cassette 'upgrade product installation' do
+        api.upgrade_product_installation(guid, version)
+      end
+    end
+
+    it "should return response" do
+      expect(response).to be_kind_of(Net::HTTPOK)
+    end
+
+    it 'should return 200' do
+      expect(response.code).to eq("200")
     end
   end
 
-  it "should run successfully" do
-    expect(response.code).to eq("200")
-  end
+  describe "when it applies unsucessfully" do
+    let(:response) do
+      VCR.use_cassette 'upgrade product installation fails' do
+        api.upgrade_product_installation(guid, version)
+      end
+    end
 
+    it "should return response" do
+      expect do
+        response
+      end.to raise_exception(OpsManager::UpgradeError)
+    end
+  end
 end
 
 describe "#upload_product" do

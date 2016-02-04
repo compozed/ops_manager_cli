@@ -46,7 +46,9 @@ class OpsManager
     def perform_new_deployment(version,  filepath,installation_settings_file)
       puts "====> Deploying #{name} version #{version}...".green
       upload(version, filepath)
-      upload_installation_settings(installation_settings_file)
+      get_installation_settings({write_to: '/tmp/is.yml'})
+      puts `spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml`
+      upload_installation_settings('/tmp/new_is.yml')
       trigger_installation
     end
 
@@ -55,5 +57,7 @@ class OpsManager
       res = JSON.parse(self.new.get_products.body)
       !!res.find{ |o| o['name'] == name && o['product_version'] == version }
     end
+
+
   end
 end
