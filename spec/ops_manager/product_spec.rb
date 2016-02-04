@@ -10,7 +10,10 @@ describe OpsManager::Product do
   let(:guid) { 'example-product-abc123' }
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, version, true) }
-    let(:installation_id){ 1234 }
+  let(:installation_id){ 1234 }
+  let(:trigger_installation_response) do
+    double( body: { 'install' => {'id' => installation_id.to_s }}.to_json )
+  end
 
   before do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
@@ -64,7 +67,7 @@ describe OpsManager::Product do
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
         s.to receive(:trigger_installation)
-          .and_return(double(body: "{\"id\":\"#{installation_id}\"}"))
+          .and_return(trigger_installation_response)
         s.to receive(:get_installation_settings)
         s.to receive(:wait_for_installation)
         s.to receive(:`)

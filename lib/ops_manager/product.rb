@@ -49,7 +49,7 @@ class OpsManager
       get_installation_settings({write_to: '/tmp/is.yml'})
       puts `spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
-      id = JSON.parse(trigger_installation.body).fetch('id').to_i
+      id = JSON.parse(trigger_installation.body).fetch('install').fetch('id').to_i
       wait_for_installation(id)
     end
 
