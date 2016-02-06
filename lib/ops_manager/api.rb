@@ -153,7 +153,7 @@ class OpsManager
       directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
       @current_version ||= directors
         .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
-    rescue Errno::ETIMEDOUT , Net::HTTPFatalError, Net::OpenTimeout
+    rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
       nil
     end
     private
