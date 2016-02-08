@@ -235,7 +235,8 @@ describe OpsManager::API do
   end
 
   describe 'current_version' do
-    [ Net::OpenTimeout, Errno::ETIMEDOUT , Net::HTTPFatalError.new( '', '' ) ].each do |error|
+    [ Net::OpenTimeout, Errno::ETIMEDOUT ,
+      Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|
       describe "when there is no ops manager and request errors: #{error}" do
 
         it "should be nil" do
