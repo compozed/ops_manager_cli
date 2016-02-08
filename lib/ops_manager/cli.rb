@@ -31,16 +31,24 @@ class OpsManager
 
     class DeployProduct < Clamp::Command
       parameter "PRODUCT_CONFIG", "opsManager product config file", required: true
-      option "--force", :flag, "force deployment" 
+      option "--force", :flag, "force deployment"
 
       def execute
         OpsManager.new.deploy_product(@product_config, force?)
       end
     end
 
+    class GetInstallationSettings < Clamp::Command
+      parameter "DESTINATION", "where should it place the donwloaded settings", required: true
+
+      def execute
+        OpsManager::Product.new.get_installation_settings(write_to: @destination)
+      end
+    end
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "deploy", "deploys or upgrades ops_manager" , Deploy
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
+    subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
   end
 end

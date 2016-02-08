@@ -52,6 +52,16 @@ describe OpsManager::Cli do
     end
   end
 
+
+  describe 'get-installation-settings' do
+    let(:args) { %w(get-installation-settings /tmp/is.yml) }
+
+    it "should call product.get_installation_settings" do
+        expect_any_instance_of(OpsManager::Product)
+          .to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+        cli.run(`pwd`, args)
+    end
+  end
   #
   # ./ops_manager provision stemcell -p path/to/stemcell.tgz -t IP -u USER -p PASSWORD
 end
