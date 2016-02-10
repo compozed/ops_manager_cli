@@ -21,8 +21,10 @@ class OpsManager
       case
       when installation.nil? || forced
         perform_new_deployment(version, filepath, installation_settings_file)
-      when installation
+      when installation && installation.version < version
         perform_upgrade(version, filepath)
+      when installation && installation.version == version
+        perform_new_deployment(version, filepath, installation_settings_file)
       end
     end
 
@@ -47,7 +49,7 @@ class OpsManager
       puts "====> Deploying #{name} version #{version}...".green
       upload(version, filepath)
       get_installation_settings({write_to: '/tmp/is.yml'})
-      puts `spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml`
+      puts `DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
       id = JSON.parse(trigger_installation.body).fetch('install').fetch('id').to_i
       wait_for_installation(id)

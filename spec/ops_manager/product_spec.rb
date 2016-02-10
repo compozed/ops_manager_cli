@@ -6,10 +6,11 @@ describe OpsManager::Product do
   let(:product_exists?){ false }
   let(:name){ 'example-product' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
-  let(:version){ '1.6.2.0' }
   let(:guid) { 'example-product-abc123' }
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
-  let(:product_installation){ OpsManager::ProductInstallation.new(guid, version, true) }
+  let(:version){ '1.6.2.0' }
+  let(:current_version){ version }
+  let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
   let(:installation_id){ 1234 }
   let(:trigger_installation_response) do
     double( body: { 'install' => {'id' => installation_id.to_s }}.to_json )
@@ -85,7 +86,7 @@ describe OpsManager::Product do
     end
 
     it 'should spruce merge current installation settings with product installation settings' do
-      expect(product).to receive(:`).with("spruce merge #{installation_settings_file} /tmp/is.yml > /tmp/new_is.yml")
+      expect(product).to receive(:`).with("DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
       product.perform_new_deployment(version, filepath, installation_settings_file)
     end
 
@@ -179,9 +180,28 @@ describe OpsManager::Product do
     end
 
     describe "when installation exists" do
-      it "perform upgrade" do
-        expect(product).to receive(:perform_upgrade)
-        product.deploy(version, filepath, installation_settings_file)
+      let(:version){ '1.6.2.0' }
+      before do
+          allow(product).to receive(:perform_upgrade)
+          allow(product).to receive(:perform_new_deployment)
+      end
+
+      describe "when version is newer than the current one" do
+        let(:current_version){ '1.5.2.0' }
+
+        it "perform upgrade" do
+          expect(product).to receive(:perform_upgrade)
+          product.deploy(version, filepath, installation_settings_file)
+        end
+      end
+
+      describe "when version match current one" do
+        let(:current_version){ version }
+
+        it "perform upgrade" do
+          expect(product).to receive(:perform_new_deployment)
+          product.deploy(version, filepath, installation_settings_file)
+        end
       end
     end
 

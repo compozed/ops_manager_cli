@@ -55,7 +55,7 @@ class OpsManager
 
     def get_installation(id)
       res = get("/api/installation/#{id}")
-      raise OpsManager::InstallationError.new(res.body) if res.body =~  /error/
+      raise OpsManager::InstallationError.new(res.body) if res.body =~  /failed/
       res
     end
 
