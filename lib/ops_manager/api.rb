@@ -156,6 +156,14 @@ class OpsManager
     rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
       nil
     end
+    def import_stemcell(filepath)
+      puts '====> Uploading stemcell...'.green
+      tar = UploadIO.new(filepath, 'multipart/form-data')
+      multipart_post( "/api/stemcells",
+                     "stemcell[file]" => tar
+                    )
+
+    end
     private
 
     def http_for(uri)

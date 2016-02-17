@@ -63,5 +63,14 @@ describe OpsManager::Cli do
     end
   end
   #
-  # ./ops_manager provision stemcell -p path/to/stemcell.tgz -t IP -u USER -p PASSWORD
+  # ./ops_manager import-stemcell path/to/stemcell.tgz
+  describe 'import-stemcello' do
+    let(:args) { %w(import-stemcell /tmp/is.yml) }
+
+    it "should call product.get_installation_settings" do
+        expect_any_instance_of(OpsManager)
+          .to receive(:import_stemcell).with( '/tmp/is.yml')
+        cli.run(`pwd`, args)
+    end
+  end
 end

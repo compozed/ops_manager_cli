@@ -1,5 +1,7 @@
+require "ops_manager/api"
 class OpsManager
   attr_accessor :deployment
+  include OpsManager::API
 
   class << self
     def target(target)
@@ -62,7 +64,6 @@ class OpsManager
       puts "OpsManager at #{target} version is already #{version}. Skiping ...".green
     end
   end
-
 
   def deploy_product(conf_file, force = false)
     conf = ::YAML.load_file(conf_file)

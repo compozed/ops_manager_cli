@@ -246,5 +246,22 @@ describe OpsManager::API do
       end
     end
   end
+
+
+  describe "#import_stemcell" do
+    let(:response) do
+      VCR.use_cassette 'import stemcell' do
+        api.import_stemcell("../fixtures/stemcell.tgz")
+      end
+    end
+
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
+
+    it "should include products in its body" do
+      expect(parsed_response).to eq({})
+    end
+  end
 end
 

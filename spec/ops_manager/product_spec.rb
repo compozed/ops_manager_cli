@@ -112,6 +112,7 @@ describe OpsManager::Product do
     let(:running){ double(body: "{\"status\":\"running\"}") }
 
     it 'returns on success' do
+      allow(product).to receive(:sleep)
       expect(product).to receive(:get_installation)
         .with(installation_id)
         .and_return( running, running, success)
