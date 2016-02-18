@@ -40,6 +40,7 @@ class OpsManager
 
   def deploy(conf_file)
     conf = ::YAML.load_file(conf_file)
+
     name = conf.fetch('name')
     version = conf.fetch('version')
     provider = conf.fetch('provider')
@@ -71,7 +72,10 @@ class OpsManager
     name = conf.fetch('name')
     version = conf.fetch('version')
     filepath = conf['filepath']
+    stemcell = conf['stemcell']
     installation_settings_file = conf['installation_settings_file']
+
+    import_stemcell(stemcell)
     product = OpsManager::Product.new(name)
     product.deploy(version, filepath, installation_settings_file, force)
   end

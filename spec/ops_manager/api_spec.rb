@@ -262,6 +262,13 @@ describe OpsManager::API do
     it "should include products in its body" do
       expect(parsed_response).to eq({})
     end
+
+    describe  "when stemcell is nil" do
+      it "should skip" do
+        expect(api).not_to receive(:puts).with(/====> Uploading stemcell.../)
+        api.import_stemcell(nil)
+      end
+    end
   end
 end
 

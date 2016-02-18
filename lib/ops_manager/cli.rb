@@ -53,6 +53,7 @@ class OpsManager
         OpsManager.new.import_stemcell(@stemcell_filepath)
       end
     end
+
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "deploy", "deploys or upgrades ops_manager" , Deploy

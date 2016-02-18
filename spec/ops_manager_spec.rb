@@ -114,9 +114,19 @@ describe OpsManager do
   end
 
   describe 'deploy_product' do
-    it 'should target_and_login' do
+    before do
       allow_any_instance_of(OpsManager::Product).to receive(:deploy)
+      allow_any_instance_of(OpsManager).to receive(:target_and_login)
+      allow_any_instance_of(OpsManager).to receive(:import_stemcell)
+    end
+
+    it 'should target_and_login' do
       expect_any_instance_of(OpsManager).to receive(:target_and_login)
+      ops_manager.deploy_product(product_deployment_file)
+    end
+
+    it 'should provision stemcell' do
+      expect_any_instance_of(OpsManager).to receive(:import_stemcell).with('stemcell.tgz')
       ops_manager.deploy_product(product_deployment_file)
     end
 

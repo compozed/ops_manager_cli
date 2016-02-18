@@ -5,4 +5,5 @@ password: bar # Optional replacement of ./ops_manager login foo bar
 name: 'example-product'
 version: '1.6.2.0'
 filepath: 'example-product-1.6.2.pivotal'
+stemcell: 'stemcell.tgz'
 installation_settings_file: 'installation_settings.yml'

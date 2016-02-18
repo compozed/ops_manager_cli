@@ -157,6 +157,7 @@ class OpsManager
       nil
     end
     def import_stemcell(filepath)
+      return unless filepath
       puts '====> Uploading stemcell...'.green
       tar = UploadIO.new(filepath, 'multipart/form-data')
       multipart_post( "/api/stemcells",
