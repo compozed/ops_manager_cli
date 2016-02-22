@@ -1,11 +1,18 @@
-require "ops_manager/api"
+require 'ops_manager/api'
+require 'net/ping'
+
 class OpsManager
   attr_accessor :deployment
   include OpsManager::API
 
   class << self
     def target(target)
-      set_conf(:target, target)
+      if Net::Ping::HTTP.new("https://#{target}").ping?
+
+        set_conf(:target, target)
+      else
+        puts "Can not connect to #{target}".red
+      end
     end
 
     def login(username, password)
@@ -75,13 +82,14 @@ class OpsManager
     stemcell = conf['stemcell']
     installation_settings_file = conf['installation_settings_file']
 
-    import_stemcell(stemcell)
     product = OpsManager::Product.new(name)
+    import_stemcell(stemcell)
     product.deploy(version, filepath, installation_settings_file, force)
   end
 
   private
   def target
+
     self.class.get_conf(:target)
   end
 

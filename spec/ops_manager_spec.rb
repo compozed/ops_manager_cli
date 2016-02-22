@@ -56,10 +56,30 @@ describe OpsManager do
   end
 
   describe '@target' do
-    it 'should set conf target' do
-      expect do
-        OpsManager.target('1.2.3.4')
-      end.to change{ OpsManager.get_conf :target }
+    let(:net_ping){ double(ping?: pingable?) }
+    before do
+      OpsManager.set_conf(:target, nil)
+      allow(Net::Ping::HTTP).to receive(:new).with("https://#{target}").and_return(net_ping)
+    end
+
+    describe 'when target is pingable' do
+      let(:pingable?){ true }
+
+      it 'should set conf target' do
+        expect do
+          OpsManager.target(target)
+        end.to change{ OpsManager.get_conf :target }.from(nil).to(target)
+      end
+    end
+
+    describe 'when target is not pingable' do
+      let(:pingable?){ false }
+
+      it 'should set conf target' do
+        expect do
+          OpsManager.target(target)
+        end.not_to change{ OpsManager.get_conf :target }
+      end
     end
   end
 
@@ -78,6 +98,11 @@ describe OpsManager do
   end
 
   describe 'target_and_login' do
+    before do
+      allow(OpsManager).to receive(:target)
+      allow(OpsManager).to receive(:login)
+    end
+
     describe 'when config has credentials' do
       let(:config) do
         {

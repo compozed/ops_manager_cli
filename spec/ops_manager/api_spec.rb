@@ -9,8 +9,9 @@ describe OpsManager::API do
   let(:parsed_response){ JSON.parse(response.body) }
 
   before do
-    OpsManager.target( ENV['TARGET'] || target)
-    OpsManager.login( ENV['USERNAME'] || 'foo', ENV['PASSWORD'] || 'bar')
+    OpsManager.set_conf( :target, ENV['TARGET'] || target)
+    OpsManager.set_conf( :username, ENV['USERNAME'] || 'foo')
+    OpsManager.set_conf( :password, ENV['PASSWORD'] || 'bar')
     allow(api).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 

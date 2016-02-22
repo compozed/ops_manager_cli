@@ -21,8 +21,9 @@ describe OpsManager::Vsphere do
   let(:vsphere){ described_class.new(name, version, opts) }
 
   before do
-    OpsManager.target('1.2.3.4')
-    OpsManager.login('foo', 'bar')
+    OpsManager.set_conf(:target, '1.2.3.4')
+    OpsManager.set_conf(:username, 'foo')
+    OpsManager.set_conf(:username, 'bar')
   end
 
   it 'should inherit from deployment' do

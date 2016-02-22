@@ -1,7 +1,6 @@
 require "ops_manager/api"
 
 class OpsManager::Deployment
-
   include OpsManager::API
 
   attr_accessor :name, :version
@@ -36,9 +35,6 @@ class OpsManager::Deployment
     upload_installation_assets
     puts "====> Finish!".green
   end
-
-
-
 
   def new_vm_name
     @new_vm_name ||= "#{name}-#{version}"
