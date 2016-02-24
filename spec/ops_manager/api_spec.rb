@@ -44,17 +44,43 @@ describe OpsManager::API do
   end
 
   describe 'upload_installation_settings' do
-    subject(:response) do
-      VCR.use_cassette 'uploading settings' do
-        api.upload_installation_settings(filepath)
+    describe 'when success' do
+      subject(:response) do
+        VCR.use_cassette 'uploading settings' do
+          api.upload_installation_settings(filepath)
+        end
+      end
+
+      let(:filepath){ '../fixtures/installation_settings.json' }
+
+      it 'should be successfully' do
+        expect(response.code).to eq("200")
+      end
+
+      it "should not raise OpsManager::InstallationSettingsError" do
+        expect do
+          response
+        end.not_to raise_exception(OpsManager::InstallationSettingsError)
       end
     end
 
-    let(:filepath){ '../fixtures/installation_settings.json' }
+    describe 'when errors' do
+      subject(:response) do
+        VCR.use_cassette 'uploading settings errors' do
+          api.upload_installation_settings(filepath)
+        end
+      end
 
-    it 'should be successfully' do
-      expect(response.code).to eq("200")
+      let(:filepath){ '../fixtures/installation_settings.json' }
+
+      it "should not raise OpsManager::InstallationSettingsError" do
+        expect do
+          response
+        end.to raise_exception(OpsManager::InstallationSettingsError)
+      end
     end
+
+
   end
 
   describe 'get_installation_assets' do
@@ -144,11 +170,11 @@ describe OpsManager::API do
     end
 
     describe 'when installation running or success' do
-    subject(:response) do
-      VCR.use_cassette 'getting installation status' do
-        api.get_installation(10)
+      subject(:response) do
+        VCR.use_cassette 'getting installation status' do
+          api.get_installation(10)
+        end
       end
-    end
       it 'should be successfull' do
         expect(response.code).to eq("200")
       end

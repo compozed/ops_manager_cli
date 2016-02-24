@@ -1,0 +1,121 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://foo:bar@1.2.3.4/api/installation_settings
+    body:
+      encoding: UTF-8
+      string: "-------------RubyMultipartPost\r\nContent-Disposition: form-data; name=\"installation[file]\";
+        filename=\"installation_settings.json\"\r\nContent-Length: 5046\r\nContent-Type:
+        text/yaml\r\nContent-Transfer-Encoding: binary\r\n\r\n{\n  \"guid\": \"5b0acc994a1bc5f6f4a3\",\n
+        \ \"installation_schema_version\": \"1.6\",\n  \"infrastructure\": {\n    \"type\":
+        \"vsphere\",\n    \"vm_password_type\": \"generate\",\n    \"director_configuration\":
+        {\n      \"resurrector_enabled\": false,\n      \"ntp_servers\": [\n        \"test1.grump.com\",\n
+        \       \"test2.grump.com\",\n        \"test3.grump.com\"\n
+        \     ],\n      \"blobstore_type\": \"local\",\n      \"database_type\": \"internal\"\n
+        \   },\n    \"networks\": [\n      {\n        \"guid\": \"fe934b95a43c4fa1341c\",\n
+        \       \"name\": \"grump-mgmt\",\n        \"iaas_network_identifier\":
+        \"PCF2_1.2.3.0_DUMMY434\",\n        \"subnet\": \"1.2.3.0/22\",\n        \"dns\":
+        \"1.1.1.1\",\n        \"gateway\": \"1.2.3.1\",\n        \"reserved_ip_ranges\":
+        \"1.2.3.1-1.2.3.10,1.2.3.21-2.3.4.254\"\n      },\n      {\n        \"guid\":
+        \"175df2024bcfbfe04cb7\",\n        \"name\": \"grump-services\",\n        \"iaas_network_identifier\":
+        \"PCF1_1.2.3.0_DUMMY433\",\n        \"subnet\": \"1.2.3.0/22\",\n        \"dns\":
+        \"1.1.1.1\",\n        \"gateway\": \"1.2.3.1\",\n        \"reserved_ip_ranges\":
+        \"1.2.3.1-1.2.3.101,1.2.3.201-2.3.4.254\"\n      },\n      {\n
+        \       \"guid\": \"606883dfe56e7590622f\",\n        \"name\": \"grump-elastic\",\n
+        \       \"iaas_network_identifier\": \"PCF1_1.2.3.0_DUMMY433\",\n        \"subnet\":
+        \"1.2.3.0/22\",\n        \"dns\": \"1.1.1.1\",\n        \"gateway\":
+        \"1.2.3.1\",\n        \"reserved_ip_ranges\": \"1.2.3.1-1.2.3.7,1.2.3.4,1.2.3.11-1.2.3.21,1.2.3.101-2.3.4.254\"\n
+        \     }\n    ],\n    \"availability_zones\": [\n      {\n        \"guid\":
+        \"6e8997a18db43494de48\",\n        \"name\": \"grump-az1\",\n        \"cluster\":
+        \"ABCD-lab-mpn-01\",\n        \"resource_pool\": \"ABCD-PCF-AZ1-RP\"\n      }\n
+        \   ],\n    \"iaas_configuration\": {\n      \"datacenter\": \"NB6-LAB\",\n
+        \     \"vcenter_ip\": \"4.4.4.4\",\n      \"vcenter_username\": \"foo\",\n
+        \     \"vcenter_password\": \"bar1!\",\n      \"datastores\": [\n        \"ABCD_65197_HDS_100\"\n
+        \     ],\n      \"bosh_vm_folder\": \"foo_vms\",\n      \"bosh_template_folder\":
+        \"foo_templates\",\n      \"bosh_disk_path\": \"foo_disk\"\n    }\n  },\n
+        \ \"products\": [\n    {\n      \"guid\": \"p-bosh-0df59f8ad273b4c79d6f\",\n
+        \     \"installation_name\": \"p-bosh-0df59f8ad273b4c79d6f\",\n      \"product_version\":
+        \"1.6.8.0\",\n      \"singleton_availability_zone_reference\": \"6e8997a18db43494de48\",\n
+        \     \"prepared\": false,\n      \"stemcell\": {\n        \"infrastructure\":
+        \"vsphere\",\n        \"hypervisor\": \"esxi\",\n        \"os\": \"ubuntu-trusty\",\n
+        \       \"version\": \"3146.5\",\n        \"file\": \"bosh-stemcell-3146.5-vsphere-esxi-ubuntu-trusty-go_agent.tgz\",\n
+        \       \"name\": \"bosh-vsphere-esxi-ubuntu-trusty-go_agent\"\n      },\n
+        \     \"jobs\": [\n        {\n          \"guid\": \"director-7e081f39cc1d010e4679\",\n
+        \         \"installation_name\": \"director\",\n          \"properties\":
+        [\n            {\n              \"value\": {\n                \"identity\":
+        \"vcap\"\n              },\n              \"identifier\": \"vm_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"vcap\"\n              },\n              \"identifier\": \"agent_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"registry\"\n              },\n              \"identifier\": \"registry_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"director\"\n              },\n              \"identifier\": \"director_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"nats\"\n              },\n              \"identifier\": \"nats_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"redis\"\n              },\n              \"identifier\": \"redis_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"postgres\"\n              },\n              \"identifier\": \"postgres_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"blobstore\"\n              },\n              \"identifier\": \"blobstore_credentials\"\n
+        \           },\n            {\n              \"value\": {\n                \"identity\":
+        \"health_monitor\"\n              },\n              \"identifier\": \"health_monitor_credentials\"\n
+        \           },\n            {\n              \"identifier\": \"director_ssl\"\n
+        \           }\n          ],\n          \"instances\": [\n            {\n              \"value\":
+        1,\n              \"identifier\": \"instances\"\n            }\n          ],\n
+        \         \"resources\": [\n            {\n              \"value\": 3072,\n
+        \             \"identifier\": \"ram\"\n            },\n            {\n              \"value\":
+        25600,\n              \"identifier\": \"ephemeral_disk\"\n            },\n
+        \           {\n              \"value\": 40960,\n              \"identifier\":
+        \"persistent_disk\"\n            },\n            {\n              \"value\":
+        2,\n              \"identifier\": \"cpu\"\n            }\n          ],\n          \"identifier\":
+        \"director\"\n        }\n      ],\n      \"infrastructure_network_reference\":
+        \"fe934b95a43c4fa1341c\",\n      \"deployment_network_reference\": \"fe934b95a43c4fa1341c\",\n
+        \     \"identifier\": \"p-bosh\"\n    }\n  ]\n}\n\r\n-------------RubyMultipartPost--\r\n\r\n"
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+      Content-Type:
+      - multipart/form-data; boundary=-----------RubyMultipartPost
+      Content-Length:
+      - '5298'
+  response:
+    status:
+      code: 422
+      message: OK
+    headers:
+      Server:
+      - nginx/1.4.6 (Ubuntu)
+      Date:
+      - Mon, 01 Feb 2016 22:55:06 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Frame-Options:
+      - SAMEORIGIN
+      X-Xss-Protection:
+      - 1; mode=block
+      X-Content-Type-Options:
+      - nosniff
+      Etag:
+      - W/"99914b932bd37a50b983c5e7c90ae93b"
+      Cache-Control:
+      - max-age=0, private, must-revalidate
+      X-Request-Id:
+      - 41a53dc9-d855-45ad-b9a1-b5976f4c6772
+      X-Runtime:
+      - '0.221218'
+    body:
+      encoding: UTF-8
+      string: '{"errors":["error 1", "error 2"]}'
+    http_version:
+  recorded_at: Mon, 01 Feb 2016 22:55:07 GMT
+recorded_with: VCR 3.0.1

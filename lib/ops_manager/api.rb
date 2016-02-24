@@ -20,8 +20,10 @@ class OpsManager
     def upload_installation_settings(filepath)
       puts '====> Uploading installation settings...'.green
       yaml = UploadIO.new(filepath, 'text/yaml')
-      multipart_post( "/api/installation_settings",
+      res = multipart_post( "/api/installation_settings",
                      "installation[file]" => yaml)
+      raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
+      res
     end
 
     def get_installation_settings(opts = {})
