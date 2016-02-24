@@ -271,5 +271,5 @@ describe OpsManager::API do
       end
     end
   end
-end
 
+end

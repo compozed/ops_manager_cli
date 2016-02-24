@@ -54,11 +54,19 @@ class OpsManager
       end
     end
 
+    class DeleteUnusedProducts < Clamp::Command
+
+      def execute
+        OpsManager.new.delete_products
+      end
+    end
+
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "deploy", "deploys or upgrades ops_manager" , Deploy
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
     subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell
+    subcommand "delete-unused-products", "Deletes unused products" , DeleteUnusedProducts
   end
 end

@@ -7,7 +7,7 @@ describe OpsManager::Cli do
     let(:args) { %w(target 1.2.3.4) }
 
     it "should call OpsManager.target IP" do
-    expect(OpsManager).to receive(:target).with('1.2.3.4')
+      expect(OpsManager).to receive(:target).with('1.2.3.4')
       cli.run(`pwd`, args)
     end
   end
@@ -57,20 +57,29 @@ describe OpsManager::Cli do
     let(:args) { %w(get-installation-settings /tmp/is.yml) }
 
     it "should call product.get_installation_settings" do
-        expect_any_instance_of(OpsManager::Product)
-          .to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
-        cli.run(`pwd`, args)
+      expect_any_instance_of(OpsManager::Product)
+        .to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      cli.run(`pwd`, args)
     end
   end
-  #
-  # ./ops_manager import-stemcell path/to/stemcell.tgz
-  describe 'import-stemcello' do
+
+  describe 'import-stemcell' do
     let(:args) { %w(import-stemcell /tmp/is.yml) }
 
-    it "should call product.get_installation_settings" do
-        expect_any_instance_of(OpsManager)
-          .to receive(:import_stemcell).with( '/tmp/is.yml')
-        cli.run(`pwd`, args)
+    it "should call ops_manager.import_stemcell" do
+      expect_any_instance_of(OpsManager)
+        .to receive(:import_stemcell).with('/tmp/is.yml')
+      cli.run(`pwd`, args)
+    end
+  end
+
+  describe 'delete-unused-products' do
+    let(:args) { %w(delete-unused-products) }
+
+    it "should call ops_manager.delete_products" do
+      expect_any_instance_of(OpsManager)
+        .to receive(:delete_products)
+      cli.run(`pwd`, args)
     end
   end
 end
