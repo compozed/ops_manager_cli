@@ -21,7 +21,7 @@ class OpsManager::Vsphere < OpsManager::Deployment
   end
 
   def stop_current_vm
-    puts '====> Stopping vm #{current_vm_name}...'.green
+    puts "====> Stopping vm #{current_vm_name}...".green
     dc = vim.serviceInstance.find_datacenter(@opts['vcenter']['datacenter'])
     logger.info "finding vm: #{current_vm_name}"
     vm = dc.find_vm(current_vm_name) or fail "VM not found"
