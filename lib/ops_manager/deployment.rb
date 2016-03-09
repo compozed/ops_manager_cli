@@ -3,10 +3,10 @@ require "ops_manager/api"
 class OpsManager::Deployment
   include OpsManager::API
 
-  attr_accessor :name, :version
+  attr_accessor :name, :desired_version
 
-  def initialize(name,  version)
-    @name, @version = name, version
+  def initialize(name,  desired_version)
+    @name, @desired_version = name, desired_version
   end
 
   %w{ stop_current_vm deploy_vm }.each do |m|
@@ -22,7 +22,7 @@ class OpsManager::Deployment
 
   def create_first_user
     puts '====> Creating initial user...'.green
-    until( create_user(version).code.to_i == 200) do
+    until( create_user(desired_version).code.to_i == 200) do
       print '.'.green ; sleep 1
     end
   end
@@ -37,7 +37,7 @@ class OpsManager::Deployment
   end
 
   def new_vm_name
-    @new_vm_name ||= "#{name}-#{version}"
+    @new_vm_name ||= "#{name}-#{desired_version}"
   end
 
   private

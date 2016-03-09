@@ -3,23 +3,24 @@ require 'yaml'
 
 describe OpsManager do
   let(:ops_manager_deployment_file){'ops_manager_deployment.yml'}
-  let(:ops_manager_deployment_conf){ YAML.load_file(ops_manager_deployment_file) }
   let(:product_deployment_file){'product_deployment.yml'}
-  let(:opts){ ops_manager_deployment_conf.fetch('opts') }
-  let(:current_vm_name){ "#{ops_manager_deployment_conf.fetch('name')}-#{current_version}"}
+  let(:current_vm_name){ "ops-manager-#{current_version}"}
   let(:target){ '1.2.3.4' }
   let(:username){ 'foo' }
   let(:password){ 'bar' }
   let(:current_version){ '1.4.2.0' }
+  let(:desired_version){ '1.4.2.0' }
   let(:ops_manager) do
     described_class.new.tap do |o|
       o.deployment = deployment
     end
   end
-  let(:deployment){ double('deployment', current_version: current_version ).as_null_object }
+  let(:deployment) do
+    double('deployment', desired_version: desired_version,
+           current_version: current_version ).as_null_object
+  end
 
   let(:ops_manager_dir){ "#{ENV['HOME']}/.ops_manager" }
-  let(:conf_file_path) { "#{ops_manager_dir}/conf.yml" }
 
   before{ `rm -rf #{ops_manager_dir}` }
 
@@ -181,44 +182,39 @@ describe OpsManager do
     end
 
     describe 'when ops-manager has been deployed and current and desired version match' do
-      let(:current_version){ ops_manager_deployment_conf.fetch('version') }
+      let(:desired_version){ current_version }
 
       it 'does not performs a deployment' do
-        VCR.use_cassette 'deploying same version' do
-          expect(ops_manager.deployment).to_not receive(:deploy)
-          expect do
-            ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-        end
+        expect(ops_manager.deployment).to_not receive(:deploy)
+        expect do
+          ops_manager.deploy(ops_manager_deployment_file)
+        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
       end
 
       it 'does not performs an upgrade' do
-        VCR.use_cassette 'deploying same version' do
-          expect(ops_manager.deployment).to_not receive(:upgrade)
-          expect do
-            ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-        end
+        expect(ops_manager.deployment).to_not receive(:upgrade)
+        expect do
+          ops_manager.deploy(ops_manager_deployment_file)
+        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
       end
     end
 
-    describe 'when current version is older than new version' do
+    describe 'when current version is older than desired version' do
+      let(:current_version){ '1.4.2.0' }
+      let(:desired_version){ '1.4.11.0' }
+
       it 'performs an upgrade' do
-        VCR.use_cassette 'deploying newer version' do
-          expect(ops_manager.deployment).to receive(:upgrade)
-          expect do
-            ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager_deployment_conf.fetch('version')}.../).to_stdout
-        end
+        expect(ops_manager.deployment).to receive(:upgrade)
+        expect do
+          ops_manager.deploy(ops_manager_deployment_file)
+        end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{desired_version}.../).to_stdout
       end
 
       it 'does not performs a deployment' do
-        VCR.use_cassette 'deploying newer version' do
-          expect(ops_manager.deployment).to_not receive(:deploy)
-          expect do
-            ops_manager.deploy(ops_manager_deployment_file)
-          end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{ops_manager_deployment_conf.fetch('version')}.../).to_stdout
-        end
+        expect(ops_manager.deployment).to_not receive(:deploy)
+        expect do
+          ops_manager.deploy(ops_manager_deployment_file)
+        end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{desired_version}.../).to_stdout
       end
     end
   end

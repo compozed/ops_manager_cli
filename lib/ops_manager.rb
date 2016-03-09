@@ -11,18 +11,14 @@ class OpsManager
       super(s.split('.').map { |e| e.to_i })
     end
 
-
-    def nil?
-
-
-    end
-
     def < x
       (self <=> x) < 0
     end
+
     def > x
       (self <=> x) > 0
     end
+
     def == x
       (self <=> x) == 0
     end
@@ -73,6 +69,7 @@ class OpsManager
   end
 
   def deploy(conf_file)
+      # byebug
     conf = ::YAML.load_file(conf_file)
 
     name = conf.fetch('name')
@@ -85,22 +82,21 @@ class OpsManager
     self.class.set_conf(:target, target)
     self.class.set_conf(:username, username)
     self.class.set_conf(:password, password)
-    @deployment ||= OpsManager.const_get(provider.capitalize).new(name, version, opts)
+    @deployment ||= OpsManager.const_get(provider.capitalize).new(name, conf.fetch('version'), opts)
 
-    new_version = OpsManager::Version.new(conf.fetch('version'))
-    actual_version = OpsManager::Version.new(deployment.current_version)
+    desired_version = OpsManager::Version.new(deployment.desired_version)
+    current_version = OpsManager::Version.new(deployment.current_version)
 
     case
 
-    when actual_version.empty?
+    when current_version.empty?
       puts "No OpsManager deployed at #{target}. Deploying ...".green
       deployment.deploy
-    when actual_version < new_version then
-
-      puts "OpsManager at #{target} version is #{actual_version}. Upgrading to #{new_version}.../".green
+    when current_version < desired_version then
+      puts "OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../".green
       deployment.upgrade
-    when actual_version == new_version then
-      puts "OpsManager at #{target} version is already #{new_version}. Skiping ...".green
+    when current_version == desired_version then
+      puts "OpsManager at #{target} version is already #{desired_version}. Skiping ...".green
     end
   end
 

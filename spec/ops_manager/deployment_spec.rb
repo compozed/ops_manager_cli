@@ -4,11 +4,11 @@ require "ops_manager/deployment"
 
 describe OpsManager::Deployment do
   let(:name){ 'ops-manager' }
-  let(:version){'1.5.5.0'}
-  let(:deployment){ described_class.new(name, version) }
+  let(:desired_version){'1.5.5.0'}
+  let(:deployment){ described_class.new(name, desired_version) }
 
   describe 'new' do
-    %w{ name version }.each do |p|
+    %w{ name desired_version}.each do |p|
       it "should set #{p}" do
         expect(deployment.send(p)).to eq(send(p))
       end

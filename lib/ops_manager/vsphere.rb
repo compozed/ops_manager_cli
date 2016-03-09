@@ -7,9 +7,9 @@ class OpsManager::Vsphere < OpsManager::Deployment
   include OpsManager::Logging
   attr_reader :opts
 
-  def initialize(name, version, opts)
+  def initialize(name, desired_version, opts)
     @opts = opts
-    super(name, version)
+    super(name, desired_version)
   end
 
   def deploy_vm
