@@ -272,6 +272,30 @@ describe OpsManager::API do
         end
       end
     end
+
+    describe 'when there are multiple director product tiles uploaded' do
+      let(:products) do
+        [
+          {
+            "name" => "p-bosh",
+            "product_version" => "1.6.8.0"
+          },
+          {
+            "name" => "p-bosh",
+            "product_version" => "1.6.11.0"
+          }
+        ]
+      end
+
+      before do
+        products_response = double('fake_products', body: products.to_json)
+        allow(api).to receive(:get_products).and_return(products_response)
+      end
+
+      it "should return latest bosh version" do
+        expect(api.current_version).to eq('1.6.11.0')
+      end
+    end
   end
 
 

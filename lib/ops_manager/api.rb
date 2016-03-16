@@ -153,11 +153,12 @@ class OpsManager
     def current_version
       products = JSON.parse(get_products.body)
       directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
-      @current_version ||= directors
-        .inject([]){ |r, i| r << i.fetch('product_version') }.sort.last
+      versions = directors.inject([]){ |r, i| r << OpsManager::Version.new(i.fetch('product_version')) }
+      @current_version ||= versions.sort.last.to_s
     rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
       nil
     end
+
     def import_stemcell(filepath)
       return unless filepath
       puts '====> Uploading stemcell...'.green
@@ -165,7 +166,6 @@ class OpsManager
       multipart_post( "/api/stemcells",
                      "stemcell[file]" => tar
                     )
-
     end
     private
 

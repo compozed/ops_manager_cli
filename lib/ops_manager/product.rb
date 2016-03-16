@@ -29,7 +29,13 @@ class OpsManager
     end
 
     def upload(version, filepath)
-      upload_product(filepath) unless self.class.exists?(name, version)
+      puts "====> Uploading product...".green
+      unless self.class.exists?(name, version)
+        upload_product(filepath)
+        print "done".green
+      else
+        print "product already exists".green
+      end
     end
 
     # make me private? maybe?
