@@ -51,7 +51,8 @@ describe OpsManager::Deployment do
 
     it 'Should perform in the right order' do
       %i( get_installation_assets get_installation_settings
-         stop_current_vm deploy upload_installation_assets ).each do |m|
+         stop_current_vm deploy provision_missing_stemcells
+         upload_installation_assets ).each do |m|
            expect(deployment).to receive(m).ordered
          end
          deployment.upgrade

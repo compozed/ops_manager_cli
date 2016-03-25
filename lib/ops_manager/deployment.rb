@@ -34,8 +34,8 @@ class OpsManager::Deployment
     get_installation_settings(write_to: 'installation_settings.json')
     stop_current_vm
     deploy
-    upload_installation_assets
     provision_missing_stemcells
+    upload_installation_assets
     puts "====> Finish!".green
   end
 
