@@ -8,6 +8,7 @@ class OpsManager
     end
 
     def download_stemcell(stemcell_version, stemcell_path, filename_regex)
+      puts "====> Downloading stemcell #{stemcell_path}...".green
       opts = {token: token}
 
       release_id = get_release_for(stemcell_version).fetch('id')
