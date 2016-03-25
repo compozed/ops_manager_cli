@@ -28,6 +28,7 @@ class OpsManager
     end
 
     def get_installation_settings(opts = {})
+      puts '====> Downloading installation settings...'.green
       opts.merge!( { basic_auth: { username: username, password: password } } )
       get("/api/installation_settings", opts)
    end
