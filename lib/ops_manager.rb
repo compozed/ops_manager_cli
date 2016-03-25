@@ -75,12 +75,15 @@ class OpsManager
     provider = conf.fetch('provider')
     username = conf.fetch('username')
     password = conf.fetch('password')
+    pivnet_token = conf.fetch('pivnet_token')
     target = conf.fetch('ip')
     opts = conf.fetch('opts')
 
     self.class.set_conf(:target, target)
     self.class.set_conf(:username, username)
     self.class.set_conf(:password, password)
+    self.class.set_conf(:pivnet_token, pivnet_token)
+
     @deployment ||= OpsManager.const_get(provider.capitalize).new(name, conf.fetch('version'), opts)
 
     desired_version = OpsManager::Version.new(deployment.desired_version)

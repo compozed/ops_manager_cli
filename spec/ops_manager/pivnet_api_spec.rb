@@ -2,13 +2,62 @@ require 'spec_helper'
 require 'ops_manager/pivnet_api'
 
 describe OpsManager::PivnetApi do
-  let(:token){'abc123'}
+  let(:pivnet_token){'abc123'}
   let(:stemcell_path){'abc123'}
-  let(:pivnet_api){ described_class.new(token) }
+  let(:pivnet_api){ described_class.new }
+
+  before do
+    OpsManager.set_conf(:pivnet_token, ENV['PIVNET_TOKEN'] || pivnet_token)
+      stub_request(:get, 'https://network.pivotal.io/api/v2/authentication')
+    end
 
   describe '#new' do
-    it 'should set pivnet token' do
-      expect(pivnet_api.token).to eq(token)
+    it  'should try authentication' do
+      expect_any_instance_of(OpsManager::PivnetApi).to receive(:get_authentication)
+      pivnet_api
+    end
+  end
+
+  describe '#get_authentication' do
+  before do
+      stub_request(:get, 'https://network.pivotal.io/api/v2/authentication').
+        to_return(:status => status_code, :body => "", :headers => {})
+    end
+
+    describe 'when token is correct' do
+      let(:pivnet_token){ 'good-token' }
+      let(:status_code){ 200 }
+
+
+      it 'should inform that token authenticates' do
+        VCR.turned_off do
+          pivnet_api.get_authentication
+          expect(WebMock).to have_requested(
+            :get,
+            "https://network.pivotal.io/api/v2/authentication").
+            with(:headers => {'Accept'=>'*/*',
+               'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+               'Authorization'=>"Token #{pivnet_token}",
+               'User-Agent'=>'Ruby' } ).twice
+        end
+      end
+    end
+
+    describe 'when token not is correct' do
+      let(:pivnet_token){ 'wrong-token' }
+      let(:status_code){ 401 }
+
+      it 'should raise exception authentication fail' do
+        VCR.turned_off do
+          expect do
+            pivnet_api.get_authentication
+            expect(WebMock).to have_requested(
+              :get,
+              "https://network.pivotal.io/api/v2/authentication").
+              with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
+          end.to raise_exception(OpsManager::PivnetAuthenticationError)
+        end
+      end
     end
   end
 
@@ -20,6 +69,8 @@ describe OpsManager::PivnetApi do
     let(:other_product_file_id){ rand(1000..9999) }
     let(:release_id){ rand(1000..9999) }
     let(:other_release_id){ rand(1000..9999) }
+
+
 
     let(:stemcell_releases_response) do
       {
@@ -66,8 +117,8 @@ describe OpsManager::PivnetApi do
         to_return(:status => 200, :body => stemcell_releases_response.to_json, :headers => {})
 
       # curl -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Token xo5saxf1AfjYxzrVNsa5" -X GET https://network.pivotal.io/api/v2/products/stemcells/releases/1562/product_files
-        stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files").
-          to_return(:status => 200, :body => product_files_response.to_json, :headers => {})
+      stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files").
+        to_return(:status => 200, :body => product_files_response.to_json, :headers => {})
 
         stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
           to_return(:status => 200, :body => "banana", :headers => {})
@@ -78,7 +129,7 @@ describe OpsManager::PivnetApi do
         pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
         expect(WebMock).to have_requested(
           :get,
-          "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{token}" })
+          "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
       end
     end
 

@@ -1,15 +1,14 @@
 class OpsManager
   class PivnetApi
     include OpsManager::BaseApi
-    attr_reader :token
 
-    def initialize(token)
-      @token = token
+    def initialize
+      get_authentication
     end
 
     def download_stemcell(stemcell_version, stemcell_path, filename_regex)
       puts "====> Downloading stemcell #{stemcell_path}...".green
-      opts = {token: token}
+      opts = {token: pivnet_token}
 
       release_id = get_release_for(stemcell_version).fetch('id')
       product_file = get_product_file_for(release_id, filename_regex)
@@ -17,6 +16,14 @@ class OpsManager
 
       opts.merge!(write_to: stemcell_path)
       get("/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download", opts)
+    end
+
+    def get_authentication
+      puts "====> Authentication to Pivnet".green
+      opts = {token: pivnet_token}
+      res = get("/api/v2/authentication", opts)
+      raise OpsManager::PivnetAuthenticationError.new(res.body) unless res.code == '200'
+      res
     end
 
     private
@@ -41,6 +48,10 @@ class OpsManager
     def get_product_file_for(release_id, filename_regex)
       products = JSON.parse(get_product_files(release_id).body).fetch('product_files')
       products.select{ |r| r.fetch('aws_object_key') =~ filename_regex }.first
+    end
+
+    def pivnet_token
+      @pivnet_token ||= OpsManager.get_conf(:pivnet_token)
     end
   end
 end

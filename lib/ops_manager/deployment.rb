@@ -60,6 +60,6 @@ class OpsManager::Deployment
   end
 
   def pivnet_api
-    @pivnet_api = OpsManager::PivnetApi.new('a_token')
+    @pivnet_api = OpsManager::PivnetApi.new
   end
 end

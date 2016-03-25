@@ -5,6 +5,7 @@ version: 1.4.11.0 #~~~~!!!
 ip: 1.2.3.4
 username: foo
 password: bar
+pivnet_token: abc123
 opts:
   ova_path: ops-manager.ova
   portgroup: 'dummy-portgroup'
