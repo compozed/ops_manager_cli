@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'ops_manager/api'
 
-describe OpsManager::API do
-  class Foo ; include OpsManager::API; end
+describe OpsManager::Api do
+  class Foo ; include OpsManager::Api; end
   let(:api){ Foo.new }
   let(:target){ '1.2.3.4' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }

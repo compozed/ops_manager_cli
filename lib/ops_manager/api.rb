@@ -1,9 +1,10 @@
 require "ops_manager/logging"
+require "ops_manager/base_api"
 require "net/http/post/multipart"
 
 class OpsManager
-  module API
-    include OpsManager::Logging
+  module Api
+    include OpsManager::BaseApi
 
     def create_user(version)
       if version =~/1.5/
@@ -27,6 +28,7 @@ class OpsManager
     end
 
     def get_installation_settings(opts = {})
+      opts.merge!( { basic_auth: { username: username, password: password } } )
       get("/api/installation_settings", opts)
    end
 
@@ -40,9 +42,11 @@ class OpsManager
     end
 
     def get_installation_assets
+      opts = { write_to: "installation_assets.zip" }
+      opts.merge!( basic_auth: { username: username, password: password })
+
       puts '====> Download installation assets...'.green
-      get("/api/installation_asset_collection",
-          write_to: "installation_assets.zip")
+      get("/api/installation_asset_collection", opts)
     end
 
     def delete_products
@@ -56,7 +60,8 @@ class OpsManager
     end
 
     def get_installation(id)
-      res = get("/api/installation/#{id}")
+      opts = { basic_auth: { username: username, password: password }}
+      res = get("/api/installation/#{id}" , opts )
       raise OpsManager::InstallationError.new(res.body) if res.body =~  /failed/
       res
     end
@@ -76,78 +81,7 @@ class OpsManager
     end
 
     def get_products
-      get('/api/products')
-    end
-
-    def get(endpoint, opts = {})
-      uri = uri_for(endpoint)
-      http = http_for(uri)
-      request = Net::HTTP::Get.new(uri.request_uri)
-      request.basic_auth(username, password)
-
-      if opts[:write_to]
-        begin
-          f = open(opts.fetch(:write_to), "wb")
-          http.request(request) do |res|
-            res.read_body do |segment|
-              f.write(segment)
-            end
-          end
-        ensure
-          f.close
-        end
-      else
-
-        http.request(request).tap do |res|
-          logger.info("performing get to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
-          logger.info("get response body #{res.body}")
-        end
-      end
-    end
-
-    def post(endpoint, opts= {body: ''})
-      uri = uri_for(endpoint)
-      http = http_for(uri)
-      request = Net::HTTP::Post.new(uri.request_uri)
-      request.basic_auth(username, password)
-      body = opts.fetch(:body)
-      request.body= body
-      http.request(request).tap do |res|
-        logger.info("performing post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
-        logger.info("post response body #{res.body}")
-      end
-    end
-
-    def put(endpoint, opts)
-      uri = uri_for(endpoint)
-      http = http_for(uri)
-      request = Net::HTTP::Put.new(uri.request_uri)
-      request.set_form_data( opts)
-      request.basic_auth(username, password)
-      # body = opts.fetch( :body )
-      http.request(request).tap do |res|
-        logger.info("performing put to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
-        logger.info("put response body #{res.body}")
-      end
-    end
-
-    def multipart_post(endpoint, opts)
-      uri = uri_for(endpoint)
-      http = http_for(uri)
-      request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
-      request.basic_auth(username, password)
-      http.request(request).tap do |res|
-        logger.info("performing multipart_post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
-        logger.info("post response body #{res.body}")
-      end
-    end
-
-    def delete(endpoint, opts = {})
-      uri = uri_for(endpoint)
-      http = http_for(uri)
-      request = Net::HTTP::Delete.new(uri.request_uri)
-      request.basic_auth(username, password)
-      http.request(request)
+      get('/api/products', { basic_auth: { username: username, password: password }} )
     end
 
     def current_version
@@ -168,18 +102,6 @@ class OpsManager
                     )
     end
     private
-
-    def http_for(uri)
-      Net::HTTP.new(uri.host, uri.port).tap do |http|
-        http.use_ssl = true
-        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-        http.read_timeout = 1200
-      end
-    end
-
-    def uri_for(endpoint)
-      URI.parse("https://#{target}#{endpoint}")
-    end
 
     def target
       @target ||= OpsManager.get_conf(:target)

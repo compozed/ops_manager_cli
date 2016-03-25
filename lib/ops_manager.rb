@@ -3,7 +3,7 @@ require 'net/ping'
 
 class OpsManager
   attr_accessor :deployment
-  include OpsManager::API
+  include OpsManager::Api
 
   class Version < Array
     def initialize s
@@ -69,7 +69,6 @@ class OpsManager
   end
 
   def deploy(conf_file)
-      # byebug
     conf = ::YAML.load_file(conf_file)
 
     name = conf.fetch('name')

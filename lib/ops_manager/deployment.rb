@@ -1,7 +1,9 @@
 require "ops_manager/api"
+require "ops_manager/pivnet_api"
+require "ops_manager/installation_settings"
 
 class OpsManager::Deployment
-  include OpsManager::API
+  include OpsManager::Api
 
   attr_accessor :name, :desired_version
 
@@ -29,10 +31,11 @@ class OpsManager::Deployment
 
   def upgrade
     get_installation_assets
-    get_installation_settings
+    get_installation_settings(write_to: 'installation_settings.json')
     stop_current_vm
     deploy
     upload_installation_assets
+    provision_missing_stemcells
     puts "====> Finish!".green
   end
 
@@ -43,5 +46,20 @@ class OpsManager::Deployment
   private
   def current_vm_name
     @current_vm_name ||= "#{name}-#{current_version}"
+  end
+
+  def provision_missing_stemcells
+    installation_settings.stemcells.each do |s|
+      pivnet_api.download_stemcell(s.fetch(:version), s.fetch(:file), /vsphere/)
+      import_stemcell(s.fetch(:file))
+    end
+  end
+
+  def installation_settings
+    @installation_settings ||= OpsManager::InstallationSettings.new('installation_settings.json')
+  end
+
+  def pivnet_api
+    @pivnet_api = OpsManager::PivnetApi.new('a_token')
   end
 end

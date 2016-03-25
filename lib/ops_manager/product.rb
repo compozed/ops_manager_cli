@@ -5,7 +5,7 @@ require "ops_manager/logging"
 class OpsManager
   class Product
     include OpsManager::Logging
-    include OpsManager::API
+    include OpsManager::Api
 
     attr_reader :name
 

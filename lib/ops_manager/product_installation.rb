@@ -13,7 +13,7 @@ class OpsManager
     end
 
     class << self
-    include OpsManager::API
+    include OpsManager::Api
       def find(name)
         is = installation_settings_for(name)
         new(
