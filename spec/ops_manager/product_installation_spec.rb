@@ -38,7 +38,7 @@ describe OpsManager::ProductInstallation do
     end
 
 
-    describe "when the product installation exists and it is prepared" do
+    describe "when the product installation exists" do
 
       subject(:installation) do
         VCR.use_cassette 'product installed' do
@@ -46,7 +46,7 @@ describe OpsManager::ProductInstallation do
         end
       end
 
-      it "should be prepared" do
+      it "should fetch installation_settings#prepared entry" do
         expect(installation).to be_prepared
       end
     end

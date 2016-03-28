@@ -4,8 +4,9 @@ require "ops_manager/logging"
 
 class OpsManager
   class Product
+    extend Forwardable
+    def_delegator :opsman_api, :current_version
     include OpsManager::Logging
-    include OpsManager::Api::Opsman
 
     attr_reader :name
 

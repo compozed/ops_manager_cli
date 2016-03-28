@@ -2,8 +2,7 @@ require 'spec_helper'
 require 'ops_manager/api/opsman'
 
 describe OpsManager::Api::Opsman do
-  class Foo ; include OpsManager::Api::Opsman; end
-  let(:api){ Foo.new }
+  let(:api){ OpsManager::Api::Opsman.new }
   let(:target){ '1.2.3.4' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:parsed_response){ JSON.parse(response.body) }

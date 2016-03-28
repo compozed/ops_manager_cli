@@ -13,7 +13,6 @@ class OpsManager
     end
 
     class << self
-    include OpsManager::Api::Opsman
       def find(name)
         is = installation_settings_for(name)
         new(
@@ -26,10 +25,14 @@ class OpsManager
       private
 
       def installation_settings_for(name)
-        res = get_installation_settings
+        res = opsman_api.get_installation_settings
         parsed_res = JSON.parse(res.body)
         products = parsed_res.fetch('products')
         products.select{|o| o.fetch('identifier') == name }.first
+      end
+
+      def opsman_api
+        @opsman_api ||= OpsManager::Api::Opsman.new
       end
     end
   end

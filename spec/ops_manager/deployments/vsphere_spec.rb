@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe OpsManager::Vsphere do
+describe OpsManager::Deployments::Vsphere do
   let(:conf_file){'ops_manager_deployment.yml'}
   let(:conf){ YAML.load_file(conf_file) }
   let(:name){ conf.fetch('name') }
@@ -27,7 +27,7 @@ describe OpsManager::Vsphere do
   end
 
   it 'should inherit from deployment' do
-    expect(described_class).to be < OpsManager::Deployment
+    expect(described_class).to be < OpsManager::Deployments::Base
   end
 
   it 'should include logging' do

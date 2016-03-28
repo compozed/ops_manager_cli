@@ -40,9 +40,6 @@ class OpsManager
         post("/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download", opts)
       end
 
-      def target
-        @target ||= "network.pivotal.io"
-      end
 
       def get_stemcell_releases(opts = {})
         get("/api/v2/products/stemcells/releases", opts)
@@ -60,6 +57,10 @@ class OpsManager
       def get_product_file_for(release_id, filename_regex)
         products = JSON.parse(get_product_files(release_id).body).fetch('product_files')
         products.select{ |r| r.fetch('aws_object_key') =~ filename_regex }.first
+      end
+
+      def target
+        @target ||= "network.pivotal.io"
       end
 
       def pivnet_token

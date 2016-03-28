@@ -4,7 +4,7 @@ require "net/http/post/multipart"
 
 class OpsManager
   module Api
-    module Opsman
+    class Opsman
       include OpsManager::Api::Base
 
       def create_user(version)

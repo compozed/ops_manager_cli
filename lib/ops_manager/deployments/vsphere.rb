@@ -1,11 +1,12 @@
-require "ops_manager/deployment"
+require "ops_manager/deployments/base"
 require 'rbvmomi'
 require "uri"
 require "ops_manager/logging"
 
-class OpsManager::Vsphere < OpsManager::Deployment
+class OpsManager::Deployments::Vsphere < OpsManager::Deployments::Base
   include OpsManager::Logging
   attr_reader :opts
+  def_delegators :opsman_api, :target, :password, :username
 
   def initialize(name, desired_version, opts)
     @opts = opts
@@ -40,5 +41,9 @@ class OpsManager::Vsphere < OpsManager::Deployment
   def vcenter_password
     URI.encode(@opts['vcenter']['password'])
   end
+
+    def opsman_api
+      @opsman_api ||= OpsManager::Api::Opsman.new
+    end
 end
 

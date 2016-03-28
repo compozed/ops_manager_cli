@@ -1,8 +1,8 @@
 require 'spec_helper'
 require 'yaml'
-require "ops_manager/deployment"
+require "ops_manager/deployments/base"
 
-describe OpsManager::Deployment do
+describe OpsManager::Deployments::Base do
   let(:deployment){ described_class.new(name, desired_version) }
   let(:name){ 'ops-manager' }
   let(:desired_version){'1.5.5.0'}

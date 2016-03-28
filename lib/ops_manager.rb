@@ -1,9 +1,11 @@
 require 'ops_manager/api/opsman'
 require 'net/ping'
+require 'forwardable'
 
 class OpsManager
+  extend Forwardable
   attr_accessor :deployment
-  include OpsManager::Api::Opsman
+  def_delegator :opsman_api, :current_version
 
   class Version < Array
     def initialize s
@@ -84,7 +86,7 @@ class OpsManager
     self.class.set_conf(:password, password)
     self.class.set_conf(:pivnet_token, pivnet_token)
 
-    @deployment ||= OpsManager.const_get(provider.capitalize).new(name, conf.fetch('version'), opts)
+    @deployment ||= OpsManager::Deployments.const_get(provider.capitalize).new(name, conf.fetch('version'), opts)
 
     desired_version = OpsManager::Version.new(deployment.desired_version)
     current_version = OpsManager::Version.new(deployment.current_version)
@@ -137,12 +139,16 @@ class OpsManager
   def self.conf_file_path
     "#{ops_manager_dir}/conf.yml"
   end
+
+  def opsman_api
+    @opsman_api ||= OpsManager::Api::Opsman.new
+  end
 end
 
 
 
 require "ops_manager/version"
-require "ops_manager/vsphere"
+require "ops_manager/deployments/vsphere"
 require "ops_manager/cli"
 require "ops_manager/errors"
 require "colorize"
