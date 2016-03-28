@@ -125,7 +125,16 @@ describe OpsManager::Api::Pivnet do
           to_return(:status => 302, :body => "banana", :headers => { 'Location' => stemcell_redirect_uri })
 
         stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
+
+        stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").
+          to_return(:status => 200, :body => "")
     end
+    it 'should accept stemcell eula before downloading' do
+      pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
+      expect(WebMock).to have_requested(
+          :post,
+          "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
+      end
 
     it 'should download specified stemcell version' do
       VCR.turned_off do
