@@ -1,9 +1,9 @@
-require 'ops_manager/api'
+require 'ops_manager/api/opsman'
 require 'net/ping'
 
 class OpsManager
   attr_accessor :deployment
-  include OpsManager::Api
+  include OpsManager::Api::Opsman
 
   class Version < Array
     def initialize s

@@ -1,9 +1,9 @@
-require "ops_manager/api"
-require "ops_manager/pivnet_api"
+require "ops_manager/api/opsman"
+require "ops_manager/api/pivnet"
 require "ops_manager/installation_settings"
 
 class OpsManager::Deployment
-  include OpsManager::Api
+  include OpsManager::Api::Opsman
 
   attr_accessor :name, :desired_version
 
@@ -60,6 +60,6 @@ class OpsManager::Deployment
   end
 
   def pivnet_api
-    @pivnet_api = OpsManager::PivnetApi.new
+    @pivnet_api = OpsManager::Api::Pivnet.new
   end
 end

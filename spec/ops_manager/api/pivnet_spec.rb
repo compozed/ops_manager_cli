@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'ops_manager/pivnet_api'
+require 'ops_manager/api/pivnet'
 
-describe OpsManager::PivnetApi do
+describe OpsManager::Api::Pivnet do
   let(:pivnet_token){'abc123'}
   let(:stemcell_path){'abc123'}
   let(:pivnet_api){ described_class.new }
@@ -13,7 +13,7 @@ describe OpsManager::PivnetApi do
 
   describe '#new' do
     it  'should try authentication' do
-      expect_any_instance_of(OpsManager::PivnetApi).to receive(:get_authentication)
+      expect_any_instance_of(OpsManager::Api::Pivnet).to receive(:get_authentication)
       pivnet_api
     end
   end
@@ -110,6 +110,7 @@ describe OpsManager::PivnetApi do
       }
     end
     let(:stemcell_path){ "bosh-stemcell-#{stemcell_version}-vsphere-esxi-ubuntu-trusty-go_agent.tgz" }
+    let(:stemcell_redirect_uri){ "https://abc123.cloudfront.net/product_files/Pivotal-CF/bosh-stemcell-3146.8-vsphere-esxi-ubuntu-trusty-go_agent.tgz" }
 
     before do
       # curl -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Token xo3saxf1AfjYxzrVNsa5" -X GET https://network.pivotal.io/api/v2/products/stemcells/releases
@@ -120,15 +121,17 @@ describe OpsManager::PivnetApi do
       stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files").
         to_return(:status => 200, :body => product_files_response.to_json, :headers => {})
 
-        stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
-          to_return(:status => 200, :body => "banana", :headers => {})
+        stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
+          to_return(:status => 302, :body => "banana", :headers => { 'Location' => stemcell_redirect_uri })
+
+        stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
     end
 
     it 'should download specified stemcell version' do
       VCR.turned_off do
         pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
         expect(WebMock).to have_requested(
-          :get,
+          :post,
           "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
       end
     end

@@ -1,4 +1,4 @@
-require 'ops_manager/api'
+require 'ops_manager/api/opsman'
 
 class OpsManager
   class ProductInstallation
@@ -13,7 +13,7 @@ class OpsManager
     end
 
     class << self
-    include OpsManager::Api
+    include OpsManager::Api::Opsman
       def find(name)
         is = installation_settings_for(name)
         new(

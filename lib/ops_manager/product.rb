@@ -1,11 +1,11 @@
-require 'ops_manager/api'
+require 'ops_manager/api/opsman'
 require 'ops_manager/product_installation'
 require "ops_manager/logging"
 
 class OpsManager
   class Product
     include OpsManager::Logging
-    include OpsManager::Api
+    include OpsManager::Api::Opsman
 
     attr_reader :name
 

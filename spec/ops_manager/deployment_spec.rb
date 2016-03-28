@@ -11,7 +11,7 @@ describe OpsManager::Deployment do
 
   before do
     allow(OpsManager::InstallationSettings).to receive(:new).and_return(installation_settings)
-    allow(OpsManager::PivnetApi).to receive(:new).and_return(pivnet_api)
+    allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
   end
 
   describe 'new' do
