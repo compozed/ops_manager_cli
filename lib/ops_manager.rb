@@ -5,7 +5,7 @@ require 'forwardable'
 class OpsManager
   extend Forwardable
   attr_accessor :deployment
-  def_delegators :opsman_api, :current_version
+  def_delegators :opsman_api, :current_version, :import_stemcell
 
 
   class << self
