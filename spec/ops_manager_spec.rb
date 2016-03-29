@@ -10,14 +10,14 @@ describe OpsManager do
   let(:password){ 'bar' }
   let(:current_version){ '1.4.2.0' }
   let(:desired_version){ '1.4.2.0' }
-  let(:ops_manager) do
-    described_class.new.tap do |o|
-      o.deployment = deployment
-    end
-  end
+  let(:ops_manager) { described_class.new }
   let(:deployment) do
     double('deployment', desired_version: desired_version,
            current_version: current_version ).as_null_object
+  end
+
+  before do
+    allow(OpsManager::Deployments::Vsphere).to receive(:new).and_return(deployment)
   end
 
   let(:ops_manager_dir){ "#{ENV['HOME']}/.ops_manager" }
@@ -163,59 +163,69 @@ describe OpsManager do
   end
 
   describe 'deploy' do
-    describe 'when no ops-manager has been deployed' do
-      let(:current_version){ nil }
+    describe 'when provider=vsphere' do
+      let(:provider){ 'vsphere' }
 
-      it 'performs a deployment' do
-        expect(ops_manager.deployment).to receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
-      end
-
-      it 'does not performs an upgrade' do
-        expect(ops_manager.deployment).to_not receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
+      it 'ops_manager.deplyment should be kind of OpsManager::Deployments::Vsphere' do
+        expect(OpsManager::Deployments::Vsphere).to receive(:new)
+        ops_manager.deploy(ops_manager_deployment_file)
       end
     end
+  end
 
-    describe 'when ops-manager has been deployed and current and desired version match' do
-      let(:desired_version){ current_version }
 
-      it 'does not performs a deployment' do
-        expect(ops_manager.deployment).to_not receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-      end
+  describe 'when no ops-manager has been deployed' do
+    let(:current_version){ nil }
 
-      it 'does not performs an upgrade' do
-        expect(ops_manager.deployment).to_not receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-      end
+    it 'performs a deployment' do
+      expect(deployment).to receive(:deploy)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
     end
 
-    describe 'when current version is older than desired version' do
-      let(:current_version){ '1.4.2.0' }
-      let(:desired_version){ '1.4.11.0' }
+    it 'does not performs an upgrade' do
+      expect(deployment).to_not receive(:upgrade)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
+    end
+  end
 
-      it 'performs an upgrade' do
-        expect(ops_manager.deployment).to receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{desired_version}.../).to_stdout
-      end
+  describe 'when ops-manager has been deployed and current and desired version match' do
+    let(:desired_version){ current_version }
 
-      it 'does not performs a deployment' do
-        expect(ops_manager.deployment).to_not receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is #{ops_manager.deployment.current_version}. Upgrading to #{desired_version}.../).to_stdout
-      end
+    it 'does not performs a deployment' do
+      expect(deployment).to_not receive(:deploy)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
+    end
+
+    it 'does not performs an upgrade' do
+      expect(deployment).to_not receive(:upgrade)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
+    end
+  end
+
+  describe 'when current version is older than desired version' do
+    let(:current_version){ '1.4.2.0' }
+    let(:desired_version){ '1.4.11.0' }
+
+    it 'performs an upgrade' do
+      expect(deployment).to receive(:upgrade)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../).to_stdout
+    end
+
+    it 'does not performs a deployment' do
+      expect(deployment).to_not receive(:deploy)
+      expect do
+        ops_manager.deploy(ops_manager_deployment_file)
+      end.to output(/OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../).to_stdout
     end
   end
 end

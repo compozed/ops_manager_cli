@@ -5,35 +5,12 @@ require 'forwardable'
 class OpsManager
   extend Forwardable
   attr_accessor :deployment
-  def_delegator :opsman_api, :current_version
+  def_delegators :opsman_api, :current_version
 
-  class Version < Array
-    def initialize s
-      return unless s
-      super(s.split('.').map { |e| e.to_i })
-    end
-
-    def < x
-      (self <=> x) < 0
-    end
-
-    def > x
-      (self <=> x) > 0
-    end
-
-    def == x
-      (self <=> x) == 0
-    end
-
-    def to_s
-      self.join('.')
-    end
-  end
 
   class << self
     def target(target)
       if Net::Ping::HTTP.new("https://#{target}").ping?
-
         set_conf(:target, target)
       else
         puts "Can not connect to #{target}".red
@@ -42,7 +19,7 @@ class OpsManager
 
     def login(username, password)
       set_conf(:username, username)
-      set_conf( :password, password)
+      set_conf(:password, password)
     end
 
     def set_conf(key, val)
@@ -78,6 +55,7 @@ class OpsManager
     username = conf.fetch('username')
     password = conf.fetch('password')
     pivnet_token = conf.fetch('pivnet_token')
+    version = conf.fetch('version')
     target = conf.fetch('ip')
     opts = conf.fetch('opts')
 
@@ -86,10 +64,13 @@ class OpsManager
     self.class.set_conf(:password, password)
     self.class.set_conf(:pivnet_token, pivnet_token)
 
-    @deployment ||= OpsManager::Deployments.const_get(provider.capitalize).new(name, conf.fetch('version'), opts)
+    @deployment ||= case provider
+                      when 'vsphere'
+                        OpsManager::Deployments::Vsphere.new(name, version, opts)
+                      end
 
-    desired_version = OpsManager::Version.new(deployment.desired_version)
-    current_version = OpsManager::Version.new(deployment.current_version)
+    desired_version = OpsManager::Semver.new(deployment.desired_version)
+    current_version = OpsManager::Semver.new(deployment.current_version)
 
     case
 
@@ -120,7 +101,6 @@ class OpsManager
 
   private
   def target
-
     self.class.get_conf(:target)
   end
 
@@ -148,6 +128,7 @@ end
 
 
 require "ops_manager/version"
+require "ops_manager/semver"
 require "ops_manager/deployments/vsphere"
 require "ops_manager/cli"
 require "ops_manager/errors"

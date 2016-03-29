@@ -6,7 +6,7 @@ require "ops_manager/logging"
 class OpsManager::Deployments::Vsphere < OpsManager::Deployments::Base
   include OpsManager::Logging
   attr_reader :opts
-  def_delegators :opsman_api, :target, :password, :username
+  def_delegators :opsman_api, :target, :password, :username, :current_version
 
   def initialize(name, desired_version, opts)
     @opts = opts

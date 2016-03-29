@@ -89,7 +89,7 @@ class OpsManager
       def current_version
         products = JSON.parse(get_products.body)
         directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
-        versions = directors.inject([]){ |r, i| r << OpsManager::Version.new(i.fetch('product_version')) }
+        versions = directors.inject([]){ |r, i| r << OpsManager::Semver.new(i.fetch('product_version')) }
         @current_version ||= versions.sort.last.to_s
       rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
         nil
