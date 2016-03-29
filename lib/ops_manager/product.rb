@@ -5,7 +5,10 @@ require "ops_manager/logging"
 class OpsManager
   class Product
     extend Forwardable
-    def_delegator :opsman_api, :current_version
+
+    def_delegators :opsman_api, :current_version, :upload_product, :get_installation_settings,
+      :upgrade_product_installation, :get_installation, :get_products
+
     include OpsManager::Logging
 
     attr_reader :name
