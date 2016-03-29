@@ -6,7 +6,8 @@ class OpsManager::Deployments
   class Base
     extend Forwardable
     def_delegators :pivnet_api, :download_stemcell
-    def_delegators :opsman_api, :create_user
+    def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
+      :get_installation_settings, :upload_installation_assets, :import_stemcell
 
 
     attr_accessor :name, :desired_version
@@ -40,6 +41,8 @@ class OpsManager::Deployments
       deploy
       provision_missing_stemcells
       upload_installation_assets
+      OpsManager::Installation.trigger!.wait_for_result
+
       puts "====> Finish!".green
     end
 

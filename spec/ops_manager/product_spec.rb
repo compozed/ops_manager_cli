@@ -11,10 +11,7 @@ describe OpsManager::Product do
   let(:version){ '1.6.2.0' }
   let(:current_version){ version }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
-  let(:installation_id){ 1234 }
-  let(:trigger_installation_response) do
-    double( body: { 'install' => {'id' => installation_id.to_s }}.to_json )
-  end
+  let(:installation){ double.as_null_object }
 
   before do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
@@ -22,6 +19,7 @@ describe OpsManager::Product do
       .and_return(product_installation)
     allow(described_class).to receive(:exists?)
       .and_return(product_exists?)
+    allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
   end
 
   describe "#initialize" do
@@ -63,16 +61,15 @@ describe OpsManager::Product do
   end
 
   describe "#perform_new_deployment" do
+
     before do
       allow(product).tap do |s|
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
-        s.to receive(:trigger_installation)
-          .and_return(trigger_installation_response)
         s.to receive(:get_installation_settings)
-        s.to receive(:wait_for_installation)
         s.to receive(:`)
       end
+
     end
 
     it 'performs a product upload' do
@@ -96,31 +93,19 @@ describe OpsManager::Product do
     end
 
     it 'should trigger installation' do
-      expect(product).to receive(:trigger_installation)
-      product.perform_new_deployment(version, filepath,installation_settings_file)
+      expect(OpsManager::Installation).to receive(:trigger!)
+      product.perform_new_deployment(version, filepath, installation_settings_file)
     end
 
     it 'should wait for installation' do
-      # allow(product).to receive(:trigger_installation)
-      expect(product).to receive(:wait_for_installation).with(installation_id)
+      expect(installation).to receive(:wait_for_result)
       product.perform_new_deployment(version, filepath,installation_settings_file)
     end
   end
 
-  describe "#wait_for_installation" do
-    let(:success){ double(body: "{\"status\":\"succeess\"}") }
-    let(:running){ double(body: "{\"status\":\"running\"}") }
-
-    it 'returns on success' do
-      allow(product).to receive(:sleep)
-      expect(product).to receive(:get_installation)
-        .with(installation_id)
-        .and_return( running, running, success)
-      product.wait_for_installation(installation_id)
-    end
-  end
 
   describe "#perform_upgrade" do
+
     let(:product_installation) do
       OpsManager::ProductInstallation.new(guid, '1.6.0.0', true)
     end
@@ -132,7 +117,6 @@ describe OpsManager::Product do
       allow(product).tap do |s|
         s.to receive(:upgrade_product_installation).with(guid, version)
         s.to receive(:upload_product)
-        s.to receive(:trigger_installation)
       end
     end
 
@@ -152,17 +136,22 @@ describe OpsManager::Product do
       end
 
       it 'should trigger installation' do
-        expect(product).to receive(:trigger_installation)
+        expect(OpsManager::Installation).to receive(:trigger!)
+        product.perform_upgrade(version, filepath)
+      end
+
+      it 'should wait for installation' do
+        expect(installation).to receive(:wait_for_result)
         product.perform_upgrade(version, filepath)
       end
     end
 
     describe "when previous installation is not prepared" do
       let(:installation_prepared){ false }
+
       it 'Should skip upgrade' do
         expect(product).not_to receive(:upload_product)
         expect(product).not_to receive(:upgrade_product_installation)
-        expect(product).not_to receive(:trigger_installation)
         product.perform_upgrade(version, filepath)
       end
     end
@@ -183,8 +172,8 @@ describe OpsManager::Product do
     describe "when installation exists" do
       let(:version){ '1.6.2.0' }
       before do
-          allow(product).to receive(:perform_upgrade)
-          allow(product).to receive(:perform_new_deployment)
+        allow(product).to receive(:perform_upgrade)
+        allow(product).to receive(:perform_new_deployment)
       end
 
       describe "when version is newer than the current one" do

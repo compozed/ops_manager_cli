@@ -8,10 +8,12 @@ describe OpsManager::Deployments::Base do
   let(:desired_version){'1.5.5.0'}
   let(:installation_settings){ double('installation_settings').as_null_object }
   let(:pivnet_api){ double('pivnet_api').as_null_object }
+  let(:installation){ double.as_null_object }
 
   before do
     allow(OpsManager::InstallationSettings).to receive(:new).and_return(installation_settings)
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
+    allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
   end
 
   describe 'new' do
@@ -56,6 +58,16 @@ describe OpsManager::Deployments::Base do
            expect(deployment).to receive(m).ordered
          end
          deployment.upgrade
+    end
+
+    it 'should trigger installation' do
+      expect(OpsManager::Installation).to receive(:trigger!)
+      deployment.upgrade
+    end
+
+    it 'should wait for installation' do
+      expect(installation).to receive(:wait_for_result)
+      deployment.upgrade
     end
 
     describe 'when provisioning missing stemcells' do

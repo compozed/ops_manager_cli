@@ -30,36 +30,48 @@ prints out available commands with their usage
 
     ./ops_manager help
 
-### Deploy or upgrade Ops Manager
 
-It does not require **target** or **login**.
+### Target 
+
+    ./ops_manager target ops_manager_address
+
+
+### Login 
+
+    ./ops_manager login username password
+
+
+### Deploy or upgrade 
+
+**target** and **login** are optional and can be provided in the YAML conf file.
 
 Once you have created the config you can run a deployment:
 
     ./ops_manager deploy [config/ops_manager_example.yml](spec/dummy/ops_manager_deployment.yml)
 
 
-### Target OpsManager
+### Deploy or upgrade product tile
 
-    ./ops_manager target ops_manager_address
-
-
-### Login in to OpsManager
-
-    ./ops_manager login username password
-
-
-### Upgrade a product
-
-Remember to perform  **target** and **login** before performing an upgrade
+**target** and **login** are optional and can be provided in the YAML conf file.
 
     ./ops_manager deploy-product [config/product_example.yml](spec/dummy/ops_manager_deployment.yml)
 
 
 ### Provision stemcell(TBD)
 
-    ./ops_manager provision stemcell -p ./path/to/stemcell 
+    ./ops_manager provision-stemcell -p ./path/to/stemcell 
 
+
+## Building Docker image
+
+    bundle exec rake build
+    docker build -t compozed/ops_manager_cli
+
+
+## Provisioning docker image to private registry
+
+    docker tag -f compozed/ops_manager_cli PRI_REGISTRY:PORT/compozed/ops_manager_cli
+    docker push PRI_REGISTRY:PORT/compozed/ops_manager_cli
 
 ## Development
 
