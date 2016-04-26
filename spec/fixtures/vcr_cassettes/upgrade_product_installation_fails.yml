@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_settings
+    uri: https://1.2.3.4/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''
@@ -68,7 +68,7 @@ http_interactions:
   recorded_at: Thu, 21 Jan 2016 22:46:37 GMT
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_settings
+    uri: https://1.2.3.4/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''
@@ -134,7 +134,7 @@ http_interactions:
   recorded_at: Thu, 21 Jan 2016 22:46:37 GMT
 - request:
     method: put
-    uri: https://foo:bar@1.2.3.4/api/installation_settings/products/example-product-31695d885b442a75beee
+    uri: https://1.2.3.4/api/installation_settings/products/example-product-31695d885b442a75beee
     body:
       encoding: US-ASCII
       string: to_version=1.6.2.0
@@ -183,7 +183,7 @@ http_interactions:
   recorded_at: Thu, 21 Jan 2016 22:46:38 GMT
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_settings
+    uri: https://1.2.3.4/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''

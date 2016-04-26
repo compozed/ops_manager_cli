@@ -98,7 +98,7 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
-    let(:base_uri){ 'https://foo:bar@1.2.3.4' }
+    let(:base_uri){ 'https://1.2.3.4' }
     before do
       stub_request(:post, uri).
         with(:body => body,

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_settings
+    uri: https://1.2.3.4/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''
@@ -62,7 +62,7 @@ http_interactions:
   recorded_at: Wed, 20 Jan 2016 17:50:00 GMT
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.9/api/installation_settings
+    uri: https://1.2.3.9/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''
@@ -122,7 +122,7 @@ http_interactions:
   recorded_at: Wed, 20 Jan 2016 17:50:01 GMT
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.9/api/installation_settings
+    uri: https://1.2.3.9/api/installation_settings
     body:
       encoding: US-ASCII
       string: ''

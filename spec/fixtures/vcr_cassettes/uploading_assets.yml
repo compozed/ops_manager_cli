@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/installation_asset_collection
     body:
       encoding: US-ASCII
       string: ''
@@ -115,7 +115,7 @@ http_interactions:
   recorded_at: Mon, 11 Jan 2016 05:04:39 GMT
 - request:
     method: post
-    uri: https://foo:bar@1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/installation_asset_collection
     body:
       encoding: ASCII-8BIT
       string: !binary |-
@@ -412,7 +412,7 @@ http_interactions:
   recorded_at: Mon, 11 Jan 2016 05:04:50 GMT
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/installation_asset_collection
     body:
       encoding: US-ASCII
       string: ''

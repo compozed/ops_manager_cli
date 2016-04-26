@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://foo:bar@1.2.3.4/api/products
+    uri: https://1.2.3.4/api/products
     body:
       encoding: US-ASCII
       string: ''

@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: post
-    uri: https://foo:bar@1.2.3.4/api/stemcells
+    uri: https://1.2.3.4/api/stemcells
     body:
       encoding: ASCII-8BIT
       string: !binary |-
