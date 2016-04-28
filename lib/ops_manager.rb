@@ -1,6 +1,8 @@
 require 'ops_manager/api/opsman'
 require 'net/ping'
 require 'forwardable'
+require 'ops_manager/configs/product_deployment'
+require 'ops_manager/configs/opsman_deployment'
 
 class OpsManager
   extend Forwardable
@@ -10,7 +12,8 @@ class OpsManager
 
   class << self
     def target(target)
-      if Net::Ping::HTTP.new("https://#{target}").ping?
+      @target = target
+      if target_is_pingable?
         set_conf(:target, target)
       else
         puts "Can not connect to #{target}".red
@@ -36,6 +39,11 @@ class OpsManager
       conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
       conf[ key ]
     end
+
+    private
+    def target_is_pingable?
+      Net::Ping::HTTP.new("https://#{@target}").ping?
+    end
   end
 
   def target_and_login(config)
@@ -47,27 +55,15 @@ class OpsManager
     self.class.login(username, password) if username && password
   end
 
-  def deploy(conf_file)
-    conf = ::YAML.load_file(conf_file)
+  def deploy(config_file)
+    config = OpsManager::Configs::OpsmanDeployment.new(::YAML.load_file(config_file))
 
-    name = conf.fetch('name')
-    provider = conf.fetch('provider')
-    username = conf.fetch('username')
-    password = conf.fetch('password')
-    pivnet_token = conf.fetch('pivnet_token')
-    version = conf.fetch('version')
-    target = conf.fetch('ip')
-    opts = conf.fetch('opts')
+    self.class.set_conf(:target, config.ip)
+    self.class.set_conf(:username, config.username)
+    self.class.set_conf(:password, config.password)
+    self.class.set_conf(:pivnet_token, config.pivnet_token)
 
-    self.class.set_conf(:target, target)
-    self.class.set_conf(:username, username)
-    self.class.set_conf(:password, password)
-    self.class.set_conf(:pivnet_token, pivnet_token)
-
-    @deployment ||= case provider
-                      when 'vsphere'
-                        OpsManager::Deployments::Vsphere.new(name, version, opts)
-                      end
+    @deployment ||= OpsManager::Deployments::Vsphere.new(config.name, config.version, config.opts)
 
     desired_version = OpsManager::Semver.new(deployment.desired_version)
     current_version = OpsManager::Semver.new(deployment.current_version)
@@ -85,18 +81,12 @@ class OpsManager
     end
   end
 
-  def deploy_product(conf_file, force = false)
-    conf = ::YAML.load_file(conf_file)
-    target_and_login(conf)
-    name = conf.fetch('name')
-    version = conf.fetch('version')
-    filepath = conf['filepath']
-    stemcell = conf['stemcell']
-    installation_settings_file = conf['installation_settings_file']
-
-    product = OpsManager::Product.new(name)
-    import_stemcell(stemcell)
-    product.deploy(version, filepath, installation_settings_file, force)
+  def deploy_product(config_file, force = false)
+    config = OpsManager::Configs::ProductDeployment.new(::YAML.load_file(config_file))
+    target_and_login({username: config.username, password: config.password })
+    product = OpsManager::Product.new(config.name)
+    import_stemcell(config.stemcell)
+    product.deploy(config.version, config.filepath, config.installation_settings_file, force)
   end
 
   private
