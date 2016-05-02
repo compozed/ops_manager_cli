@@ -2,7 +2,6 @@ require "ops_manager/api/opsman"
 require "ops_manager/api/pivnet"
 require "ops_manager/installation_settings"
 require 'ops_manager/configs/opsman_deployment'
-require 'byebug'
 
 class OpsManager::Deployment
     extend Forwardable
