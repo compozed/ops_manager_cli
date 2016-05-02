@@ -2,7 +2,8 @@ require 'spec_helper'
 require 'ops_manager/product'
 
 describe OpsManager::Product do
-  let(:product){ described_class.new(name) }
+  let(:product){ described_class.new('product_deployment.yml', force) }
+  let(:force){ false }
   let(:product_exists?){ false }
   let(:name){ 'example-product' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
@@ -22,14 +23,6 @@ describe OpsManager::Product do
     allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
   end
 
-  describe "#initialize" do
-    %w(name).each do |attr|
-      it "sets the #{attr}" do
-        expect(product.send(attr)).to eq(send(attr))
-      end
-    end
-  end
-
   describe "#installation" do
     it "should look for its ProductInstallation" do
       allow(product).to receive(:installation).and_call_original
@@ -44,7 +37,7 @@ describe OpsManager::Product do
     before do
       allow(described_class).to receive(:exists?)
         .and_call_original
-      allow_any_instance_of(OpsManager::Product).to receive(:get_products).and_return(products_response)
+      allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_products).and_return(products_response)
     end
 
     describe 'when product exists' do
@@ -60,7 +53,8 @@ describe OpsManager::Product do
     end
   end
 
-  describe "#perform_new_deployment" do
+  describe "#deploy" do
+    subject(:deploy){ product.deploy }
 
     before do
       allow(product).tap do |s|
@@ -73,38 +67,39 @@ describe OpsManager::Product do
     end
 
     it 'performs a product upload' do
-      expect(product).to receive(:upload).with(version, filepath)
-      product.perform_new_deployment(version, filepath, installation_settings_file)
+      expect(product).to receive(:upload)
+      deploy
     end
 
     it 'should download current installation setting' do
       expect(product).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
-      product.perform_new_deployment(version, filepath, installation_settings_file)
+      deploy
     end
 
     it 'should spruce merge current installation settings with product installation settings' do
       expect(product).to receive(:`).with("DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
-      product.perform_new_deployment(version, filepath, installation_settings_file)
+      deploy
     end
 
     it 'should upload new installation settings' do
       expect(product).to receive(:upload_installation_settings).with('/tmp/new_is.yml')
-      product.perform_new_deployment(version, filepath,installation_settings_file)
+      deploy
     end
 
     it 'should trigger installation' do
       expect(OpsManager::Installation).to receive(:trigger!)
-      product.perform_new_deployment(version, filepath, installation_settings_file)
+      deploy
     end
 
     it 'should wait for installation' do
       expect(installation).to receive(:wait_for_result)
-      product.perform_new_deployment(version, filepath,installation_settings_file)
+      deploy
     end
   end
 
 
-  describe "#perform_upgrade" do
+  describe "#upgrade" do
+        subject(:upgrade){ product.upgrade }
 
     let(:product_installation) do
       OpsManager::ProductInstallation.new(guid, '1.6.0.0', true)
@@ -125,24 +120,24 @@ describe OpsManager::Product do
 
       it 'performs a product upload' do
         expect(product).to receive(:upload)
-        product.perform_upgrade(version, filepath)
+        upgrade
       end
 
 
       it 'should perform a version upgrade' do
         expect(product).to receive(:upgrade_product_installation)
           .with(guid, version)
-        product.perform_upgrade(version, filepath)
+        upgrade
       end
 
       it 'should trigger installation' do
         expect(OpsManager::Installation).to receive(:trigger!)
-        product.perform_upgrade(version, filepath)
+        upgrade
       end
 
       it 'should wait for installation' do
         expect(installation).to receive(:wait_for_result)
-        product.perform_upgrade(version, filepath)
+        upgrade
       end
     end
 
@@ -152,36 +147,60 @@ describe OpsManager::Product do
       it 'Should skip upgrade' do
         expect(product).not_to receive(:upload_product)
         expect(product).not_to receive(:upgrade_product_installation)
-        product.perform_upgrade(version, filepath)
+        upgrade
       end
     end
 
   end
 
 
-  describe "#deploy" do
+  describe "#run" do
+    subject(:run){ product.run }
+
+    before do
+      allow(OpsManager).to receive(:target_and_login)
+      allow_any_instance_of(OpsManager::Product).to receive(:deploy)
+      allow(product).to receive(:import_stemcell)
+    end
+
+    it 'should target_and_login' do
+      expect(OpsManager).to receive(:target_and_login)
+      run
+    end
+
+    it 'should provision stemcell' do
+      expect(product).to receive(:import_stemcell).with('stemcell.tgz')
+      run
+    end
+
+    it 'should execute a product deploy' do
+      expect_any_instance_of(OpsManager::Product).to receive(:deploy)
+      run
+    end
+
+
     describe "when installation is nil" do
       let(:product_installation){ nil }
 
       it "perform deployment" do
-        expect(product).to receive(:perform_new_deployment)
-        product.deploy(version, filepath, installation_settings_file)
+        expect(product).to receive(:deploy)
+      run
       end
     end
 
     describe "when installation exists" do
       let(:version){ '1.6.2.0' }
       before do
-        allow(product).to receive(:perform_upgrade)
-        allow(product).to receive(:perform_new_deployment)
+        allow(product).to receive(:upgrade)
+        allow(product).to receive(:deploy)
       end
 
       describe "when version is newer than the current one" do
         let(:current_version){ '1.5.2.0' }
 
         it "perform upgrade" do
-          expect(product).to receive(:perform_upgrade)
-          product.deploy(version, filepath, installation_settings_file)
+          expect(product).to receive(:upgrade)
+      run
         end
       end
 
@@ -189,16 +208,16 @@ describe OpsManager::Product do
         let(:current_version){ version }
 
         it "perform upgrade" do
-          expect(product).to receive(:perform_new_deployment)
-          product.deploy(version, filepath, installation_settings_file)
+          expect(product).to receive(:deploy)
+          run
         end
       end
     end
 
     describe "when forced deployment" do
       it "perform deployment" do
-        expect(product).to receive(:perform_new_deployment)
-        product.deploy(version, filepath, installation_settings_file, true)
+        expect(product).to receive(:deploy)
+        run
       end
     end
   end
@@ -209,7 +228,7 @@ describe OpsManager::Product do
 
       it "uploads product" do
         expect(product).to receive(:upload_product)
-        product.upload(version, filepath)
+        product.upload
       end
     end
 
@@ -218,7 +237,7 @@ describe OpsManager::Product do
 
       it 'should skip product upload' do
         expect(product).not_to receive(:upload_product)
-        product.upload(version, filepath)
+        product.upload
       end
     end
   end

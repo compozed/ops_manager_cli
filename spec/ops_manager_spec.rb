@@ -57,70 +57,38 @@ describe OpsManager do
     end
   end
 
-  describe 'target_and_login' do
+  describe '@target_and_login' do
     before do
       allow(OpsManager).to receive(:target)
       allow(OpsManager).to receive(:login)
     end
 
     describe 'when config has credentials' do
-      let(:config) do
-        {
-          'target' => target,
-          'username' => username,
-          'password' => password
-        }
-      end
+      subject(:target_and_login){ OpsManager.target_and_login(target, username, password) }
 
       it 'should target' do
         expect(OpsManager).to receive(:target).with(target)
-        ops_manager.target_and_login(config)
+        target_and_login
       end
 
       it 'should login' do
         expect(OpsManager).to receive(:login).with(username, password)
-        ops_manager.target_and_login(config)
+        target_and_login
       end
     end
 
     describe 'when config does not have credentials' do
-      let(:config)  {{}}
+      subject(:target_and_login){ OpsManager.target_and_login(nil, nil, nil) }
 
       it 'should not target' do
         expect(OpsManager).not_to receive(:target).with(target)
-        ops_manager.target_and_login(config)
+        target_and_login
       end
 
       it 'should not login' do
         expect(OpsManager).not_to receive(:login).with(username, password)
-        ops_manager.target_and_login(config)
+        target_and_login
       end
     end
   end
-
-  describe 'deploy_product' do
-    before do
-      allow_any_instance_of(OpsManager::Product).to receive(:deploy)
-      allow_any_instance_of(OpsManager).to receive(:target_and_login)
-      allow_any_instance_of(OpsManager).to receive(:import_stemcell)
-    end
-
-    it 'should target_and_login' do
-      expect_any_instance_of(OpsManager).to receive(:target_and_login)
-      ops_manager.deploy_product(product_deployment_file)
-    end
-
-    it 'should provision stemcell' do
-      expect_any_instance_of(OpsManager).to receive(:import_stemcell).with('stemcell.tgz')
-      ops_manager.deploy_product(product_deployment_file)
-    end
-
-    it 'should execute a product deploy' do
-      expect_any_instance_of(OpsManager::Product).to receive(:deploy)
-      ops_manager.deploy_product(product_deployment_file)
-    end
-  end
-
-
-
 end

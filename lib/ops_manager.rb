@@ -7,10 +7,6 @@ require 'ops_manager/configs/opsman_deployment'
 
 class OpsManager
   extend SessionConfig
-  extend Forwardable
-  attr_accessor :deployment
-  def_delegators :opsman_api, :current_version, :import_stemcell
-
 
   class << self
     def target(target)
@@ -27,29 +23,15 @@ class OpsManager
       set_conf(:password, password)
     end
 
+    def target_and_login(target, username, password)
+      target(target) if target
+      login(username, password) if username && password
+    end
 
     private
     def target_is_pingable?
       Net::Ping::HTTP.new("https://#{@target}").ping?
     end
-  end
-
-  def target_and_login(config)
-    username = config['username']
-    password = config['password']
-    target = config['target']
-
-    self.class.target(target) if target
-    self.class.login(username, password) if username && password
-  end
-
-
-  def deploy_product(config_file, force = false)
-    config = OpsManager::Configs::ProductDeployment.new(::YAML.load_file(config_file))
-    target_and_login({username: config.username, password: config.password })
-    product = OpsManager::Product.new(config.name)
-    import_stemcell(config.stemcell)
-    product.deploy(config.version, config.filepath, config.installation_settings_file, force)
   end
 
   private
@@ -63,10 +45,6 @@ class OpsManager
 
   def password
     self.class.get_conf(:password)
-  end
-
-  def opsman_api
-    @opsman_api ||= OpsManager::Api::Opsman.new
   end
 end
 

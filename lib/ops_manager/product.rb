@@ -2,67 +2,68 @@ require 'ops_manager/api/opsman'
 require 'ops_manager/product_installation'
 require 'ops_manager/installation'
 require "ops_manager/logging"
+require "ops_manager/semver"
 
 class OpsManager
   class Product
     extend Forwardable
-
     def_delegators :opsman_api, :current_version, :upload_product, :get_installation_settings,
       :upgrade_product_installation, :get_installation, :get_products, :upload_installation_settings,
-      :trigger_installation
+      :trigger_installation, :import_stemcell
 
     include OpsManager::Logging
 
-    attr_reader :name
-
-    def initialize(name = nil)
-      @name = name
+    def initialize(config_file, forced_deployment = false)
+      @config_file = config_file
+      @forced_deployment = forced_deployment
     end
 
     def installation
-      OpsManager::ProductInstallation.find(name)
+      OpsManager::ProductInstallation.find(config.name)
     end
 
-    def deploy(version, filepath, installation_settings_file, forced = false)
+    def run
+      OpsManager.target_and_login({username: config.username, password: config.password })
+      import_stemcell(config.stemcell)
+
       case
-      when installation.nil? || forced
-        perform_new_deployment(version, filepath, installation_settings_file)
-      when installation && installation.version < version
-        perform_upgrade(version, filepath)
-      when installation && installation.version == version
-        perform_new_deployment(version, filepath, installation_settings_file)
+      when installation.nil? || forced_deployment?
+        deploy
+      when installation && installation.version < config.desired_version
+        upgrade
+      when installation && installation.version == config.desired_version
+        deploy
       end
     end
 
-    def upload(version, filepath)
+    def upload
       puts "====> Uploading product...".green
-      unless self.class.exists?(name, version)
-        upload_product(filepath)
+      unless Product.exists?(config.name, config.desired_version)
+        upload_product(config.filepath)
         print "done".green
       else
         print "product already exists".green
       end
     end
 
-    # make me private? maybe?
-    def perform_upgrade(version, filepath)
+    def upgrade
       unless installation.prepared?
         puts "====> Skipping as this product has a pending installation!".red
         return
       end
-      puts "====> Upgrading #{name} version from #{installation.version} to #{version}...".green
-      upload(version, filepath)
-      upgrade_product_installation(installation.guid, version)
+      puts "====> Upgrading #{config.name} version from #{installation.version} to #{config.desired_version}...".green
+      upload
+      upgrade_product_installation(installation.guid, config.desired_version)
       OpsManager::Installation.trigger!.wait_for_result
 
       puts "====> Finish!".green
     end
 
-    def perform_new_deployment(version,  filepath,installation_settings_file)
-      puts "====> Deploying #{name} version #{version}...".green
-      upload(version, filepath)
+    def deploy
+      puts "====> Deploying #{config.name} version #{config.desired_version}...".green
+      upload
       get_installation_settings({write_to: '/tmp/is.yml'})
-      puts `DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml`
+      puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
       OpsManager::Installation.trigger!.wait_for_result
 
@@ -70,14 +71,25 @@ class OpsManager
     end
 
     def self.exists?(name, version)
-      res = JSON.parse(self.new.get_products.body)
+      res = JSON.parse(OpsManager::Api::Opsman.new.get_products.body)
       !!res.find{ |o| o['name'] == name && o['product_version'] == version }
     end
 
-
     private
+    def desired_version
+      @desired_version ||= OpsManager::Semver.new(config.desired_version)
+    end
+
+    def forced_deployment?
+      !!@forced_deployment
+    end
+
     def opsman_api
       @opsman_api ||= OpsManager::Api::Opsman.new
+    end
+
+    def config
+      OpsManager::Configs::ProductDeployment.new(::YAML.load_file(@config_file))
     end
   end
 end

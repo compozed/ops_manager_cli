@@ -1,5 +1,6 @@
 require "clamp"
 require "ops_manager/product"
+require "ops_manager/deployment"
 
 class OpsManager
   class Cli < Clamp::Command
@@ -25,7 +26,7 @@ class OpsManager
       parameter "OPS_MANAGER_CONFIG", "opsManager config file", required: true
 
       def execute
-        OpsManager.new.deploy(@ops_manager_config)
+        OpsManager::Deployment.new(@ops_manager_config).run
       end
     end
 
@@ -34,7 +35,7 @@ class OpsManager
       option "--force", :flag, "force deployment"
 
       def execute
-        OpsManager.new.deploy_product(@product_config, force?)
+        OpsManager::Product.new(product_config, force?).run
       end
     end
 
@@ -42,7 +43,7 @@ class OpsManager
       parameter "DESTINATION", "where should it place the donwloaded settings", required: true
 
       def execute
-        OpsManager::Product.new.get_installation_settings(write_to: @destination)
+      OpsManager::Api::Opsman.new.get_installation_settings(write_to: @destination)
       end
     end
 

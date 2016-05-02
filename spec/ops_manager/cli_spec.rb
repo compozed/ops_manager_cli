@@ -26,27 +26,34 @@ describe OpsManager::Cli do
     let(:args) { %w(deploy ops_manager_deployment.yml) }
 
     it "should call ops_manager.deploy" do
-      expect_any_instance_of(OpsManager).to receive(:deploy).with('ops_manager_deployment.yml')
+      expect(OpsManager::Deployment).to receive(:new).with('ops_manager_deployment.yml').and_call_original
+      expect_any_instance_of(OpsManager::Deployment).to receive(:run)
       cli.run(`pwd`, args)
     end
   end
 
-
   # ./ops_manager deploy-product -c conf.yml
   describe "deploy-product" do
-    let(:args) { %w(deploy-product product.yml) }
+    let(:args) { "deploy-product #{'--force' if force} product.yml".split(" ") }
 
-    it "should call ops_manager.deploy_product" do
-      expect_any_instance_of(OpsManager).to receive(:deploy_product).with('product.yml', nil)
-      cli.run(`pwd`, args)
+    before do
+      expect(OpsManager::Product).to receive(:new).with('product.yml', force).and_call_original
     end
 
-    describe "when --force" do
-      let(:args) { %w(deploy-product --force product.yml) }
+    describe 'when no --force provided' do
+      let(:force){ nil }
+
+      it "should call ops_manager.deploy_product" do
+        expect_any_instance_of(OpsManager::Product).to receive(:run)
+        cli.run(`pwd`, args)
+      end
+    end
+
+    describe "when --force provided" do
+      let(:force){ true }
 
       it "should call ops_manager.deploy_product with force" do
-        expect_any_instance_of(OpsManager)
-          .to receive(:deploy_product).with('product.yml', true)
+        expect_any_instance_of(OpsManager::Product).to receive(:run)
         cli.run(`pwd`, args)
       end
     end
@@ -57,7 +64,7 @@ describe OpsManager::Cli do
     let(:args) { %w(get-installation-settings /tmp/is.yml) }
 
     it "should call product.get_installation_settings" do
-      expect_any_instance_of(OpsManager::Product)
+      expect_any_instance_of(OpsManager::Api::Opsman)
         .to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
       cli.run(`pwd`, args)
     end

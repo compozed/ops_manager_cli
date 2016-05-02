@@ -198,9 +198,7 @@ describe OpsManager::Api::Opsman do
   end
 
   describe "#upgrade_product_installation" do
-    let(:name){ 'example-product' }
-    let(:product){ OpsManager::Product.new(name) }
-    let(:guid) {product.installation.guid }
+    let(:guid) { "example-product-31695d885b442a75beee" }
     let(:version){ '1.6.2.0' }
 
     describe "when it applies sucessfully" do
