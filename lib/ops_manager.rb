@@ -1,10 +1,12 @@
 require 'ops_manager/api/opsman'
 require 'net/ping'
 require 'forwardable'
+require 'session_config'
 require 'ops_manager/configs/product_deployment'
 require 'ops_manager/configs/opsman_deployment'
 
 class OpsManager
+  extend SessionConfig
   extend Forwardable
   attr_accessor :deployment
   def_delegators :opsman_api, :current_version, :import_stemcell
@@ -25,20 +27,6 @@ class OpsManager
       set_conf(:password, password)
     end
 
-    def set_conf(key, val)
-      conf = {}
-      Dir.mkdir(ops_manager_dir) unless Dir.exists?(ops_manager_dir)
-      conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-      puts "Changing #{key} to #{val}".yellow unless conf[key].nil?
-      conf[key] = val
-      File.open(conf_file_path, 'w'){|f| f.write(conf.to_yaml) }
-    end
-
-    def get_conf(key)
-      conf = {}
-      conf = YAML.load_file(conf_file_path) if File.exists?(conf_file_path)
-      conf[ key ]
-    end
 
     private
     def target_is_pingable?
@@ -75,14 +63,6 @@ class OpsManager
 
   def password
     self.class.get_conf(:password)
-  end
-
-  def self.ops_manager_dir
-    "#{ENV['HOME']}/.ops_manager"
-  end
-
-  def self.conf_file_path
-    "#{ops_manager_dir}/conf.yml"
   end
 
   def opsman_api

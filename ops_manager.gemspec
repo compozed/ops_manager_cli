@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "colorize"
   spec.add_dependency "clamp"
   spec.add_dependency "net-ping"
+  spec.add_dependency "session_config"
 end

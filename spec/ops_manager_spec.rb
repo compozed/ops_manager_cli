@@ -9,40 +9,10 @@ describe OpsManager do
   let(:password){ 'bar' }
   let(:ops_manager) { described_class.new }
 
-  let(:ops_manager_dir){ "#{ENV['HOME']}/.ops_manager" }
-
-  before{ `rm -rf #{ops_manager_dir}` }
+  before{ `rm -rf #{OpsManager.session_config_dir}` }
 
   it 'has a version number' do
     expect(OpsManager::VERSION).not_to be nil
-  end
-
-  describe '@set_conf' do
-    describe 'when configuration has not been set' do
-      before{ `rm -rf #{ops_manager_dir}` }
-
-      it 'should write conf to the yaml' do
-        expect do
-          OpsManager.set_conf :foo, 'baz'
-        end.to change{ OpsManager.get_conf :foo }.from(nil).to('baz')
-      end
-    end
-
-    describe 'when configuration has been set' do
-      before{ OpsManager.set_conf :foo, 'bar' }
-
-      it 'should merge conf to the yaml' do
-        expect do
-          OpsManager.set_conf :foo, 'baz'
-        end.to change{ OpsManager.get_conf :foo }.from('bar').to('baz')
-      end
-
-      it 'should warn user that the conf is being changed' do
-        expect do
-          OpsManager.set_conf :foo, 'baz'
-        end.to output(/Changing foo to baz/).to_stdout
-      end
-    end
   end
 
   describe '@target' do
