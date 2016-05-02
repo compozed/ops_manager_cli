@@ -86,11 +86,11 @@ class OpsManager
         get('/api/products', { basic_auth: { username: username, password: password }} )
       end
 
-      def current_version
+      def get_current_version
         products = JSON.parse(get_products.body)
         directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
         versions = directors.inject([]){ |r, i| r << OpsManager::Semver.new(i.fetch('product_version')) }
-        @current_version ||= versions.sort.last.to_s
+        versions.sort.last.to_s
       rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
         nil
       end
@@ -112,12 +112,9 @@ class OpsManager
         @password ||= OpsManager.get_conf(:password)
       end
 
-      private
-
       def target
         @target ||= OpsManager.get_conf(:target)
       end
-
     end
   end
 end

@@ -6,11 +6,11 @@ describe OpsManager::Configs::OpsmanDeployment do
   let(:config) do
     {
       'name' => 'example-product',
-      'version'  => '1.4.11.0',
       'provider' => 'vsphere',
-      'ip' => '1.2.3.4',
+      'desired_version'  => '1.4.11.0',
       'username' => 'foo',
       'password' => 'bar',
+      'ip' => '1.2.3.4',
       'pivnet_token' => 'abc123',
       'opts' => {}
     }
@@ -22,7 +22,7 @@ describe OpsManager::Configs::OpsmanDeployment do
       end.not_to raise_error
     end
 
-  %w{ name provider username password pivnet_token version target ops }.each do |attr|
+  %w{ name provider desired_version username password ip pivnet_token ops }.each do |attr|
     it "should require #{attr}" do
       config.delete(attr)
       expect do

@@ -7,13 +7,11 @@ class OpsManager::Deployments
     extend Forwardable
     def_delegators :pivnet_api, :download_stemcell
     def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
-      :get_installation_settings, :upload_installation_assets, :import_stemcell
+      :get_installation_settings, :upload_installation_assets, :import_stemcell, :target,
+      :password, :username, :get_current_version
 
-
-    attr_accessor :name, :desired_version
-
-    def initialize(name,  desired_version)
-      @name, @desired_version = name, desired_version
+    def initialize(config_file)
+      @config_file = config_file
     end
 
     %w{ stop_current_vm deploy_vm }.each do |m|
@@ -29,7 +27,7 @@ class OpsManager::Deployments
 
     def create_first_user
       puts '====> Creating initial user...'.green
-      until( create_user(desired_version).code.to_i == 200) do
+      until( create_user(config.desired_version).code.to_i == 200) do
         print '.'.green ; sleep 1
       end
     end
@@ -37,8 +35,8 @@ class OpsManager::Deployments
     def upgrade
       get_installation_assets
       get_installation_settings(write_to: 'installation_settings.json')
-      stop_current_vm
-      deploy
+      stop_current_vm(current_vm_name)
+      deploy(new_vm_name, config.ip)
       provision_missing_stemcells
       upload_installation_assets
       OpsManager::Installation.trigger!.wait_for_result
@@ -46,13 +44,22 @@ class OpsManager::Deployments
       puts "====> Finish!".green
     end
 
+
     def new_vm_name
-      @new_vm_name ||= "#{name}-#{desired_version}"
+      @new_vm_name ||= "#{config.name}-#{config.desired_version}"
     end
 
     private
+    def current_version
+      @current_version ||= OpsManager::Semver.new(get_current_version)
+    end
+
+    def desired_version
+      @desired_version ||= OpsManager::Semver.new(config.desired_version)
+    end
+
     def current_vm_name
-      @current_vm_name ||= "#{name}-#{current_version}"
+      @current_vm_name ||= "#{config.name}-#{current_version}"
     end
 
     def provision_missing_stemcells
@@ -72,6 +79,10 @@ class OpsManager::Deployments
 
     def opsman_api
       @opsman_api ||= OpsManager::Api::Opsman.new
+    end
+
+    def config
+      @config ||= OpsManager::Configs::OpsmanDeployment.new(::YAML.load_file(@config_file))
     end
   end
 end

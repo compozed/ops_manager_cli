@@ -115,6 +115,7 @@ class OpsManager
           http.read_timeout = 1200
         end
       end
+
     end
   end
 end

@@ -7,10 +7,9 @@ require 'ops_manager/api/base'
 describe OpsManager::Api::Base do
   class FooApi
     include OpsManager::Api::Base
-
-    def target
-      'foo.com'
-    end
+      def target
+        'foo.com'
+      end
   end
 
   let(:base_api){ FooApi.new }

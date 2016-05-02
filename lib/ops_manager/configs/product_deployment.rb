@@ -5,7 +5,7 @@ class OpsManager
     class ProductDeployment < Base
       def initialize(config)
         super(config)
-        validate_presence_of!(:name, :version)
+        validate_presence_of!(:name, :desired_version)
       end
     end
   end

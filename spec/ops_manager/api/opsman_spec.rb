@@ -11,6 +11,7 @@ describe OpsManager::Api::Opsman do
     OpsManager.set_conf( :target, ENV['TARGET'] || target)
     OpsManager.set_conf( :username, ENV['USERNAME'] || 'foo')
     OpsManager.set_conf( :password, ENV['PASSWORD'] || 'bar')
+
     allow(api).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
@@ -260,14 +261,14 @@ describe OpsManager::Api::Opsman do
     end
   end
 
-  describe 'current_version' do
+  describe 'get_current_version' do
     [ Net::OpenTimeout, Errno::ETIMEDOUT ,
       Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|
       describe "when there is no ops manager and request errors: #{error}" do
 
         it "should be nil" do
           allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(error)
-          expect(api.current_version).to be_nil
+          expect(api.get_current_version).to be_nil
         end
       end
     end
@@ -292,7 +293,7 @@ describe OpsManager::Api::Opsman do
       end
 
       it "should return latest bosh version" do
-        expect(api.current_version).to eq('1.6.11.0')
+        expect(api.get_current_version).to eq('1.6.11.0')
       end
     end
   end

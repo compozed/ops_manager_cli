@@ -55,31 +55,6 @@ class OpsManager
     self.class.login(username, password) if username && password
   end
 
-  def deploy(config_file)
-    config = OpsManager::Configs::OpsmanDeployment.new(::YAML.load_file(config_file))
-
-    self.class.set_conf(:target, config.ip)
-    self.class.set_conf(:username, config.username)
-    self.class.set_conf(:password, config.password)
-    self.class.set_conf(:pivnet_token, config.pivnet_token)
-
-    @deployment ||= OpsManager::Deployments::Vsphere.new(config.name, config.version, config.opts)
-
-    desired_version = OpsManager::Semver.new(deployment.desired_version)
-    current_version = OpsManager::Semver.new(deployment.current_version)
-
-    case
-
-    when current_version.empty?
-      puts "No OpsManager deployed at #{target}. Deploying ...".green
-      deployment.deploy
-    when current_version < desired_version then
-      puts "OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../".green
-      deployment.upgrade
-    when current_version == desired_version then
-      puts "OpsManager at #{target} version is already #{desired_version}. Skiping ...".green
-    end
-  end
 
   def deploy_product(config_file, force = false)
     config = OpsManager::Configs::ProductDeployment.new(::YAML.load_file(config_file))

@@ -2,23 +2,12 @@ require 'spec_helper'
 require 'yaml'
 
 describe OpsManager do
-  let(:ops_manager_deployment_file){'ops_manager_deployment.yml'}
   let(:product_deployment_file){'product_deployment.yml'}
   let(:current_vm_name){ "ops-manager-#{current_version}"}
   let(:target){ '1.2.3.4' }
   let(:username){ 'foo' }
   let(:password){ 'bar' }
-  let(:current_version){ '1.4.2.0' }
-  let(:desired_version){ '1.4.2.0' }
   let(:ops_manager) { described_class.new }
-  let(:deployment) do
-    double('deployment', desired_version: desired_version,
-           current_version: current_version ).as_null_object
-  end
-
-  before do
-    allow(OpsManager::Deployments::Vsphere).to receive(:new).and_return(deployment)
-  end
 
   let(:ops_manager_dir){ "#{ENV['HOME']}/.ops_manager" }
 
@@ -123,19 +112,19 @@ describe OpsManager do
         ops_manager.target_and_login(config)
       end
     end
-  end
 
-  describe 'when config does not have credentials' do
-    let(:config)  {{}}
+    describe 'when config does not have credentials' do
+      let(:config)  {{}}
 
-    it 'should not target' do
-      expect(OpsManager).not_to receive(:target).with(target)
-      ops_manager.target_and_login(config)
-    end
+      it 'should not target' do
+        expect(OpsManager).not_to receive(:target).with(target)
+        ops_manager.target_and_login(config)
+      end
 
-    it 'should not login' do
-      expect(OpsManager).not_to receive(:login).with(username, password)
-      ops_manager.target_and_login(config)
+      it 'should not login' do
+        expect(OpsManager).not_to receive(:login).with(username, password)
+        ops_manager.target_and_login(config)
+      end
     end
   end
 
@@ -162,72 +151,6 @@ describe OpsManager do
     end
   end
 
-  describe 'deploy' do
-    describe 'when provider=vsphere' do
-      let(:provider){ 'vsphere' }
-
-      it 'ops_manager.deplyment should be kind of OpsManager::Deployments::Vsphere' do
-        expect(OpsManager::Deployments::Vsphere).to receive(:new)
-        ops_manager.deploy(ops_manager_deployment_file)
-      end
-    end
-
-
-    describe 'when no ops-manager has been deployed' do
-      let(:current_version){ nil }
-
-      it 'performs a deployment' do
-        expect(deployment).to receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
-      end
-
-      it 'does not performs an upgrade' do
-        expect(deployment).to_not receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
-      end
-    end
-
-    describe 'when ops-manager has been deployed and current and desired version match' do
-      let(:desired_version){ current_version }
-
-      it 'does not performs a deployment' do
-        expect(deployment).to_not receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-      end
-
-      it 'does not performs an upgrade' do
-        expect(deployment).to_not receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is already #{current_version}. Skiping .../).to_stdout
-      end
-    end
-
-    describe 'when current version is older than desired version' do
-      let(:current_version){ '1.4.2.0' }
-      let(:desired_version){ '1.4.11.0' }
-
-      it 'performs an upgrade' do
-        expect(deployment).to receive(:upgrade)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../).to_stdout
-      end
-
-      it 'does not performs a deployment' do
-        expect(deployment).to_not receive(:deploy)
-        expect do
-          ops_manager.deploy(ops_manager_deployment_file)
-        end.to output(/OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../).to_stdout
-      end
-    end
-  end
 
 
 end

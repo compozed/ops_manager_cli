@@ -5,7 +5,7 @@ class OpsManager
     class OpsmanDeployment < Base
       def initialize(config)
         super(config)
-        validate_presence_of!(:name, :version, :provider, :username, :password, :pivnet_token, :ip, :opts)
+        validate_presence_of!(:name, :desired_version, :provider, :username, :password, :pivnet_token, :ip, :opts)
       end
     end
   end

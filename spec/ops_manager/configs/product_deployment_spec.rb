@@ -6,7 +6,7 @@ describe OpsManager::Configs::ProductDeployment do
   let(:config) do
     {
       'name' => 'example-product',
-      'version'  => '1.6.2.0'
+      'desired_version'  => '1.6.2.0'
     }
   end
 
@@ -16,7 +16,7 @@ describe OpsManager::Configs::ProductDeployment do
       end.not_to raise_error
     end
 
-  %w{ name version }.each do |attr|
+  %w{ name desired_version }.each do |attr|
     it "should require #{attr}" do
       config.delete(attr)
       expect do
