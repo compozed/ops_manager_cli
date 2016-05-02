@@ -37,14 +37,14 @@ describe OpsManager::Cli do
     let(:args) { "deploy-product #{'--force' if force} product.yml".split(" ") }
 
     before do
-      expect(OpsManager::Product).to receive(:new).with('product.yml', force).and_call_original
+      expect(OpsManager::ProductDeployment).to receive(:new).with('product.yml', force).and_call_original
     end
 
     describe 'when no --force provided' do
       let(:force){ nil }
 
       it "should call ops_manager.deploy_product" do
-        expect_any_instance_of(OpsManager::Product).to receive(:run)
+        expect_any_instance_of(OpsManager::ProductDeployment).to receive(:run)
         cli.run(`pwd`, args)
       end
     end
@@ -53,7 +53,7 @@ describe OpsManager::Cli do
       let(:force){ true }
 
       it "should call ops_manager.deploy_product with force" do
-        expect_any_instance_of(OpsManager::Product).to receive(:run)
+        expect_any_instance_of(OpsManager::ProductDeployment).to receive(:run)
         cli.run(`pwd`, args)
       end
     end

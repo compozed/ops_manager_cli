@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'ops_manager/product_installation'
 
 describe OpsManager::ProductInstallation do
   let(:name){ 'p-bosh' }

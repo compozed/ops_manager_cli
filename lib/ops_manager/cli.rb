@@ -1,5 +1,5 @@
 require "clamp"
-require "ops_manager/product"
+require "ops_manager/product_deployment"
 require "ops_manager/deployment"
 
 class OpsManager
@@ -35,7 +35,7 @@ class OpsManager
       option "--force", :flag, "force deployment"
 
       def execute
-        OpsManager::Product.new(product_config, force?).run
+        OpsManager::ProductDeployment.new(product_config, force?).run
       end
     end
 

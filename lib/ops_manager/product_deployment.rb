@@ -5,7 +5,7 @@ require "ops_manager/logging"
 require "ops_manager/semver"
 
 class OpsManager
-  class Product
+  class ProductDeployment
     extend Forwardable
     def_delegators :opsman_api, :current_version, :upload_product, :get_installation_settings,
       :upgrade_product_installation, :get_installation, :get_products, :upload_installation_settings,
@@ -38,7 +38,7 @@ class OpsManager
 
     def upload
       puts "====> Uploading product...".green
-      unless Product.exists?(config.name, config.desired_version)
+      unless self.class.exists?(config.name, config.desired_version)
         upload_product(config.filepath)
         print "done".green
       else
