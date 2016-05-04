@@ -1,4 +1,4 @@
-require 'ops_manager/configs/Base'
+require 'ops_manager/configs/base'
 
 class OpsManager
   class Configs
