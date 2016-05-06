@@ -35,7 +35,7 @@ class OpsManager::Deployment
   end
 
   def deploy
-    deploy_vm
+    deploy_vm(desired_vm_name , config.ip)
     create_first_user
   end
 
@@ -80,6 +80,10 @@ class OpsManager::Deployment
 
     def current_vm_name
       @current_vm_name ||= "#{config.name}-#{current_version}"
+    end
+
+    def desired_vm_name
+      @desired_vm_name ||= "#{config.name}-#{config.desired_version}"
     end
 
     def provision_missing_stemcells

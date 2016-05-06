@@ -1,5 +1,4 @@
 require 'ostruct'
-require 'byebug'
 
 class OpsManager
   class Configs

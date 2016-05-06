@@ -23,7 +23,7 @@ class OpsManager
     end
 
     def run
-      OpsManager.target_and_login({username: config.username, password: config.password })
+      OpsManager.target_and_login(config.target, config.username, config.password)
       import_stemcell(config.stemcell)
 
       case
