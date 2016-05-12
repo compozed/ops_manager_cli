@@ -2,7 +2,7 @@
 name: 'ops-manager'
 
 provider: vsphere
-desired_version: 1.4.11.0 #~~~~!!!
+desired_version: 1.4.11.0
 ip: 1.2.3.4
 username: foo
 password: bar

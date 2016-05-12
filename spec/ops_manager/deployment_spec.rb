@@ -16,6 +16,7 @@ describe OpsManager::Deployment do
   let(:target){ '1.2.3.4' }
   let(:config) do
     double('config',
+           name: 'ops-manager',
            desired_version: desired_version,
            ip: target,
            password: password,
@@ -43,12 +44,23 @@ describe OpsManager::Deployment do
     end
   end
 
-  describe 'deploy' do
+  describe '#deploy' do
     it 'Should perform in the right order' do
-      %i( deploy_vm create_first_user).each do |m|
-        expect(deployment).to receive(m).ordered
+      %i( deploy_vm create_first_user).each do |method|
+        expect(deployment).to receive(method).ordered
       end
       deployment.deploy
+    end
+
+    describe 'when desired_version 1.7' do
+      let(:desired_version){'1.7.1.0'}
+      before{ allow(deployment).to receive(:config).and_return(config) }
+
+      it 'should skip create_first_user' do
+        allow(deployment).to receive(:deploy_vm)
+        expect(deployment).not_to receive(:create_first_user)
+        deployment.deploy
+      end
     end
   end
 
@@ -113,7 +125,6 @@ describe OpsManager::Deployment do
   end
 
   describe 'run' do
-
     before do
       allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_current_version).and_return(current_version)
       allow(deployment).tap do |d|
