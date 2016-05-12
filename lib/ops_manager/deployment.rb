@@ -87,6 +87,7 @@ class OpsManager::Deployment
   end
 
   def provision_missing_stemcells
+    puts '====> Reprovisioning missing stemcells...'.green
     installation_settings.stemcells.each do |s|
       download_stemcell(s.fetch(:version), s.fetch(:file), /vsphere/)
       import_stemcell(s.fetch(:file))

@@ -4,6 +4,7 @@ require 'ops_manager/api/opsman'
 describe OpsManager::Api::Opsman do
   let(:api){ OpsManager::Api::Opsman.new }
   let(:target){ '1.2.3.4' }
+  let(:base_uri){ 'https://1.2.3.4' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:parsed_response){ JSON.parse(response.body) }
 
@@ -99,7 +100,6 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
-    let(:base_uri){ 'https://1.2.3.4' }
     before do
       stub_request(:post, uri).
         with(:body => body,
@@ -298,10 +298,15 @@ describe OpsManager::Api::Opsman do
 
 
   describe "#import_stemcell" do
-    let(:response) do
-      VCR.use_cassette 'import stemcell' do
-        api.import_stemcell("../fixtures/stemcell.tgz")
-      end
+    subject(:import_stemcell){ api.import_stemcell("../fixtures/stemcell.tgz") }
+
+    let(:response_body){ '{}' }
+    let(:response){ import_stemcell }
+    let(:status_code){ 200 }
+    let(:uri){ "#{base_uri}/api/stemcells" }
+
+    before do
+      stub_request(:post, uri).to_return(status: status_code, body: response_body)
     end
 
     it "should run successfully" do
@@ -316,6 +321,15 @@ describe OpsManager::Api::Opsman do
       it "should skip" do
         expect(api).not_to receive(:puts).with(/====> Uploading stemcell.../)
         api.import_stemcell(nil)
+      end
+    end
+
+    describe "when fails to upload stemcell" do
+      let(:status_code){ 400 }
+      let(:response_body){ '{"error": "someting failed" }' }
+
+      it "should raise StemcellUploadError" do
+        expect{ import_stemcell }.to raise_error{ OpsManager::StemcellUploadError }
       end
     end
   end

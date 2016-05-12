@@ -99,9 +99,12 @@ class OpsManager
         return unless filepath
         puts '====> Uploading stemcell...'.green
         tar = UploadIO.new(filepath, 'multipart/form-data')
-        multipart_post( "/api/stemcells",
+        res = multipart_post( "/api/stemcells",
                        "stemcell[file]" => tar
                       )
+
+        raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
+        res
       end
 
       def username
