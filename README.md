@@ -65,7 +65,7 @@ Once you have created the config you can run a deployment:
 ## Building Docker image
 
     bundle exec rake build
-    docker build -t compozed/ops_manager_cli
+    docker build -t compozed/ops_manager_cli # Optional: --build-arg DOWNLOAD_URL=http://your_blobstore.com/ovftool.bundle
 
 
 ## Provisioning docker image to private registry
