@@ -2,8 +2,9 @@ require 'spec_helper'
 require 'ops_manager/api/opsman'
 
 describe OpsManager::Api::Opsman do
-  let(:api){ OpsManager::Api::Opsman.new }
+  let(:api){ OpsManager::Api::Opsman.new(ops_manager_version) }
   let(:target){ '1.2.3.4' }
+  let(:ops_manager_version){ '1.5' }
   let(:base_uri){ 'https://1.2.3.4' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:parsed_response){ JSON.parse(response.body) }
@@ -100,6 +101,9 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
+    subject(:create_user){ api.create_user }
+    let(:response){ create_user }
+
     before do
       stub_request(:post, uri).
         with(:body => body,
@@ -108,25 +112,37 @@ describe OpsManager::Api::Opsman do
     end
 
     describe 'when version 1.5.x' do
-      let(:version){ '1.5.5.0' }
+      let(:ops_manager_version){ '1.5.5.0' }
       let(:body){ "user[user_name]=foo&user[password]=bar&user[password_confirmantion]=bar"}
       let(:uri){ "#{base_uri}/api/users" }
 
       it "should successfully create first user" do
         VCR.turned_off do
-          api.create_user(version)
+          expect(response.code).to eq('200')
         end
       end
     end
 
     describe 'when version 1.6.x' do
-      let(:version){ '1.6.4' }
+      let(:ops_manager_version){ '1.6.4' }
       let(:uri){ "#{base_uri}/api/setup" }
       let(:body){ "setup[user_name]=foo&setup[password]=bar&setup[password_confirmantion]=bar&setup[eula_accepted]=true" }
 
       it "should successfully setup first user" do
         VCR.turned_off do
-          api.create_user(version)
+          expect(response.code).to eq('200')
+        end
+      end
+    end
+
+    describe 'when version 1.7.x' do
+      let(:ops_manager_version){ '1.7.5.0' }
+      let(:body){ 'setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=bar&setup[admin_password_confirmation]=bar' }
+      let(:uri){ "#{base_uri}/api/v0/setup" }
+
+      it "should successfully create first user" do
+        VCR.turned_off do
+          expect(response.code).to eq('200')
         end
       end
     end
@@ -140,7 +156,7 @@ describe OpsManager::Api::Opsman do
     end
 
     it 'should be successfull' do
-      expect(response.code).to eq("200")
+      expect(response.code).to eq('200')
     end
 
     it 'should return installation id' do
@@ -199,12 +215,12 @@ describe OpsManager::Api::Opsman do
 
   describe "#upgrade_product_installation" do
     let(:guid) { "example-product-31695d885b442a75beee" }
-    let(:version){ '1.6.2.0' }
+    let(:product_version){ '1.6.2.0' }
 
     describe "when it applies sucessfully" do
       let(:response) do
         VCR.use_cassette 'upgrade product installation' do
-          api.upgrade_product_installation(guid, version)
+          api.upgrade_product_installation(guid, product_version)
         end
       end
 
@@ -220,7 +236,7 @@ describe OpsManager::Api::Opsman do
     describe "when it applies unsucessfully" do
       let(:response) do
         VCR.use_cassette 'upgrade product installation fails' do
-          api.upgrade_product_installation(guid, version)
+          api.upgrade_product_installation(guid, product_version)
         end
       end
 
@@ -290,9 +306,6 @@ describe OpsManager::Api::Opsman do
         allow(api).to receive(:get_products).and_return(products_response)
       end
 
-      it "should return latest bosh version" do
-        expect(api.get_current_version).to eq('1.6.11.0')
-      end
     end
   end
 
@@ -334,4 +347,33 @@ describe OpsManager::Api::Opsman do
     end
   end
 
+  describe 'uri_for' do
+    let(:endpoint){ '/get_some_resource' }
+    subject(:uri){ api.uri_for(endpoint) }
+
+    describe 'when ops manager version is 1.5' do
+      let(:ops_manager_version){ '1.5' }
+
+      it 'should set the namespace to api/' do
+        expect(uri.to_s).to eq("https://#{target}/api#{endpoint}")
+      end
+    end
+
+    describe 'when ops manager version is 1.6' do
+      let(:ops_manager_version){ '1.6' }
+
+      it 'should set the namespace to api/' do
+        expect(uri.to_s).to eq("https://#{target}/api#{endpoint}")
+      end
+    end
+
+    describe 'when ops manager version is 1.7' do
+      let(:ops_manager_version){ '1.7' }
+
+      it 'should set the namespace to api/v0' do
+        expect(uri.to_s).to eq("https://#{target}/api/v0#{endpoint}")
+      end
+    end
+  end
 end
+

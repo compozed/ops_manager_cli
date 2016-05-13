@@ -51,17 +51,6 @@ describe OpsManager::Deployment do
       end
       deployment.deploy
     end
-
-    describe 'when desired_version 1.7' do
-      let(:desired_version){'1.7.1.0'}
-      before{ allow(deployment).to receive(:config).and_return(config) }
-
-      it 'should skip create_first_user' do
-        allow(deployment).to receive(:deploy_vm)
-        expect(deployment).not_to receive(:create_first_user)
-        deployment.deploy
-      end
-    end
   end
 
   describe 'upgrade' do

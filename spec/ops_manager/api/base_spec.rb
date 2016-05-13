@@ -5,14 +5,17 @@ require 'spec_helper'
 require 'ops_manager/api/base'
 
 describe OpsManager::Api::Base do
-  class FooApi
-    include OpsManager::Api::Base
-      def target
-        'foo.com'
-      end
-  end
+  class FooApi < OpsManager::Api::Base; end
 
   let(:base_api){ FooApi.new }
+  let(:desired_version){ '1.5' }
+  let(:target){ 'foo.com' }
+  let(:config){ double('config', desired_version: desired_version) }
+
+  before do
+   allow(base_api).to receive(:target).and_return(target)
+   allow(base_api).to receive(:config).and_return(config)
+  end
 
   describe '#post' do
     describe 'when response is 302' do
@@ -32,27 +35,19 @@ describe OpsManager::Api::Base do
 
   describe '#uri_for' do
     let(:uri){ base_api.uri_for(endpoint) }
+    let(:endpoint){ '/some/endpoint' }
 
-    describe 'when endpoint starts with /' do
-      let(:endpoint){ '/some/endpoint' }
-
-      it 'returns URI with target' do
-        expect(uri).to be_kind_of(URI)
-      end
-
-      it 'should concatenate target to endpoint' do
-        expect(uri.to_s).to eq("https://foo.com#{endpoint}")
-      end
+    it 'returns URI' do
+      expect(uri).to be_kind_of(URI)
     end
 
-    describe 'when endpoint starts with http' do
+    describe 'when endpoint is a full url' do
       let(:endpoint){ 'https://banana.com/get' }
 
       it 'does not override with target' do
         expect(uri.to_s).to eq(endpoint)
       end
     end
+
   end
 end
-
-

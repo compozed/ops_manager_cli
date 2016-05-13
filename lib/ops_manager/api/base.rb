@@ -1,6 +1,6 @@
 class OpsManager
   module Api
-    module Base
+    class Base
       include OpsManager::Logging
 
       def get(endpoint, opts = {})
@@ -115,7 +115,6 @@ class OpsManager
           http.read_timeout = 1200
         end
       end
-
     end
   end
 end

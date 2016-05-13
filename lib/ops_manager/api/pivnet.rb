@@ -1,7 +1,6 @@
 class OpsManager
   module Api
-    class Pivnet
-      include OpsManager::Api::Base
+    class Pivnet < OpsManager::Api::Base
 
       def initialize
         get_authentication
@@ -30,7 +29,6 @@ class OpsManager
 
       def accept_release_eula(release_id)
         puts "====> Accepting stemcell eula ...".green
-
         opts = { headers: { 'Authorization' => "Token #{pivnet_token}" } }
         post("/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance", opts)
       end
@@ -39,7 +37,6 @@ class OpsManager
         opts = { write_to: stemcell_path, headers: { 'Authorization' => "Token #{pivnet_token}" } }
         post("/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download", opts)
       end
-
 
       def get_stemcell_releases(opts = {})
         get("/api/v2/products/stemcells/releases", opts)

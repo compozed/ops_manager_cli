@@ -8,7 +8,7 @@ class OpsManager::Deployment
   def_delegators :pivnet_api, :download_stemcell
   def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
     :get_installation_settings, :upload_installation_assets, :import_stemcell, :target,
-    :password, :username, :get_current_version
+    :password, :username, :get_current_version ,:ops_manager_version=
 
   def initialize(config_file)
     @config_file = config_file
@@ -35,9 +35,11 @@ class OpsManager::Deployment
   end
 
   def deploy
+    set_api_ops_manager_version(config.desired_version)
     deploy_vm(desired_vm_name , config.ip)
-    create_first_user unless desired_version?('1.7')
+    create_first_user
   end
+
 
   %w{ stop_current_vm deploy_vm }.each do |m|
     define_method(m) do
@@ -47,7 +49,7 @@ class OpsManager::Deployment
 
   def create_first_user
     puts '====> Creating initial user...'.green
-    until( create_user(config.desired_version).code.to_i == 200) do
+    until( create_user.code.to_i == 200) do
       print '.'.green ; sleep 1
     end
   end
@@ -112,5 +114,9 @@ class OpsManager::Deployment
 
   def desired_version?(version)
     !!(desired_version.to_s =~/#{version}/)
+  end
+
+  def set_api_ops_manager_version(ops_manager_version)
+    opsman_api.ops_manager_version= ops_manager_version
   end
 end
