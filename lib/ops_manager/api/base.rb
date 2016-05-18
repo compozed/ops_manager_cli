@@ -46,16 +46,18 @@ class OpsManager
         http = http_for(uri)
         request = Net::HTTP::Post.new(uri.request_uri)
 
+        request.basic_auth(username, password) if self.respond_to?(:username)
+
         if opts.has_key?(:headers)
           opts.delete(:headers).each_pair do |k,v|
             request[k] = v
           end
         end
 
-        request.basic_auth(username, password) if self.respond_to?(:username)
 
         body = opts[:body] || ''
         request.body= body
+
         res = http.request(request).tap do |res|
           logger.info("performing post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
           logger.info("post response body #{res.body}")
@@ -68,12 +70,19 @@ class OpsManager
         end
       end
 
-      def put(endpoint, opts)
+      def put(endpoint, opts ={})
         uri = uri_for(endpoint)
         http = http_for(uri)
         request = Net::HTTP::Put.new(uri.request_uri)
-        request.set_form_data( opts)
-        request.basic_auth(username, password)
+        request.set_form_data(opts)
+
+        request.basic_auth(username, password) if self.respond_to?(:username)
+
+        if opts.has_key?(:headers)
+          opts.delete(:headers).each_pair do |k,v|
+            request[k] = v
+          end
+        end
         # body = opts.fetch( :body )
         http.request(request).tap do |res|
           logger.info("performing put to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
@@ -81,11 +90,18 @@ class OpsManager
         end
       end
 
-      def multipart_post(endpoint, opts)
+      def multipart_post(endpoint, opts = {})
         uri = uri_for(endpoint)
         http = http_for(uri)
         request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
-        request.basic_auth(username, password)
+
+        request.basic_auth(username, password) if self.respond_to?(:username)
+
+        if opts.has_key?(:headers)
+          opts.delete(:headers).each_pair do |k,v|
+            request[k] = v
+          end
+        end
         http.request(request).tap do |res|
           logger.info("performing multipart_post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
           logger.info("post response body #{res.body}")
@@ -96,7 +112,14 @@ class OpsManager
         uri = uri_for(endpoint)
         http = http_for(uri)
         request = Net::HTTP::Delete.new(uri.request_uri)
-        request.basic_auth(username, password)
+
+        request.basic_auth(username, password) if self.respond_to?(:username)
+
+        if opts.has_key?(:headers)
+          opts.delete(:headers).each_pair do |k,v|
+            request[k] = v
+          end
+        end
         http.request(request)
       end
 

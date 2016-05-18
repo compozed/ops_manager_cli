@@ -1,6 +1,7 @@
 require "ops_manager/logging"
 require "ops_manager/api/base"
 require "net/http/post/multipart"
+require "uaa"
 
 class OpsManager
   module Api
@@ -11,18 +12,17 @@ class OpsManager
         @ops_manager_version = ops_manager_version
       end
 
-
       def create_user
         case ops_manager_version
-        when /1.5/
-          body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
-          uri= "/users"
         when /1.6/
           body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
           uri= "/setup"
         when /1.7/
           body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
           uri= "/setup"
+        else
+          body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
+          uri= "/users"
         end
 
         post(uri, body: body)
@@ -39,7 +39,6 @@ class OpsManager
 
       def get_installation_settings(opts = {})
         puts '====> Downloading installation settings...'.green
-        opts.merge!( { basic_auth: { username: username, password: password } } )
         get("/installation_settings", opts)
       end
 
@@ -48,13 +47,11 @@ class OpsManager
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
         multipart_post( "/installation_asset_collection",
                        :password => @password,
-                       "installation[file]" => zip
-                      )
+                       "installation[file]" => zip)
       end
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
-        opts.merge!( basic_auth: { username: username, password: password })
 
         puts '====> Download installation assets...'.green
         get("/installation_asset_collection", opts)
@@ -71,8 +68,7 @@ class OpsManager
       end
 
       def get_installation(id)
-        opts = { basic_auth: { username: username, password: password }}
-        res = get("/installation/#{id}" , opts )
+        res = get("/installation/#{id}")
         raise OpsManager::InstallationError.new(res.body) if res.body =~  /failed/
         res
       end
@@ -92,7 +88,7 @@ class OpsManager
       end
 
       def get_products
-        get('/products', { basic_auth: { username: username, password: password }} )
+        get('/products')
       end
 
       def get_current_version
@@ -132,13 +128,55 @@ class OpsManager
         super("#{api_namespace}#{endpoint}")
       end
 
+      def get(endpoint, opts = {})
+        super(endpoint, add_authentication(opts))
+      end
+
+      def post(endpoint, opts = {})
+        super(endpoint, add_authentication(opts))
+      end
+
+      def put(endpoint, opts={})
+        super(endpoint, add_authentication(opts))
+      end
+
+      def multipart_post(endpoint, opts={})
+        super(endpoint, add_authentication(opts))
+      end
+
+      def delete(endpoint, opts={})
+        super(endpoint, add_authentication(opts))
+      end
+
       private
+      def get_token
+        token_issuer.owner_password_grant(username, password, 'opsman.admin')
+      end
+
+      def token_issuer
+        @token_issuer ||= CF::UAA::TokenIssuer.new(
+          "https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true )
+      end
+
+      def access_token
+        @access_token ||= get_token.info['access_token']
+      end
+
+      def add_authentication(opts)
+        case ops_manager_version
+
+        when /1.7/
+          opts[:headers] ||= {}
+          opts[:headers]['Authorization'] ||= "Bearer #{access_token}"
+        else
+          opts[:basic_auth] = { username: username, password: password }
+        end
+        opts
+      end
+
+
       def api_namespace
         case ops_manager_version
-        when /1.5/
-          "/api"
-        when /1.6/
-          "/api"
         when /1.7/
           "/api/v0"
         else

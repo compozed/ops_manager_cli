@@ -8,8 +8,8 @@ describe OpsManager::Api::Pivnet do
 
   before do
     OpsManager.set_conf(:pivnet_token, ENV['PIVNET_TOKEN'] || pivnet_token)
-      stub_request(:get, 'https://network.pivotal.io/api/v2/authentication')
-    end
+    stub_request(:get, 'https://network.pivotal.io/api/v2/authentication')
+  end
 
   describe '#new' do
     it  'should try authentication' do
@@ -19,7 +19,7 @@ describe OpsManager::Api::Pivnet do
   end
 
   describe '#get_authentication' do
-  before do
+    before do
       stub_request(:get, 'https://network.pivotal.io/api/v2/authentication').
         to_return(:status => status_code, :body => "", :headers => {})
     end
@@ -30,16 +30,14 @@ describe OpsManager::Api::Pivnet do
 
 
       it 'should inform that token authenticates' do
-        VCR.turned_off do
-          pivnet_api.get_authentication
-          expect(WebMock).to have_requested(
-            :get,
-            "https://network.pivotal.io/api/v2/authentication").
-            with(:headers => {'Accept'=>'*/*',
-               'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-               'Authorization'=>"Token #{pivnet_token}",
-               'User-Agent'=>'Ruby' } ).twice
-        end
+        pivnet_api.get_authentication
+        expect(WebMock).to have_requested(
+          :get,
+          "https://network.pivotal.io/api/v2/authentication").
+          with(:headers => {'Accept'=>'*/*',
+                            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+                            'Authorization'=>"Token #{pivnet_token}",
+                            'User-Agent'=>'Ruby' } ).twice
       end
     end
 
@@ -48,15 +46,13 @@ describe OpsManager::Api::Pivnet do
       let(:status_code){ 401 }
 
       it 'should raise exception authentication fail' do
-        VCR.turned_off do
-          expect do
-            pivnet_api.get_authentication
-            expect(WebMock).to have_requested(
-              :get,
-              "https://network.pivotal.io/api/v2/authentication").
-              with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
-          end.to raise_exception(OpsManager::PivnetAuthenticationError)
-        end
+        expect do
+          pivnet_api.get_authentication
+          expect(WebMock).to have_requested(
+            :get,
+            "https://network.pivotal.io/api/v2/authentication").
+            with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
+        end.to raise_exception(OpsManager::PivnetAuthenticationError)
       end
     end
   end
@@ -124,34 +120,30 @@ describe OpsManager::Api::Pivnet do
         stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
           to_return(:status => 302, :body => "banana", :headers => { 'Location' => stemcell_redirect_uri })
 
-        stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
+          stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
 
-        stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").
-          to_return(:status => 200, :body => "")
+          stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").
+            to_return(:status => 200, :body => "")
     end
     it 'should accept stemcell eula before downloading' do
       pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
       expect(WebMock).to have_requested(
-          :post,
-          "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
-      end
+        :post,
+        "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
+    end
 
     it 'should download specified stemcell version' do
-      VCR.turned_off do
-        pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
-        expect(WebMock).to have_requested(
-          :post,
-          "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
-      end
+      pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
+      expect(WebMock).to have_requested(
+        :post,
+        "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
     end
 
     it 'should write stemcell to file' do
-      VCR.turned_off do
-        `rm #{stemcell_path}`
-        pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
-        file_content = File.read(stemcell_path)
-        expect(file_content).to eq('banana')
-      end
+      `rm #{stemcell_path}`
+      pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
+      file_content = File.read(stemcell_path)
+      expect(file_content).to eq('banana')
     end
   end
 end
