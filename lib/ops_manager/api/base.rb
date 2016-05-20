@@ -10,10 +10,7 @@ class OpsManager
         request = Net::HTTP::Get.new(uri.request_uri)
 
         if opts.has_key?(:basic_auth)
-          request.basic_auth(
-            opts[:basic_auth][:username],
-            opts[:basic_auth][:password]
-          )
+          request.basic_auth( opts[:basic_auth][:username], opts[:basic_auth][:password])
         end
 
         if opts.has_key?(:headers)

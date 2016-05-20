@@ -26,6 +26,7 @@ class OpsManager::Deployment
     when current_version.empty?
       puts "No OpsManager deployed at #{target}. Deploying ...".green
       deploy
+      create_first_user
     when current_version < desired_version then
       puts "OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version}.../".green
       upgrade
@@ -37,7 +38,6 @@ class OpsManager::Deployment
   def deploy
     set_api_ops_manager_version(config.desired_version)
     deploy_vm(desired_vm_name , config.ip)
-    create_first_user
   end
 
 
@@ -59,8 +59,8 @@ class OpsManager::Deployment
     get_installation_settings(write_to: 'installation_settings.json')
     stop_current_vm(current_vm_name)
     deploy
-    provision_missing_stemcells
     upload_installation_assets
+    provision_missing_stemcells
     OpsManager::Installation.trigger!.wait_for_result
 
     puts "====> Finish!".green

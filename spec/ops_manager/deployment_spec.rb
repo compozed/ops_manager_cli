@@ -46,7 +46,7 @@ describe OpsManager::Deployment do
 
   describe '#deploy' do
     it 'Should perform in the right order' do
-      %i( deploy_vm create_first_user).each do |method|
+      %i( deploy_vm).each do |method|
         expect(deployment).to receive(method).ordered
       end
       deployment.deploy
@@ -64,8 +64,8 @@ describe OpsManager::Deployment do
 
     it 'Should perform in the right order' do
       %i( get_installation_assets get_installation_settings
-         stop_current_vm deploy provision_missing_stemcells
-         upload_installation_assets ).each do |m|
+         stop_current_vm deploy upload_installation_assets
+         provision_missing_stemcells).each do |m|
            expect(deployment).to receive(m).ordered
          end
          deployment.upgrade
@@ -119,6 +119,7 @@ describe OpsManager::Deployment do
       allow(deployment).tap do |d|
         d.to receive(:config).and_return(config)
         d.to receive(:deploy)
+        d.to receive(:create_first_user)
         d.to receive(:upgrade)
       end
     end
@@ -129,6 +130,7 @@ describe OpsManager::Deployment do
 
       it 'performs a deployment' do
         expect(deployment).to receive(:deploy)
+        expect(deployment).to receive(:create_first_user)
         expect do
           run
         end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
@@ -187,8 +189,8 @@ describe OpsManager::Deployment do
       before { allow(deployment).to receive(:create_user).and_return(error_response, success_response) }
 
       it 'should retry until success' do
-          expect(deployment).to receive(:create_user).twice
-          deployment.create_first_user
+        expect(deployment).to receive(:create_user).twice
+        deployment.create_first_user
       end
     end
   end

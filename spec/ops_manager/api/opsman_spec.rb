@@ -14,20 +14,20 @@ describe OpsManager::Api::Opsman do
 
   before do
     allow(token_issuer).to receive(:owner_password_grant)
-      .with(username, password, 'opsman.admin')
+      .with('admin', password, 'opsman.admin')
       .and_return(uaa_token)
     allow(CF::UAA::TokenIssuer).to receive(:new)
       .with("https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true)
       .and_return(token_issuer)
 
-    OpsManager.set_conf( :target, ENV['TARGET'] || target)
-    OpsManager.set_conf( :username, ENV['USERNAME'] || username)
-    OpsManager.set_conf( :password, ENV['PASSWORD'] || password)
+    OpsManager.set_conf(:target, ENV['TARGET'] || target)
+    OpsManager.set_conf(:username, ENV['USERNAME'] || username)
+    OpsManager.set_conf(:password, ENV['PASSWORD'] || password)
 
     allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
-  describe 'upload_installation_assets' do
+  describe '#upload_installation_assets' do
     before do
       `rm installation_assets.zip`
       `cp ../fixtures/installation_assets.zip .`
@@ -51,7 +51,7 @@ describe OpsManager::Api::Opsman do
 
 
     it 'should download successfully' do
-        opsman.get_installation_settings
+      opsman.get_installation_settings
 
       expect(WebMock).to have_requested(:get, "https://#{target}/api/installation_settings")
         .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
@@ -114,29 +114,17 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
-
     subject(:create_user){ opsman.create_user }
     let(:response){ create_user }
 
     before do
       stub_request(:post, uri).
-        with(:body => body,
-             :headers => {'Accept'=>'*/*', 'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3', 'User-Agent'=>'Ruby'}).
+        with(:body => body).
         to_return(:status => 200, :body => "", :headers => {})
 
       opsman.ops_manager_version= ops_manager_version
-
     end
 
-    describe 'when version 1.5.x' do
-      let(:ops_manager_version){ '1.5.5.0' }
-      let(:body){ "user[user_name]=foo&user[password]=bar&user[password_confirmantion]=bar"}
-      let(:uri){ "#{base_uri}/api/users" }
-
-      it "should successfully create first user" do
-          expect(response.code).to eq('200')
-      end
-    end
 
     describe 'when version 1.6.x' do
       let(:ops_manager_version){ '1.6.4' }
@@ -144,7 +132,7 @@ describe OpsManager::Api::Opsman do
       let(:body){ "setup[user_name]=foo&setup[password]=bar&setup[password_confirmantion]=bar&setup[eula_accepted]=true" }
 
       it "should successfully setup first user" do
-          expect(response.code).to eq('200')
+        expect(response.code).to eq('200')
       end
     end
 
@@ -154,7 +142,13 @@ describe OpsManager::Api::Opsman do
       let(:uri){ "#{base_uri}/api/v0/setup" }
 
       it "should successfully create first user" do
-          expect(response.code).to eq('200')
+        expect(response.code).to eq('200')
+      end
+
+      it 'should not send any authentication on post request' do
+        create_user
+        expect(WebMock).not_to have_requested(:post, uri)
+          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
       end
     end
   end
@@ -192,7 +186,7 @@ describe OpsManager::Api::Opsman do
       end
 
       subject(:response) do
-          opsman.get_installation(installation_id)
+        opsman.get_installation(installation_id)
       end
 
       it "should rasie OpsManager::InstallationError" do
@@ -284,7 +278,7 @@ describe OpsManager::Api::Opsman do
     end
 
     it 'should perform get to products api endpoint' do
-        opsman.get_products
+      opsman.get_products
 
       expect(WebMock).to have_requested(:get, "https://#{target}/api/products")
         .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
@@ -368,14 +362,6 @@ describe OpsManager::Api::Opsman do
     let(:endpoint){ '/get_some_resource' }
     subject(:uri){ opsman.uri_for(endpoint) }
 
-    describe 'when ops manager version is 1.5' do
-      let(:ops_manager_version){ '1.5' }
-
-      it 'should set the namespace to api/' do
-        expect(uri.to_s).to eq("https://#{target}/api#{endpoint}")
-      end
-    end
-
     describe 'when ops manager version is 1.6' do
       let(:ops_manager_version){ '1.6' }
 
@@ -394,7 +380,7 @@ describe OpsManager::Api::Opsman do
   end
 
 
-  %i{ get post put delete }.each do |http_verb|
+  %i{ get put delete }.each do |http_verb|
     describe "#{http_verb}" do
       before do
         stub_request(http_verb, "https://#{target}/api/v0/banana")
@@ -405,26 +391,10 @@ describe OpsManager::Api::Opsman do
         before{ opsman.ops_manager_version = ops_manager_version }
 
         it 'should include uaa access-token in request' do
-            opsman.send(http_verb, '/banana')
-            expect(WebMock).to have_requested(http_verb, "https://#{target}/api/v0/banana")
-              .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
-        end
-      end
-    end
-  end
-  describe "#multipart_post" do
-    before do
-      stub_request(:post, "https://#{target}/api/v0/banana")
-    end
-
-    describe 'when ops manager version is 1.7' do
-      let(:ops_manager_version){ '1.7' }
-      before{ opsman.ops_manager_version = ops_manager_version }
-
-      it 'should include uaa access-token in request' do
-          opsman.multipart_post('/banana')
-          expect(WebMock).to have_requested(:post, "https://#{target}/api/v0/banana")
+          opsman.send(http_verb, '/banana')
+          expect(WebMock).to have_requested(http_verb, "https://#{target}/api/v0/banana")
             .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+        end
       end
     end
   end

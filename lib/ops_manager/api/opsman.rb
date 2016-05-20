@@ -20,9 +20,6 @@ class OpsManager
         when /1.7/
           body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
           uri= "/setup"
-        else
-          body= "user[user_name]=#{username}&user[password]=#{password}&user[password_confirmantion]=#{password}"
-          uri= "/users"
         end
 
         post(uri, body: body)
@@ -31,8 +28,9 @@ class OpsManager
       def upload_installation_settings(filepath)
         puts '====> Uploading installation settings...'.green
         yaml = UploadIO.new(filepath, 'text/yaml')
-        res = multipart_post( "/installation_settings",
-                             "installation[file]" => yaml)
+        opts = { "installation[file]" => yaml}
+        opts = add_authentication(opts)
+        res = multipart_post( "/installation_settings", opts)
         raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
         res
       end
@@ -45,9 +43,8 @@ class OpsManager
       def upload_installation_assets
         puts '====> Uploading installation assets...'.green
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
-        multipart_post( "/installation_asset_collection",
-                       :password => @password,
-                       "installation[file]" => zip)
+        opts = { :passphrase => @password, "installation[file]" => zip }
+        multipart_post( "/installation_asset_collection", opts)
       end
 
       def get_installation_assets
@@ -64,7 +61,7 @@ class OpsManager
 
       def trigger_installation
         puts '====> Applying changes...'.green
-        post('/installation')
+        post('/installation', add_authentication)
       end
 
       def get_installation(id)
@@ -104,9 +101,9 @@ class OpsManager
         return unless filepath
         puts '====> Uploading stemcell...'.green
         tar = UploadIO.new(filepath, 'multipart/form-data')
-        res = multipart_post( "/stemcells",
-                             "stemcell[file]" => tar
-                            )
+        opts = { "stemcell[file]" => tar }
+        opts = add_authentication(opts)
+        res = multipart_post("/stemcells", opts)
 
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
         res
@@ -132,15 +129,7 @@ class OpsManager
         super(endpoint, add_authentication(opts))
       end
 
-      def post(endpoint, opts = {})
-        super(endpoint, add_authentication(opts))
-      end
-
       def put(endpoint, opts={})
-        super(endpoint, add_authentication(opts))
-      end
-
-      def multipart_post(endpoint, opts={})
         super(endpoint, add_authentication(opts))
       end
 
@@ -150,7 +139,7 @@ class OpsManager
 
       private
       def get_token
-        token_issuer.owner_password_grant(username, password, 'opsman.admin')
+        token_issuer.owner_password_grant('admin', password, 'opsman.admin')
       end
 
       def token_issuer
@@ -162,7 +151,7 @@ class OpsManager
         @access_token ||= get_token.info['access_token']
       end
 
-      def add_authentication(opts)
+      def add_authentication(opts={})
         case ops_manager_version
 
         when /1.7/
@@ -173,7 +162,6 @@ class OpsManager
         end
         opts
       end
-
 
       def api_namespace
         case ops_manager_version
