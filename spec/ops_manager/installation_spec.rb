@@ -9,6 +9,8 @@ describe OpsManager::Installation do
   before do
       allow_any_instance_of(OpsManager::Api::Opsman).to receive(:trigger_installation)
         .and_return(installation_response)
+      allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_current_version)
+        .and_return('1.5')
   end
   describe '@initialize' do
     it 'should set installation.id' do

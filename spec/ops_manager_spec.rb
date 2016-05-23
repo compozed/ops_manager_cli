@@ -15,7 +15,7 @@ describe OpsManager do
     expect(OpsManager::VERSION).not_to be nil
   end
 
-  describe '@target' do
+  describe '@target=' do
     let(:net_ping){ double(ping?: pingable?) }
     before do
       OpsManager.set_conf(:target, nil)
@@ -27,7 +27,7 @@ describe OpsManager do
 
       it 'should set conf target' do
         expect do
-          OpsManager.target(target)
+          OpsManager.target=(target)
         end.to change{ OpsManager.get_conf :target }.from(nil).to(target)
       end
     end
@@ -37,7 +37,7 @@ describe OpsManager do
 
       it 'should set conf target' do
         expect do
-          OpsManager.target(target)
+          OpsManager.target=(target)
         end.not_to change{ OpsManager.get_conf :target }
       end
     end
@@ -57,9 +57,25 @@ describe OpsManager do
     end
   end
 
+  describe '@deployment=' do
+    it 'should set deployment config file path' do
+      expect do
+        OpsManager.deployment= 'path/to/config'
+      end.to change{ OpsManager.get_conf :deployment }
+    end
+  end
+
+  describe '@deployment=' do
+    it 'should set deployment config file path' do
+      expect do
+        OpsManager.deployment= 'path/to/config'
+      end.to change{ OpsManager.get_conf :deployment }
+    end
+  end
+
   describe '@target_and_login' do
     before do
-      allow(OpsManager).to receive(:target)
+      allow(OpsManager).to receive(:target=)
       allow(OpsManager).to receive(:login)
     end
 
@@ -67,7 +83,7 @@ describe OpsManager do
       subject(:target_and_login){ OpsManager.target_and_login(target, username, password) }
 
       it 'should target' do
-        expect(OpsManager).to receive(:target).with(target)
+        expect(OpsManager).to receive(:target=).with(target)
         target_and_login
       end
 
@@ -81,7 +97,7 @@ describe OpsManager do
       subject(:target_and_login){ OpsManager.target_and_login(nil, nil, nil) }
 
       it 'should not target' do
-        expect(OpsManager).not_to receive(:target).with(target)
+        expect(OpsManager).not_to receive(:target=).with(target)
         target_and_login
       end
 

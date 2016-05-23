@@ -6,13 +6,16 @@ class OpsManager
   extend SessionConfig
 
   class << self
-    def target(target)
-      @target = target
-      if target_is_pingable?
-        set_conf(:target, target)
+    def target=(uri)
+      if target_is_pingable?(uri)
+        set_conf(:target, uri)
       else
-        puts "Can not connect to #{target}".red
+        puts "Can not connect to #{uri}".red
       end
+    end
+
+    def deployment=(filepath)
+      set_conf(:deployment, filepath)
     end
 
     def login(username, password)
@@ -20,14 +23,14 @@ class OpsManager
       set_conf(:password, password)
     end
 
-    def target_and_login(target, username, password)
-      target(target) if target
+    def target_and_login(uri, username, password)
+      self.target=uri if uri
       login(username, password) if username && password
     end
 
     private
-    def target_is_pingable?
-      Net::Ping::HTTP.new("https://#{@target}").ping?
+    def target_is_pingable?(uri)
+      Net::Ping::HTTP.new("https://#{uri}").ping?
     end
   end
 

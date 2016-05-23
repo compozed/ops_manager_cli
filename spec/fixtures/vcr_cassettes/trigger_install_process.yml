@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: post
-    uri: https://1.2.3.4/api/installation
+    uri: https://1.2.3.4/api/v0/installation
     body:
       encoding: UTF-8
       string: ''

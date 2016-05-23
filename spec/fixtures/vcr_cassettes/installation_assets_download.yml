@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/v0/installation_asset_collection
     body:
       encoding: US-ASCII
       string: ''

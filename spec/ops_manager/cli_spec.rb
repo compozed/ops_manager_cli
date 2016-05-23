@@ -23,14 +23,24 @@ describe OpsManager::Cli do
 
   # ./ops_manager deploy -c conf.yml
   describe "deploy" do
-    let(:args) { %w(deploy ops_manager_deployment.yml) }
+    let(:args) { %w(deploy) }
 
     it "should call ops_manager.deploy" do
-      expect(OpsManager::Deployment).to receive(:new).with('ops_manager_deployment.yml').and_call_original
+      expect(OpsManager::Deployment).to receive(:new).and_call_original
       expect_any_instance_of(OpsManager::Deployment).to receive(:run)
       cli.run(`pwd`, args)
     end
   end
+
+  describe "deployment" do
+    let(:args) { %w(deployment ops_manager_deployment.yml) }
+
+    it "should call OpsManager.deployment= with path to config file" do
+      expect(OpsManager).to receive(:deployment=).with('ops_manager_deployment.yml')
+      cli.run(`pwd`, args)
+    end
+  end
+
 
   # ./ops_manager deploy-product -c conf.yml
   describe "deploy-product" do

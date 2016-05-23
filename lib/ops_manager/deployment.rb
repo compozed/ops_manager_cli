@@ -10,10 +10,6 @@ class OpsManager::Deployment
     :get_installation_settings, :upload_installation_assets, :import_stemcell, :target,
     :password, :username, :get_current_version ,:ops_manager_version=
 
-  def initialize(config_file)
-    @config_file = config_file
-  end
-
   def run
     OpsManager.set_conf(:target, config.ip)
     OpsManager.set_conf(:username, config.username)
@@ -105,7 +101,9 @@ class OpsManager::Deployment
   end
 
   def config
-    @config ||= OpsManager::Configs::OpsmanDeployment.new(::YAML.load_file(@config_file))
+    deployment_manifest = OpsManager.get_conf(:deployment)
+    parsed_yml = ::YAML.load_file(deployment_manifest)
+    @config ||= OpsManager::Configs::OpsmanDeployment.new(parsed_yml)
   end
 
   def installation_settings

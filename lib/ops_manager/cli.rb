@@ -23,10 +23,16 @@ class OpsManager
     end
 
     class Deploy < Clamp::Command
+      def execute
+        OpsManager::Deployment.new.run
+      end
+    end
+
+    class Deployment < Clamp::Command
       parameter "OPS_MANAGER_CONFIG", "opsManager config file", required: true
 
       def execute
-        OpsManager::Deployment.new(@ops_manager_config).run
+        OpsManager.deployment=@ops_manager_config
       end
     end
 
@@ -65,6 +71,7 @@ class OpsManager
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "deploy", "deploys or upgrades ops_manager" , Deploy
+    subcommand "deployment", "sets deployment config file path" , Deployment
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
     subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell

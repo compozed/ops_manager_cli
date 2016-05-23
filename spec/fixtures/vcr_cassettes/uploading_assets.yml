@@ -2,7 +2,7 @@
 http_interactions:
 - request:
     method: get
-    uri: https://1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/v0/installation_asset_collection
     body:
       encoding: US-ASCII
       string: ''
@@ -43,7 +43,7 @@ http_interactions:
     body:
       encoding: UTF-8
       string: '{"exception":"No installation found","backtrace":["/home/tempest-web/tempest/web/app/models/tempest/export.rb:16:in
-        `export''","/home/tempest-web/tempest/web/app/controllers/api/installation_asset_collection_controller.rb:12:in
+        `export''","/home/tempest-web/tempest/web/app/controllers/api/v0/installation_asset_collection_controller.rb:12:in
         `show''","/home/tempest-web/tempest/web/vendor/bundle/ruby/2.2.0/gems/actionpack-4.2.4/lib/action_controller/metal/implicit_render.rb:4:in
         `send_action''","/home/tempest-web/tempest/web/vendor/bundle/ruby/2.2.0/gems/actionpack-4.2.4/lib/abstract_controller/base.rb:198:in
         `process_action''","/home/tempest-web/tempest/web/vendor/bundle/ruby/2.2.0/gems/actionpack-4.2.4/lib/action_controller/metal/rendering.rb:10:in
@@ -115,7 +115,7 @@ http_interactions:
   recorded_at: Mon, 11 Jan 2016 05:04:39 GMT
 - request:
     method: post
-    uri: https://1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/v0/installation_asset_collection
     body:
       encoding: ASCII-8BIT
       string: !binary |-
@@ -412,7 +412,7 @@ http_interactions:
   recorded_at: Mon, 11 Jan 2016 05:04:50 GMT
 - request:
     method: get
-    uri: https://1.2.3.4/api/installation_asset_collection
+    uri: https://1.2.3.4/api/v0/installation_asset_collection
     body:
       encoding: US-ASCII
       string: ''

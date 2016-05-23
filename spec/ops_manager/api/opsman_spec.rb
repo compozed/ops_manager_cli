@@ -44,7 +44,7 @@ describe OpsManager::Api::Opsman do
 
   describe 'get_installation_settings' do
     before do
-      stub_request(:get, "https://#{target}/api/installation_settings").
+      stub_request(:get, "https://#{target}/api/v0/installation_settings").
         with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
         to_return(:status => 200, :body => '{"status":"failed"}')
     end
@@ -53,7 +53,7 @@ describe OpsManager::Api::Opsman do
     it 'should download successfully' do
       opsman.get_installation_settings
 
-      expect(WebMock).to have_requested(:get, "https://#{target}/api/installation_settings")
+      expect(WebMock).to have_requested(:get, "https://#{target}/api/v0/installation_settings")
         .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
     end
   end
@@ -125,17 +125,6 @@ describe OpsManager::Api::Opsman do
       opsman.ops_manager_version= ops_manager_version
     end
 
-
-    describe 'when version 1.6.x' do
-      let(:ops_manager_version){ '1.6.4' }
-      let(:uri){ "#{base_uri}/api/setup" }
-      let(:body){ "setup[user_name]=foo&setup[password]=bar&setup[password_confirmantion]=bar&setup[eula_accepted]=true" }
-
-      it "should successfully setup first user" do
-        expect(response.code).to eq('200')
-      end
-    end
-
     describe 'when version 1.7.x' do
       let(:ops_manager_version){ '1.7.5.0' }
       let(:body){ 'setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=bar&setup[admin_password_confirmation]=bar' }
@@ -180,7 +169,7 @@ describe OpsManager::Api::Opsman do
       let(:installation_id){ 1 }
 
       before do
-        stub_request(:get, "https://#{target}/api/installation/#{installation_id}").
+        stub_request(:get, "https://#{target}/api/v0/installation/#{installation_id}").
           with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
           to_return(:status => 200, :body => '{"status":"failed"}')
       end
@@ -226,7 +215,7 @@ describe OpsManager::Api::Opsman do
 
   describe "#upgrade_product_installation" do
     let(:guid) { "example-product-31695d885b442a75beee" }
-    let(:product_version){ '1.6.2.0' }
+    let(:product_version){ '1.7.2.0' }
 
     describe "when it applies sucessfully" do
       let(:response) do
@@ -273,14 +262,14 @@ describe OpsManager::Api::Opsman do
   describe "#get_products" do
 
     before do
-      stub_request(:get, "https://#{target}/api/products").
+      stub_request(:get, "https://#{target}/api/v0/products").
         to_return(:status => 200, :body => '[]')
     end
 
     it 'should perform get to products api endpoint' do
       opsman.get_products
 
-      expect(WebMock).to have_requested(:get, "https://#{target}/api/products")
+      expect(WebMock).to have_requested(:get, "https://#{target}/api/v0/products")
         .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
     end
   end
@@ -326,7 +315,7 @@ describe OpsManager::Api::Opsman do
     let(:response_body){ '{}' }
     let(:response){ import_stemcell }
     let(:status_code){ 200 }
-    let(:uri){ "#{base_uri}/api/stemcells" }
+    let(:uri){ "#{base_uri}/api/v0/stemcells" }
 
     before do
       stub_request(:post, uri).to_return(status: status_code, body: response_body)
@@ -361,14 +350,6 @@ describe OpsManager::Api::Opsman do
     before { opsman.ops_manager_version = ops_manager_version }
     let(:endpoint){ '/get_some_resource' }
     subject(:uri){ opsman.uri_for(endpoint) }
-
-    describe 'when ops manager version is 1.6' do
-      let(:ops_manager_version){ '1.6' }
-
-      it 'should set the namespace to api/' do
-        expect(uri.to_s).to eq("https://#{target}/api#{endpoint}")
-      end
-    end
 
     describe 'when ops manager version is 1.7' do
       let(:ops_manager_version){ '1.7' }

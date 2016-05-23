@@ -16,13 +16,11 @@ class OpsManager
         case ops_manager_version
         when /1.6/
           body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
-          uri= "/setup"
         when /1.7/
           body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
-          uri= "/setup"
         end
 
-        post(uri, body: body)
+        post("/setup" , body: body)
       end
 
       def upload_installation_settings(filepath)
@@ -122,7 +120,7 @@ class OpsManager
       end
 
       def uri_for(endpoint)
-        super("#{api_namespace}#{endpoint}")
+        super("/api/v0#{endpoint}")
       end
 
       def get(endpoint, opts = {})
@@ -153,7 +151,6 @@ class OpsManager
 
       def add_authentication(opts={})
         case ops_manager_version
-
         when /1.7/
           opts[:headers] ||= {}
           opts[:headers]['Authorization'] ||= "Bearer #{access_token}"
@@ -161,15 +158,6 @@ class OpsManager
           opts[:basic_auth] = { username: username, password: password }
         end
         opts
-      end
-
-      def api_namespace
-        case ops_manager_version
-        when /1.7/
-          "/api/v0"
-        else
-          "/api"
-        end
       end
     end
   end

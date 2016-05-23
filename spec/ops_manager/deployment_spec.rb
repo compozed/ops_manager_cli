@@ -3,7 +3,7 @@ require "ops_manager/deployment"
 require 'yaml'
 
 describe OpsManager::Deployment do
-  let(:deployment){ described_class.new('ops_manager_deployment.yml') }
+  let(:deployment){ described_class.new }
   let(:target){'1.2.3.4'}
   let(:current_version){ '1.4.2.0' }
   let(:desired_version){'1.5.5.0'}
@@ -28,6 +28,7 @@ describe OpsManager::Deployment do
     OpsManager.set_conf(:target, ENV['TARGET'] || target)
     OpsManager.set_conf(:username, ENV['USERNAME'] || 'foo')
     OpsManager.set_conf(:password, ENV['PASSWORD'] || 'bar')
+    OpsManager.set_conf(:deployment, ENV['DEPLOYMENT'] || 'ops_manager_deployment.yml')
 
     allow(OpsManager::InstallationSettings).to receive(:new).and_return(installation_settings)
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)

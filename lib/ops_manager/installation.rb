@@ -1,7 +1,7 @@
 class OpsManager
   class Installation
     extend Forwardable
-    def_delegators :opsman_api, :trigger_installation, :get_installation
+    def_delegators :opsman_api, :trigger_installation, :get_installation, :get_current_version
     attr_reader :id
 
     def self.trigger!
