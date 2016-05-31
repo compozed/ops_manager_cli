@@ -96,9 +96,9 @@ class OpsManager::Deployment
     @pivnet_api ||= OpsManager::Api::Pivnet.new
   end
 
-  def opsman_api
-    @opsman_api ||= OpsManager::Api::Opsman.new
-  end
+    def opsman_api
+      @opsman_api ||= OpsManager::Api::Opsman.new
+    end
 
   def config
     deployment_manifest = OpsManager.get_conf(:deployment)

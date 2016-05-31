@@ -1,7 +1,7 @@
 class OpsManager
   class Installation
     extend Forwardable
-    def_delegators :opsman_api, :trigger_installation, :get_installation, :get_current_version
+    def_delegators :opsman_api, :trigger_installation, :get_installation, :get_current_version, :get_staged_products
     attr_reader :id
 
     def self.trigger!
@@ -9,7 +9,9 @@ class OpsManager
     end
 
     def initialize
-      res = trigger_installation
+      body = [ 'ignore_warnings=true' ]
+      body << staged_products_guids.collect{ |guid| "enabled_errands[#{guid}]{}" }
+      res = trigger_installation( body: body.join('&') )
       @id = JSON.parse(res.body).fetch('install').fetch('id').to_i
     end
 
@@ -22,7 +24,11 @@ class OpsManager
 
     private
     def opsman_api
-      @opsman_api ||= OpsManager::Api::Opsman.new
+      @opsman_api ||= OpsManager::Api::Opsman.new('1.7')
+    end
+
+    def staged_products_guids
+      JSON.parse(get_staged_products.body).collect{ |product| product.fetch('guid') }
     end
   end
 end

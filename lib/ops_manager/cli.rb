@@ -9,7 +9,7 @@ class OpsManager
       parameter "OPS_MANAGER_IP", "Ops Manager Ip", required: true
 
       def execute
-        OpsManager.target(@ops_manager_ip)
+        OpsManager.set_target(@ops_manager_ip)
       end
     end
 

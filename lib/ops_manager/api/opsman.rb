@@ -20,57 +20,70 @@ class OpsManager
           body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         end
 
-        post("/setup" , body: body)
+        post("/api/v0/setup" , body: body)
       end
 
-      def upload_installation_settings(filepath)
+      def upload_installation_settings(filepath = 'installation_settings.json')
         puts '====> Uploading installation settings...'.green
         yaml = UploadIO.new(filepath, 'text/yaml')
         opts = { "installation[file]" => yaml}
         opts = add_authentication(opts)
-        res = multipart_post( "/installation_settings", opts)
+        res = multipart_post("/api/v0/installation_settings", opts)
         raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
         res
       end
 
+      def get_staged_products(opts = {})
+        opts = add_authentication(opts)
+        get("/api/v0/staged/products", opts)
+      end
+
       def get_installation_settings(opts = {})
-        puts '====> Downloading installation settings...'.green
-        get("/installation_settings", opts)
+       puts '====> Downloading installation settings...'.green
+        opts = add_authentication(opts)
+        get("/api/installation_settings", opts)
       end
 
       def upload_installation_assets
         puts '====> Uploading installation assets...'.green
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
         opts = { :passphrase => @password, "installation[file]" => zip }
-        multipart_post( "/installation_asset_collection", opts)
+        multipart_post( "/api/v0/installation_asset_collection", opts)
       end
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
+        opts = add_authentication(opts)
 
         puts '====> Download installation assets...'.green
-        get("/installation_asset_collection", opts)
+
+        get("/api/installation_asset_collection", opts)
       end
 
-      def delete_products
+      def delete_products(opts = {})
         puts '====> Deleating unused products...'.green
-        delete('/products')
+        opts = add_authentication(opts)
+        delete('/api/v0/products', opts)
       end
 
-      def trigger_installation
+      def trigger_installation(opts = {})
         puts '====> Applying changes...'.green
-        post('/installation', add_authentication)
+        opts = add_authentication(opts)
+        post('/api/v0/installations', opts)
       end
 
       def get_installation(id)
-        res = get("/installation/#{id}")
+        opts = add_authentication
+        res = get("/api/v0/installations/#{id}", opts)
         raise OpsManager::InstallationError.new(res.body) if res.body =~  /failed/
         res
       end
 
       def upgrade_product_installation(guid, product_version)
         puts "====> Bumping product installation #{guid} product_version to #{product_version}...".green
-        res = put("/installation_settings/products/#{guid}", to_version: product_version)
+        opts = { to_version: product_version }
+        opts = add_authentication(opts)
+        res = put("/api/v0/installation_settings/products/#{guid}", opts)
         raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
         res
       end
@@ -83,7 +96,9 @@ class OpsManager
       end
 
       def get_products
-        get('/products')
+        opts = add_authentication
+        res = get("/api/products", opts)
+        res
       end
 
       def get_current_version
@@ -101,7 +116,7 @@ class OpsManager
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
         opts = add_authentication(opts)
-        res = multipart_post("/stemcells", opts)
+        res = multipart_post("/api/v0/stemcells", opts)
 
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
         res
@@ -119,26 +134,13 @@ class OpsManager
         @target ||= OpsManager.get_conf(:target)
       end
 
-      def uri_for(endpoint)
-        super("/api/v0#{endpoint}")
-      end
-
-      def get(endpoint, opts = {})
-        super(endpoint, add_authentication(opts))
-      end
-
-      def put(endpoint, opts={})
-        super(endpoint, add_authentication(opts))
-      end
-
-      def delete(endpoint, opts={})
-        super(endpoint, add_authentication(opts))
+      def get_token
+        token_issuer.owner_password_grant('admin', password, 'opsman.admin').tap do |token|
+          logger.info "UAA Token: #{token.inspect}"
+        end
       end
 
       private
-      def get_token
-        token_issuer.owner_password_grant('admin', password, 'opsman.admin')
-      end
 
       def token_issuer
         @token_issuer ||= CF::UAA::TokenIssuer.new(
@@ -148,6 +150,7 @@ class OpsManager
       def access_token
         @access_token ||= get_token.info['access_token']
       end
+
 
       def add_authentication(opts={})
         case ops_manager_version

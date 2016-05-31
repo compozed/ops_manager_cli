@@ -90,6 +90,7 @@ class OpsManager
       def multipart_post(endpoint, opts = {})
         uri = uri_for(endpoint)
         http = http_for(uri)
+
         request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
 
         request.basic_auth(username, password) if self.respond_to?(:username)
@@ -99,6 +100,7 @@ class OpsManager
             request[k] = v
           end
         end
+
         http.request(request).tap do |res|
           logger.info("performing multipart_post to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
           logger.info("post response body #{res.body}")

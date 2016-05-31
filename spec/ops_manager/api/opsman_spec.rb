@@ -29,86 +29,99 @@ describe OpsManager::Api::Opsman do
 
   describe '#upload_installation_assets' do
     before do
-      `rm installation_assets.zip`
-      `cp ../fixtures/installation_assets.zip .`
+      allow(UploadIO).to receive(:new).with("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
+      stub_request(:post, "https://#{target}/api/v0/installation_asset_collection").
+        to_return(:status => 200, :body => '{}')
+        opsman.ops_manager_version= '1.7'
     end
 
     it 'should upload successfully' do
-      VCR.use_cassette 'uploading assets' do
-        expect do
-          opsman.upload_installation_assets
-        end.to change{ opsman.get_installation_assets.code.to_i }.from(500).to(200)
-      end
+      opsman.upload_installation_assets
+      expect(WebMock).to have_requested(:post, "https://#{target}/api/v0/installation_asset_collection")
+    end
+
+    it 'should not send uaa token' do
+      opsman.upload_installation_assets
+      expect(WebMock).not_to have_requested(:post, "https://#{target}/api/v0/installation_asset_collection").
+        with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
 
-  describe 'get_installation_settings' do
+  describe "#get_staged_products" do
+    let(:uri){ "https://#{target}/api/v0/staged/products" }
     before do
-      stub_request(:get, "https://#{target}/api/v0/installation_settings").
-        with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
+      stub_request(:get, uri).
+        to_return(:status => 200, :body => "[]")
+        opsman.ops_manager_version= '1.7'
+    end
+
+    it 'should get successfully' do
+      opsman.get_staged_products
+      expect(WebMock).to have_requested(:get, uri).
+        with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
+
+  describe '#get_installation_assets' do
+    let(:uri){ "https://#{target}/api/installation_asset_collection" }
+
+    before do
+      stub_request(:get, uri).
+        to_return(:status => 200, :body => '{}')
+    end
+
+    it 'should download successfully' do
+      opsman.get_installation_assets
+      expect(WebMock).to have_requested(:get, uri)
+        .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
+    end
+  end
+
+
+  describe 'get_installation_settings' do
+    let(:uri){ "https://#{target}/api/installation_settings" }
+
+    before do
+      stub_request(:get, uri).
         to_return(:status => 200, :body => '{"status":"failed"}')
     end
 
 
     it 'should download successfully' do
       opsman.get_installation_settings
-
-      expect(WebMock).to have_requested(:get, "https://#{target}/api/v0/installation_settings")
+      expect(WebMock).to have_requested(:get, "https://#{target}/api/installation_settings")
         .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
     end
   end
 
   describe 'upload_installation_settings' do
+    let(:filepath){ '../fixtures/installation_settings.json' }
+    let(:uri){ "https://#{target}/api/v0/installation_settings" }
+    before do
+      stub_request(:post, uri).
+        to_return(status: http_code, body: '{"errors":["error 1", "error 2"]}')
+    end
+
     describe 'when success' do
-      subject(:response) do
-        VCR.use_cassette 'uploading settings' do
-          opsman.upload_installation_settings(filepath)
-        end
-      end
+      let(:body){ '{}' }
+      let(:http_code){ 200}
 
-      let(:filepath){ '../fixtures/installation_settings.json' }
-
-      it 'should be successfully' do
-        expect(response.code).to eq("200")
-      end
-
-      it "should not raise OpsManager::InstallationSettingsError" do
-        expect do
-          response
-        end.not_to raise_exception(OpsManager::InstallationSettingsError)
+      it 'performs the correct request' do
+        opsman.upload_installation_settings(filepath)
+        expect(WebMock).to have_requested(:post, uri).
+          with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
       end
     end
 
     describe 'when errors' do
-      subject(:response) do
-        VCR.use_cassette 'uploading settings errors' do
-          opsman.upload_installation_settings(filepath)
-        end
-      end
+      let(:http_code){ 500 }
+      let(:body){ '{"errors":["error 1", "error 2"]}' }
 
-      let(:filepath){ '../fixtures/installation_settings.json' }
 
       it "should not raise OpsManager::InstallationSettingsError" do
         expect do
-          response
+          opsman.upload_installation_settings(filepath)
         end.to raise_exception(OpsManager::InstallationSettingsError)
-      end
-    end
-
-
-  end
-
-  describe 'get_installation_assets' do
-    before{ `rm -r installation_assets.zip assets` }
-
-    it 'should download successfully' do
-      VCR.use_cassette 'installation assets download' do
-        opsman.get_installation_assets
-        expect(File).to exist("installation_assets.zip" )
-        `unzip installation_assets.zip -d assets`
-        expect(File).to exist("assets/deployments/bosh-deployments.yml")
-        expect(File).to exist("assets/installation.yml")
-        expect(File).to exist("assets/metadata/microbosh.yml")
       end
     end
   end
@@ -143,134 +156,113 @@ describe OpsManager::Api::Opsman do
   end
 
   describe "#trigger_installation" do
-    subject(:response) do
-      VCR.use_cassette 'trigger install process' do
-        opsman.trigger_installation
-      end
+    let(:body){ '{"install":{"id":10}}' }
+    let(:uri){ "https://#{target}/api/v0/installations" }
+
+    before do
+      stub_request(:post, uri).
+        with(:body => body).
+        to_return(:status => 200, :body => "", :headers => {})
+      opsman.ops_manager_version= /1.7/
     end
 
-    it 'should be successfull' do
-      expect(response.code).to eq('200')
-    end
-
-    it 'should return installation id' do
-      expect(parsed_response.fetch('install').fetch('id')).to be_kind_of(Integer)
-    end
   end
 
   describe "#get_installation" do
-    subject(:response) do
-      VCR.use_cassette 'getting installation status' do
-        opsman.get_installation(10)
+    let(:installation_id){ 1 }
+    let(:uri){ "https://#{target}/api/v0/installations/#{installation_id}" }
+
+    before do
+      stub_request(:get, uri).
+        to_return(status: 200, body: body)
+      opsman.ops_manager_version= '1.7'
+    end
+
+    describe 'when success' do
+      let(:body){ '{"status":"succeded"}' }
+
+      it 'performs the correct request' do
+        opsman.get_installation(installation_id)
+
+        expect(WebMock).to have_requested(:get, uri)
+          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
       end
     end
 
-    describe 'when installation errors' do
-      let(:installation_id){ 1 }
-
-      before do
-        stub_request(:get, "https://#{target}/api/v0/installation/#{installation_id}").
-          with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='}).
-          to_return(:status => 200, :body => '{"status":"failed"}')
-      end
-
-      subject(:response) do
-        opsman.get_installation(installation_id)
-      end
+    describe 'when errors' do
+      let(:body){'{"status":"failed"}'}
 
       it "should rasie OpsManager::InstallationError" do
         expect do
-          response
+          opsman.get_installation(installation_id)
         end.to raise_exception(OpsManager::InstallationError)
       end
     end
-
-    describe 'when installation running or success' do
-      subject(:response) do
-        VCR.use_cassette 'getting installation status' do
-          opsman.get_installation(10)
-        end
-      end
-      it 'should be successfull' do
-        expect(response.code).to eq("200")
-      end
-
-      it 'should return installation status' do
-        expect(parsed_response.fetch('status')).to be_kind_of(String)
-      end
-    end
-
   end
 
   describe "#delete_products" do
-    it "deletes unused products" do
-      VCR.use_cassette 'deleting product' do
-        opsman.upload_product(filepath)
-        expect do
-          opsman.delete_products
-        end.to change{ opsman.get_products }
-      end
+    let(:uri){ "https://#{target}/api/v0/products" }
+
+    before do
+      stub_request(:delete, uri).
+        to_return(status: 200, body: '{}')
+      opsman.ops_manager_version= '1.7'
+    end
+
+    it 'performs the correct request' do
+      opsman.delete_products
+      expect(WebMock).to have_requested(:delete, uri)
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
 
   describe "#upgrade_product_installation" do
-    let(:guid) { "example-product-31695d885b442a75beee" }
+    let(:uri){ "https://#{target}/api/v0/installation_settings/products/#{guid}" }
+    let(:guid) { 'example-product-31695d885b442a75beee' }
     let(:product_version){ '1.7.2.0' }
 
-    describe "when it applies sucessfully" do
-      let(:response) do
-        VCR.use_cassette 'upgrade product installation' do
-          opsman.upgrade_product_installation(guid, product_version)
-        end
-      end
+    before do
+      stub_request(:put, uri).
+        to_return(status: http_code , body: '{}')
 
-      it "should return response" do
-        expect(response).to be_kind_of(Net::HTTPOK)
-      end
+      opsman.ops_manager_version= '1.7'
+    end
 
-      it 'should return 200' do
-        expect(response.code).to eq("200")
+    describe "when success" do
+      let(:http_code){ 200 }
+
+      it 'performs the correct request' do
+        opsman.upgrade_product_installation(guid, product_version)
+        expect(WebMock).to have_requested(:put, uri).
+          with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
       end
     end
 
-    describe "when it applies unsucessfully" do
-      let(:response) do
-        VCR.use_cassette 'upgrade product installation fails' do
-          opsman.upgrade_product_installation(guid, product_version)
-        end
-      end
+    describe "when failure" do
+      let(:http_code){ 422 }
+      let(:body){ '{{"errors":["Version 123 of product Pivotal Elastic Runtime is already in use."]}" }' }
 
-      it "should rasie OpsManager::UpgradeError" do
+      it "should raise OpsManager::UpgradeError" do
         expect do
-          response
+          opsman.upgrade_product_installation(guid, product_version)
         end.to raise_exception(OpsManager::UpgradeError)
       end
     end
   end
 
-  describe "#upload_product" do
-    it "deletes unused products" do
-      VCR.use_cassette 'deleting product' do
-        opsman.delete_products
-        expect do
-          opsman.upload_product(filepath)
-        end.to change{ opsman.get_products }
-      end
-    end
-  end
-
   describe "#get_products" do
-
+    let(:uri){"https://#{target}/api/products"}
     before do
-      stub_request(:get, "https://#{target}/api/v0/products").
+      stub_request(:get, uri).
         to_return(:status => 200, :body => '[]')
+      opsman.ops_manager_version= '1.7'
     end
 
     it 'should perform get to products api endpoint' do
       opsman.get_products
 
-      expect(WebMock).to have_requested(:get, "https://#{target}/api/v0/products")
-        .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
+      expect(WebMock).to have_requested(:get, uri).
+        with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
 
@@ -345,39 +337,4 @@ describe OpsManager::Api::Opsman do
       end
     end
   end
-
-  describe 'uri_for' do
-    before { opsman.ops_manager_version = ops_manager_version }
-    let(:endpoint){ '/get_some_resource' }
-    subject(:uri){ opsman.uri_for(endpoint) }
-
-    describe 'when ops manager version is 1.7' do
-      let(:ops_manager_version){ '1.7' }
-
-      it 'should set the namespace to api/v0' do
-        expect(uri.to_s).to eq("https://#{target}/api/v0#{endpoint}")
-      end
-    end
-  end
-
-
-  %i{ get put delete }.each do |http_verb|
-    describe "#{http_verb}" do
-      before do
-        stub_request(http_verb, "https://#{target}/api/v0/banana")
-      end
-
-      describe 'when ops manager version is 1.7' do
-        let(:ops_manager_version){ '1.7' }
-        before{ opsman.ops_manager_version = ops_manager_version }
-
-        it 'should include uaa access-token in request' do
-          opsman.send(http_verb, '/banana')
-          expect(WebMock).to have_requested(http_verb, "https://#{target}/api/v0/banana")
-            .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
-        end
-      end
-    end
-  end
 end
-

@@ -60,6 +60,7 @@
       "installation_name": "microbosh-9b6fc5940334026515a3",
       "product_version": "1.5.5.0",
       "singleton_availability_zone_reference": "726f3131466f617a310a",
+      "prepared": "false",
       "ips": {
         "director-part-97f9dc80c7097823954c": [
           "1.2.3.3"

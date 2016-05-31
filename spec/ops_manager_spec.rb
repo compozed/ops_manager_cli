@@ -15,11 +15,13 @@ describe OpsManager do
     expect(OpsManager::VERSION).not_to be nil
   end
 
-  describe '@target=' do
+  describe '@set_target' do
     let(:net_ping){ double(ping?: pingable?) }
+    subject(:set_target){ OpsManager.set_target(target) }
+
     before do
       OpsManager.set_conf(:target, nil)
-      allow(Net::Ping::HTTP).to receive(:new).with("https://#{target}").and_return(net_ping)
+      allow(Net::Ping::HTTP).to receive(:new).with("https://#{target}/docs").and_return(net_ping)
     end
 
     describe 'when target is pingable' do
@@ -27,7 +29,7 @@ describe OpsManager do
 
       it 'should set conf target' do
         expect do
-          OpsManager.target=(target)
+          set_target
         end.to change{ OpsManager.get_conf :target }.from(nil).to(target)
       end
     end
@@ -37,23 +39,35 @@ describe OpsManager do
 
       it 'should set conf target' do
         expect do
-          OpsManager.target=(target)
+          set_target
         end.not_to change{ OpsManager.get_conf :target }
       end
     end
   end
 
   describe '@login' do
+    let(:opsman_api){ double.as_null_object }
+    subject(:login){ OpsManager.login('foo', 'bar') }
+
+    before do
+      allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+    end
+
     it 'should set conf username' do
       expect do
-        OpsManager.login('foo', 'bar')
+        login
       end.to change{ OpsManager.get_conf :username }
     end
 
     it 'should set conf password' do
       expect do
-        OpsManager.login('foo', 'bar')
+        login
       end.to change{ OpsManager.get_conf :password }
+    end
+
+    it 'should try to get uaa token' do
+      expect(opsman_api).to receive(:get_token)
+      login
     end
   end
 
@@ -75,7 +89,7 @@ describe OpsManager do
 
   describe '@target_and_login' do
     before do
-      allow(OpsManager).to receive(:target=)
+      allow(OpsManager).to receive(:set_target)
       allow(OpsManager).to receive(:login)
     end
 
@@ -83,7 +97,7 @@ describe OpsManager do
       subject(:target_and_login){ OpsManager.target_and_login(target, username, password) }
 
       it 'should target' do
-        expect(OpsManager).to receive(:target=).with(target)
+        expect(OpsManager).to receive(:set_target).with(target)
         target_and_login
       end
 
@@ -97,7 +111,7 @@ describe OpsManager do
       subject(:target_and_login){ OpsManager.target_and_login(nil, nil, nil) }
 
       it 'should not target' do
-        expect(OpsManager).not_to receive(:target=).with(target)
+        expect(OpsManager).not_to receive(target).with(target)
         target_and_login
       end
 

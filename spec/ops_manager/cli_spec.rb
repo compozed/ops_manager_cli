@@ -6,8 +6,8 @@ describe OpsManager::Cli do
   describe "target" do
     let(:args) { %w(target 1.2.3.4) }
 
-    it "should call OpsManager.target IP" do
-      expect(OpsManager).to receive(:target).with('1.2.3.4')
+    it "should call OpsManager.set_target IP" do
+      expect(OpsManager).to receive(:set_target).with('1.2.3.4')
       cli.run(`pwd`, args)
     end
   end

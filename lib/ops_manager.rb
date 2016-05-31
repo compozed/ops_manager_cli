@@ -6,7 +6,10 @@ class OpsManager
   extend SessionConfig
 
   class << self
-    def target=(uri)
+    extend Forwardable
+    def_delegators :opsman_api, :get_token
+
+    def set_target(uri)
       if target_is_pingable?(uri)
         set_conf(:target, uri)
       else
@@ -21,16 +24,21 @@ class OpsManager
     def login(username, password)
       set_conf(:username, username)
       set_conf(:password, password)
+      opsman_api.get_token
     end
 
     def target_and_login(uri, username, password)
-      self.target=uri if uri
+      self.set_target(uri) if uri
       login(username, password) if username && password
     end
 
     private
+    def opsman_api
+      OpsManager::Api::Opsman.new
+    end
+
     def target_is_pingable?(uri)
-      Net::Ping::HTTP.new("https://#{uri}").ping?
+      Net::Ping::HTTP.new("https://#{uri}/docs").ping?
     end
   end
 
