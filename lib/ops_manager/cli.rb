@@ -68,13 +68,27 @@ class OpsManager
       end
     end
 
+    class GetUaaToken < Clamp::Command
+      def execute
+        puts OpsManager::Api::Opsman.new.get_token.info.fetch('access_token')
+      end
+    end
+
+    class SSH < Clamp::Command
+      def execute
+        `ssh ubuntu@#{OpsManager.target}`
+      end
+    end
+
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
+    subcommand "ssh", "ssh into ops_manager machine" , SSH
     subcommand "deploy", "deploys or upgrades ops_manager" , Deploy
     subcommand "deployment", "sets deployment config file path" , Deployment
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
     subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell
     subcommand "delete-unused-products", "Deletes unused products" , DeleteUnusedProducts
+    subcommand "get-uaa-token", "get uaa token from ops manager" , GetUaaToken
   end
 end

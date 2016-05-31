@@ -69,6 +69,34 @@ describe OpsManager::Cli do
     end
   end
 
+  describe "ssh" do
+    let(:args) { %w(ssh) }
+
+    before do
+      allow(OpsManager).to receive(:target).and_return('1.2.3.4')
+    end
+
+    it "should ssh to target with the ubuntu user" do
+      expect_any_instance_of(OpsManager::Cli::SSH).to receive(:`).with('ssh ubuntu@1.2.3.4')
+      cli.run(`pwd`, args)
+    end
+  end
+
+
+  describe "get-uaa-token" do
+    let(:args) { %w(get-uaa-token) }
+    let(:uaa_token){ rand(9999) }
+    let(:opsman_api){ double(get_token: double(info: { 'access_token'=> uaa_token})) }
+
+    before do
+      allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+    end
+
+    it "should get-uaa-token to target with the ubuntu user" do
+      expect_any_instance_of(OpsManager::Cli::GetUaaToken).to receive('puts').with(uaa_token)
+      cli.run(`pwd`, args)
+    end
+  end
 
   describe 'get-installation-settings' do
     let(:args) { %w(get-installation-settings /tmp/is.yml) }
