@@ -25,7 +25,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "byebug"
   spec.add_dependency "rbvmomi"
   spec.add_dependency "multipart-post"
-  spec.add_dependency "colorize"
   spec.add_dependency "clamp"
   spec.add_dependency "net-ping"
   spec.add_dependency "cf-uaa-lib"

@@ -9,3 +9,4 @@
 /tmp/
 .ops_manager
 ops_manager_cli*.gem
+/.idea/

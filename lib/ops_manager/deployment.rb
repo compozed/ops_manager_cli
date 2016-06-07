@@ -32,7 +32,6 @@ class OpsManager::Deployment
   end
 
   def deploy
-    set_api_ops_manager_version(config.desired_version)
     deploy_vm(desired_vm_name , config.ip)
   end
 
@@ -112,9 +111,5 @@ class OpsManager::Deployment
 
   def desired_version?(version)
     !!(desired_version.to_s =~/#{version}/)
-  end
-
-  def set_api_ops_manager_version(ops_manager_version)
-    opsman_api.ops_manager_version= ops_manager_version
   end
 end

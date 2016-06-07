@@ -27,12 +27,31 @@ describe OpsManager::Api::Opsman do
     allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
+  describe '#upload_product' do
+    subject(:upload_product){ opsman.upload_product(product_filepath) }
+    let(:product_filepath){ 'example-product.pivotal' }
+
+    it 'performs the correct curl' do
+      expect(opsman).to receive(:`).with("curl -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{product_filepath}' -X POST -H 'Authorization: Bearer UAA_ACCESS_TOKEN'").and_return('{}')
+      upload_product
+    end
+
+    describe 'when upload product errors' do
+      let(:body){ '{"error":"something went wrong"}' }
+
+      before { allow(opsman).to receive(:`).and_return(body) }
+
+      it 'should raise an exception' do
+        expect{ upload_product }.to raise_error{ OpsManager::ProductUploadError }
+      end
+    end
+  end
+
   describe '#upload_installation_assets' do
     before do
       allow(UploadIO).to receive(:new).with("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
       stub_request(:post, "https://#{target}/api/v0/installation_asset_collection").
         to_return(:status => 200, :body => '{}')
-        opsman.ops_manager_version= '1.7'
     end
 
     it 'should upload successfully' do
@@ -52,7 +71,6 @@ describe OpsManager::Api::Opsman do
     before do
       stub_request(:get, uri).
         to_return(:status => 200, :body => "[]")
-        opsman.ops_manager_version= '1.7'
     end
 
     it 'should get successfully' do
@@ -63,7 +81,7 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#get_installation_assets' do
-    let(:uri){ "https://#{target}/api/installation_asset_collection" }
+    let(:uri){ "https://#{target}/api/v0/installation_asset_collection" }
 
     before do
       stub_request(:get, uri).
@@ -73,7 +91,7 @@ describe OpsManager::Api::Opsman do
     it 'should download successfully' do
       opsman.get_installation_assets
       expect(WebMock).to have_requested(:get, uri)
-        .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
 
@@ -90,13 +108,13 @@ describe OpsManager::Api::Opsman do
     it 'should download successfully' do
       opsman.get_installation_settings
       expect(WebMock).to have_requested(:get, "https://#{target}/api/installation_settings")
-        .with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
 
   describe 'upload_installation_settings' do
     let(:filepath){ '../fixtures/installation_settings.json' }
-    let(:uri){ "https://#{target}/api/v0/installation_settings" }
+    let(:uri){ "https://#{target}/api/installation_settings" }
     before do
       stub_request(:post, uri).
         to_return(status: http_code, body: '{"errors":["error 1", "error 2"]}')
@@ -109,7 +127,7 @@ describe OpsManager::Api::Opsman do
       it 'performs the correct request' do
         opsman.upload_installation_settings(filepath)
         expect(WebMock).to have_requested(:post, uri).
-          with(:headers => {'Authorization'=>'Basic Zm9vOmJhcg=='})
+          with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
       end
     end
 
@@ -135,11 +153,9 @@ describe OpsManager::Api::Opsman do
         with(:body => body).
         to_return(:status => 200, :body => "", :headers => {})
 
-      opsman.ops_manager_version= ops_manager_version
     end
 
     describe 'when version 1.7.x' do
-      let(:ops_manager_version){ '1.7.5.0' }
       let(:body){ 'setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=bar&setup[admin_password_confirmation]=bar' }
       let(:uri){ "#{base_uri}/api/v0/setup" }
 
@@ -163,7 +179,6 @@ describe OpsManager::Api::Opsman do
       stub_request(:post, uri).
         with(:body => body).
         to_return(:status => 200, :body => "", :headers => {})
-      opsman.ops_manager_version= /1.7/
     end
 
   end
@@ -175,7 +190,6 @@ describe OpsManager::Api::Opsman do
     before do
       stub_request(:get, uri).
         to_return(status: 200, body: body)
-      opsman.ops_manager_version= '1.7'
     end
 
     describe 'when success' do
@@ -206,7 +220,6 @@ describe OpsManager::Api::Opsman do
     before do
       stub_request(:delete, uri).
         to_return(status: 200, body: '{}')
-      opsman.ops_manager_version= '1.7'
     end
 
     it 'performs the correct request' do
@@ -217,15 +230,13 @@ describe OpsManager::Api::Opsman do
   end
 
   describe "#upgrade_product_installation" do
-    let(:uri){ "https://#{target}/api/v0/installation_settings/products/#{guid}" }
+    let(:uri){ "https://#{target}/api/v0/staged/products/#{guid}" }
     let(:guid) { 'example-product-31695d885b442a75beee' }
     let(:product_version){ '1.7.2.0' }
 
     before do
       stub_request(:put, uri).
         to_return(status: http_code , body: '{}')
-
-      opsman.ops_manager_version= '1.7'
     end
 
     describe "when success" do
@@ -250,16 +261,15 @@ describe OpsManager::Api::Opsman do
     end
   end
 
-  describe "#get_products" do
-    let(:uri){"https://#{target}/api/products"}
+  describe "#get_available_products" do
+    let(:uri){"https://#{target}/api/v0/available_products"}
     before do
       stub_request(:get, uri).
         to_return(:status => 200, :body => '[]')
-      opsman.ops_manager_version= '1.7'
     end
 
     it 'should perform get to products api endpoint' do
-      opsman.get_products
+      opsman.get_available_products
 
       expect(WebMock).to have_requested(:get, uri).
         with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
@@ -294,7 +304,7 @@ describe OpsManager::Api::Opsman do
 
       before do
         products_response = double('fake_products', body: products.to_json)
-        allow(opsman).to receive(:get_products).and_return(products_response)
+        allow(opsman).to receive(:get_available_products).and_return(products_response)
       end
 
     end

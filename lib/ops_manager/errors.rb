@@ -4,4 +4,5 @@ class OpsManager
   class InstallationSettingsError < RuntimeError ; end
   class PivnetAuthenticationError < RuntimeError ; end
   class StemcellUploadError < RuntimeError ; end
+  class ProductUploadError < RuntimeError ; end
 end

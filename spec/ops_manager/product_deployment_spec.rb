@@ -4,7 +4,6 @@ require 'ops_manager/product_deployment'
 describe OpsManager::ProductDeployment do
   let(:product_deployment){ described_class.new('product_deployment.yml', force) }
   let(:force){ false }
-  let(:product_exists?){ false }
   let(:name){ 'example-product' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:guid) { 'example-product-abc123' }
@@ -18,8 +17,6 @@ describe OpsManager::ProductDeployment do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
     allow(product_deployment).to receive(:installation)
       .and_return(product_installation)
-    allow(described_class).to receive(:exists?)
-      .and_return(product_exists?)
     allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
   end
 
@@ -31,13 +28,13 @@ describe OpsManager::ProductDeployment do
     end
   end
 
-  describe "ProductDeployment.exists?" do
+  describe "@exists?" do
     let(:products_response){ double(body: [{'name' => 'cf', 'product_version' => '1'}].to_json )}
 
     before do
       allow(described_class).to receive(:exists?)
         .and_call_original
-      allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_products).and_return(products_response)
+      allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_available_products).and_return(products_response)
     end
 
     describe 'when product exists' do
@@ -99,7 +96,7 @@ describe OpsManager::ProductDeployment do
 
 
   describe "#upgrade" do
-        subject(:upgrade){ product_deployment.upgrade }
+    subject(:upgrade){ product_deployment.upgrade }
 
     let(:product_installation) do
       OpsManager::ProductInstallation.new(guid, '1.6.0.0', true)
@@ -111,7 +108,7 @@ describe OpsManager::ProductDeployment do
         .and_return(installation_prepared)
       allow(product_deployment).tap do |s|
         s.to receive(:upgrade_product_installation).with(guid, version)
-        s.to receive(:upload_product)
+        s.to receive(:upload)
       end
     end
 
@@ -145,7 +142,7 @@ describe OpsManager::ProductDeployment do
       let(:installation_prepared){ false }
 
       it 'Should skip upgrade' do
-        expect(product_deployment).not_to receive(:upload_product)
+        expect(product_deployment).not_to receive(:upload)
         expect(product_deployment).not_to receive(:upgrade_product_installation)
         upgrade
       end
@@ -153,6 +150,29 @@ describe OpsManager::ProductDeployment do
 
   end
 
+  describe '#upload' do
+    subject(:upload){ product_deployment.upload }
+
+    before { allow(described_class).to receive(:exists?).and_return(product_exists?) }
+
+    describe 'when product already present in ops man' do
+      let(:product_exists?){ true }
+
+      it 'Should skip product upload' do
+        expect(product_deployment).not_to receive(:upload_product)
+        upload
+      end
+    end
+
+    describe 'when product is not present' do
+      let(:product_exists?){ false }
+
+      it 'Should upload product ' do
+        expect(product_deployment).to receive(:upload_product)
+        upload
+      end
+    end
+  end
 
   describe "#run" do
     subject(:run){ product_deployment.run }
@@ -184,7 +204,7 @@ describe OpsManager::ProductDeployment do
 
       it "perform deployment" do
         expect(product_deployment).to receive(:deploy)
-      run
+        run
       end
     end
 
@@ -200,7 +220,7 @@ describe OpsManager::ProductDeployment do
 
         it "perform upgrade" do
           expect(product_deployment).to receive(:upgrade)
-      run
+          run
         end
       end
 
@@ -218,26 +238,6 @@ describe OpsManager::ProductDeployment do
       it "perform deployment" do
         expect(product_deployment).to receive(:deploy)
         run
-      end
-    end
-  end
-
-  describe "upload" do
-    describe "when product does not exist" do
-      let(:product_exists?){ false }
-
-      it "uploads product" do
-        expect(product_deployment).to receive(:upload_product)
-        product_deployment.upload
-      end
-    end
-
-    describe "when product already exists" do
-      let(:product_exists?){ true }
-
-      it 'should skip product upload' do
-        expect(product_deployment).not_to receive(:upload_product)
-        product_deployment.upload
       end
     end
   end

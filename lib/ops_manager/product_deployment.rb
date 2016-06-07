@@ -8,7 +8,7 @@ class OpsManager
   class ProductDeployment
     extend Forwardable
     def_delegators :opsman_api, :current_version, :upload_product, :get_installation_settings,
-      :upgrade_product_installation, :get_installation, :get_products, :upload_installation_settings,
+      :upgrade_product_installation, :get_installation, :get_available_products, :upload_installation_settings,
       :trigger_installation, :import_stemcell
 
     include OpsManager::Logging
@@ -38,11 +38,11 @@ class OpsManager
 
     def upload
       puts "====> Uploading product...".green
-      unless self.class.exists?(config.name, config.desired_version)
+      if ProductDeployment.exists?(config.name, config.desired_version)
+        print "product already exists".green
+      else
         upload_product(config.filepath)
         print "done".green
-      else
-        print "product already exists".green
       end
     end
 
@@ -71,8 +71,8 @@ class OpsManager
     end
 
     def self.exists?(name, version)
-      res = JSON.parse(OpsManager::Api::Opsman.new.get_products.body)
-      !!res.find{ |o| o['name'] == name && o['product_version'] == version }
+      res = JSON.parse(OpsManager::Api::Opsman.new.get_available_products.body)
+      !!res.find{ |o| o['name'] == name && o['product_version'].include?(version) }
     end
 
     private

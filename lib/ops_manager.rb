@@ -2,6 +2,24 @@ require 'net/ping'
 require 'forwardable'
 require 'session_config'
 
+class String
+  def colorize(color_code)
+    "\e[#{color_code}m#{self}\e[0m"
+  end
+
+  def red
+    colorize(31)
+  end
+
+  def green
+    colorize(32)
+  end
+
+  def yellow
+    colorize(33)
+  end
+end
+
 class OpsManager
   extend SessionConfig
 
@@ -65,7 +83,6 @@ require 'ops_manager/configs/product_deployment'
 require 'ops_manager/configs/opsman_deployment'
 require "ops_manager/cli"
 require "ops_manager/errors"
-require "colorize"
 require "net/https"
 require "uri"
 require "json"

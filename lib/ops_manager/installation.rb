@@ -24,7 +24,7 @@ class OpsManager
 
     private
     def opsman_api
-      @opsman_api ||= OpsManager::Api::Opsman.new('1.7')
+      @opsman_api ||= OpsManager::Api::Opsman.new
     end
 
     def staged_products_guids

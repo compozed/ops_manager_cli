@@ -6,20 +6,8 @@ require "uaa"
 class OpsManager
   module Api
     class Opsman < OpsManager::Api::Base
-      attr_accessor :ops_manager_version
-
-      def initialize(ops_manager_version = nil)
-        @ops_manager_version = ops_manager_version
-      end
-
       def create_user
-        case ops_manager_version
-        when /1.6/
-          body= "setup[user_name]=#{username}&setup[password]=#{password}&setup[password_confirmantion]=#{password}&setup[eula_accepted]=true"
-        when /1.7/
-          body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
-        end
-
+        body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
       end
 
@@ -28,7 +16,7 @@ class OpsManager
         yaml = UploadIO.new(filepath, 'text/yaml')
         opts = { "installation[file]" => yaml}
         opts = add_authentication(opts)
-        res = multipart_post("/api/v0/installation_settings", opts)
+        res = multipart_post("/api/installation_settings", opts)
         raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
         res
       end
@@ -47,7 +35,7 @@ class OpsManager
       def upload_installation_assets
         puts '====> Uploading installation assets...'.green
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
-        opts = { :passphrase => @password, "installation[file]" => zip }
+        opts = {:passphrase => @password, "installation[file]" => zip }
         multipart_post( "/api/v0/installation_asset_collection", opts)
       end
 
@@ -57,7 +45,7 @@ class OpsManager
 
         puts '====> Download installation assets...'.green
 
-        get("/api/installation_asset_collection", opts)
+        get("/api/v0/installation_asset_collection", opts)
       end
 
       def delete_products(opts = {})
@@ -83,26 +71,28 @@ class OpsManager
         puts "====> Bumping product installation #{guid} product_version to #{product_version}...".green
         opts = { to_version: product_version }
         opts = add_authentication(opts)
-        res = put("/api/v0/installation_settings/products/#{guid}", opts)
+        res = put("/api/v0/staged/products/#{guid}", opts)
         raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
         res
       end
 
       def upload_product(filepath)
         file = "#{filepath}"
-        cmd = "curl -k \"https://#{target}/products\" -F 'product[file]=@#{file}' -X POST -u #{username}:#{password}"
+        cmd = "curl -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{file}' -X POST -H 'Authorization: Bearer #{access_token}'"
         logger.info "running cmd: #{cmd}"
-        puts `#{cmd}`
+        body = `#{cmd}`
+        logger.info "Upload product response: #{body}"
+        raise OpsManager::ProductUploadError if body.include? "error"
       end
 
-      def get_products
+      def get_available_products
         opts = add_authentication
-        res = get("/api/products", opts)
+        res = get("/api/v0/available_products", opts)
         res
       end
 
       def get_current_version
-        products = JSON.parse(get_products.body)
+        products = JSON.parse(get_available_products.body)
         directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
         versions = directors.inject([]){ |r, i| r << OpsManager::Semver.new(i.fetch('product_version')) }
         versions.sort.last.to_s
@@ -153,13 +143,8 @@ class OpsManager
 
 
       def add_authentication(opts={})
-        case ops_manager_version
-        when /1.7/
-          opts[:headers] ||= {}
-          opts[:headers]['Authorization'] ||= "Bearer #{access_token}"
-        else
-          opts[:basic_auth] = { username: username, password: password }
-        end
+        opts[:headers] ||= {}
+        opts[:headers]['Authorization'] ||= "Bearer #{access_token}"
         opts
       end
     end
