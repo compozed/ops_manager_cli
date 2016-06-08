@@ -1,9 +1,7 @@
 class OpsManager
   class InstallationSettings < Hash
-    def initialize(installation_settings_file)
-      @installation_settings_file = installation_settings_file
-      is = JSON.parse(File.read(@installation_settings_file))
-      super.merge!(is)
+    def initialize(parsed_installation_settings)
+      super.merge!(parsed_installation_settings)
     end
 
     def stemcells

@@ -1,6 +1,7 @@
 require "clamp"
 require "ops_manager/product_deployment"
 require "ops_manager/deployment"
+require "ops_manager/product_template_generator"
 
 class OpsManager
   class Cli < Clamp::Command
@@ -49,7 +50,7 @@ class OpsManager
       parameter "DESTINATION", "where should it place the donwloaded settings", required: true
 
       def execute
-      OpsManager::Api::Opsman.new.get_installation_settings(write_to: @destination)
+        OpsManager::Api::Opsman.new.get_installation_settings(write_to: @destination)
       end
     end
 
@@ -80,6 +81,15 @@ class OpsManager
       end
     end
 
+    class GetProductTemplate < Clamp::Command
+      parameter "PRODUCT_NAME", "Product Name", required: true
+
+      def execute
+        puts ProductTemplateGenerator.new(@product_name).generate
+      end
+
+    end
+
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "ssh", "ssh into ops_manager machine" , SSH
@@ -87,6 +97,7 @@ class OpsManager
     subcommand "deployment", "sets deployment config file path" , Deployment
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
     subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
+    subcommand "get-product-template", "pulls product installation template" , GetProductTemplate
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell
     subcommand "delete-unused-products", "Deletes unused products" , DeleteUnusedProducts
     subcommand "get-uaa-token", "get uaa token from ops manager" , GetUaaToken

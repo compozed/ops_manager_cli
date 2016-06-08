@@ -35,6 +35,7 @@ describe OpsManager::Deployment do
     allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
 
     allow(deployment).to receive(:get_current_version).and_return(current_version)
+    allow(deployment).to receive(:parsed_installation_settings).and_return(current_version)
   end
 
   %w{ stop_current_vm deploy_vm }.each do |m|

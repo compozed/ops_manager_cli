@@ -6,13 +6,23 @@ require "uaa"
 class OpsManager
   module Api
     class Opsman < OpsManager::Api::Base
+      attr_reader :silent
+
+      def initialize(opts = {})
+        @silent = opts[:silent]
+      end
+
+      def say_green(str)
+        puts str.green unless silent
+      end
+
       def create_user
         body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
       end
 
       def upload_installation_settings(filepath = 'installation_settings.json')
-        puts '====> Uploading installation settings...'.green
+        say_green( '====> Uploading installation settings...')
         yaml = UploadIO.new(filepath, 'text/yaml')
         opts = { "installation[file]" => yaml}
         opts = add_authentication(opts)
@@ -27,13 +37,13 @@ class OpsManager
       end
 
       def get_installation_settings(opts = {})
-       puts '====> Downloading installation settings...'.green
+       say_green( '====> Downloading installation settings...')
         opts = add_authentication(opts)
         get("/api/installation_settings", opts)
       end
 
       def upload_installation_assets
-        puts '====> Uploading installation assets...'.green
+        say_green( '====> Uploading installation assets...')
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
         opts = {:passphrase => @password, "installation[file]" => zip }
         multipart_post( "/api/v0/installation_asset_collection", opts)
@@ -43,19 +53,19 @@ class OpsManager
         opts = { write_to: "installation_assets.zip" }
         opts = add_authentication(opts)
 
-        puts '====> Download installation assets...'.green
+        say_green( '====> Download installation assets...')
 
         get("/api/v0/installation_asset_collection", opts)
       end
 
       def delete_products(opts = {})
-        puts '====> Deleating unused products...'.green
+        say_green( '====> Deleating unused products...')
         opts = add_authentication(opts)
         delete('/api/v0/products', opts)
       end
 
       def trigger_installation(opts = {})
-        puts '====> Applying changes...'.green
+        say_green( '====> Applying changes...')
         opts = add_authentication(opts)
         post('/api/v0/installations', opts)
       end
@@ -68,7 +78,7 @@ class OpsManager
       end
 
       def upgrade_product_installation(guid, product_version)
-        puts "====> Bumping product installation #{guid} product_version to #{product_version}...".green
+        say_green( "====> Bumping product installation #{guid} product_version to #{product_version}...")
         opts = { to_version: product_version }
         opts = add_authentication(opts)
         res = put("/api/v0/staged/products/#{guid}", opts)
@@ -102,7 +112,7 @@ class OpsManager
 
       def import_stemcell(filepath)
         return unless filepath
-        puts '====> Uploading stemcell...'.green
+        say_green('====> Uploading stemcell...')
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
         opts = add_authentication(opts)

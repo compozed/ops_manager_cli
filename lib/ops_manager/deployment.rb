@@ -95,9 +95,9 @@ class OpsManager::Deployment
     @pivnet_api ||= OpsManager::Api::Pivnet.new
   end
 
-    def opsman_api
-      @opsman_api ||= OpsManager::Api::Opsman.new
-    end
+  def opsman_api
+    @opsman_api ||= OpsManager::Api::Opsman.new
+  end
 
   def config
     deployment_manifest = OpsManager.get_conf(:deployment)
@@ -106,7 +106,11 @@ class OpsManager::Deployment
   end
 
   def installation_settings
-    @installation_settings ||= OpsManager::InstallationSettings.new('installation_settings.json')
+    @installation_settings ||= OpsManager::InstallationSettings.new(parsed_installation_settings)
+  end
+
+  def parsed_installation_settings
+    JSON.parse(File.read('installation_settings.json'))
   end
 
   def desired_version?(version)

@@ -6,7 +6,6 @@ class OpsManager
       def get(endpoint, opts = {})
         uri = uri_for(endpoint)
         http = http_for(uri)
-        puts endpoint
         request = Net::HTTP::Get.new(uri.request_uri)
 
         if opts.has_key?(:basic_auth)

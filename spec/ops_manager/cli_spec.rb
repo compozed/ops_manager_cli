@@ -127,4 +127,22 @@ describe OpsManager::Cli do
       cli.run(`pwd`, args)
     end
   end
+
+  describe 'get-product-settings' do
+    let(:args) { %w(get-product-template example-product) }
+    let(:yml){ "---\nproducts: []" }
+    let(:product_template_generator){ double(generate: yml).as_null_object }
+
+    before do
+      allow(OpsManager::ProductTemplateGenerator)
+        .to receive(:new).with('example-product')
+        .and_return(product_template_generator)
+    end
+
+
+    it "should return product installation settings" do
+      expect_any_instance_of(OpsManager::Cli::GetProductTemplate).to receive(:puts).with( yml )
+      cli.run(`pwd`, args)
+    end
+  end
 end
