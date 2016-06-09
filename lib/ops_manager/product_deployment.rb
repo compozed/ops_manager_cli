@@ -1,6 +1,6 @@
 require 'ops_manager/api/opsman'
 require 'ops_manager/product_installation'
-require 'ops_manager/installation'
+require 'ops_manager/installation_runner'
 require "ops_manager/logging"
 require "ops_manager/semver"
 
@@ -54,7 +54,7 @@ class OpsManager
       puts "====> Upgrading #{config.name} version from #{installation.version} to #{config.desired_version}...".green
       upload
       upgrade_product_installation(installation.guid, config.desired_version)
-      OpsManager::Installation.trigger!.wait_for_result
+      OpsManager::InstallationRunner.trigger!.wait_for_result
 
       puts "====> Finish!".green
     end
@@ -65,7 +65,7 @@ class OpsManager
       get_installation_settings({write_to: '/tmp/is.yml'})
       puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
-      OpsManager::Installation.trigger!.wait_for_result
+      OpsManager::InstallationRunner.trigger!.wait_for_result
 
       puts "====> Finish!".green
     end

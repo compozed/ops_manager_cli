@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'ops_manager/installation'
+require 'ops_manager/installation_runner'
 
-describe OpsManager::Installation do
+describe OpsManager::InstallationRunner do
   let(:installation){ described_class.new }
   let(:installation_id){ rand(9999) }
   let(:installation_response){ double('installation_response', body: "{\"install\":{\"id\":#{installation_id}}}" ) }

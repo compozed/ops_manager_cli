@@ -17,7 +17,7 @@ describe OpsManager::ProductDeployment do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
     allow(product_deployment).to receive(:installation)
       .and_return(product_installation)
-    allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
+    allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
   end
 
   describe "#installation" do
@@ -84,7 +84,7 @@ describe OpsManager::ProductDeployment do
     end
 
     it 'should trigger installation' do
-      expect(OpsManager::Installation).to receive(:trigger!)
+      expect(OpsManager::InstallationRunner).to receive(:trigger!)
       deploy
     end
 
@@ -128,7 +128,7 @@ describe OpsManager::ProductDeployment do
       end
 
       it 'should trigger installation' do
-        expect(OpsManager::Installation).to receive(:trigger!)
+        expect(OpsManager::InstallationRunner).to receive(:trigger!)
         upgrade
       end
 

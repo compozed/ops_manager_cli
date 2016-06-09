@@ -56,7 +56,7 @@ class OpsManager::Deployment
     deploy
     upload_installation_assets
     provision_missing_stemcells
-    OpsManager::Installation.trigger!.wait_for_result
+    OpsManager::InstallationRunner.trigger!.wait_for_result
 
     puts "====> Finish!".green
   end

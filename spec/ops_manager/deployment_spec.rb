@@ -32,7 +32,7 @@ describe OpsManager::Deployment do
 
     allow(OpsManager::InstallationSettings).to receive(:new).and_return(installation_settings)
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
-    allow(OpsManager::Installation).to receive(:trigger!).and_return(installation)
+    allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
 
     allow(deployment).to receive(:get_current_version).and_return(current_version)
     allow(deployment).to receive(:parsed_installation_settings).and_return(current_version)
@@ -74,7 +74,7 @@ describe OpsManager::Deployment do
     end
 
     it 'should trigger installation' do
-      expect(OpsManager::Installation).to receive(:trigger!)
+      expect(OpsManager::InstallationRunner).to receive(:trigger!)
       deployment.upgrade
     end
 
