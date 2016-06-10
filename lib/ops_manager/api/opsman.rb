@@ -77,6 +77,18 @@ class OpsManager
         res
       end
 
+      def get_installation_logs(id)
+        opts = add_authentication
+        res = get("/api/v0/installations/#{id}/logs", opts)
+        res
+      end
+
+      def get_installations(opts = {})
+        opts = add_authentication
+        res = get("/api/v0/installations", opts)
+        res
+      end
+
       def upgrade_product_installation(guid, product_version)
         say_green( "====> Bumping product installation #{guid} product_version to #{product_version}...")
         opts = { to_version: product_version }

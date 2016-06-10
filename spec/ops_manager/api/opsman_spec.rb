@@ -347,4 +347,50 @@ describe OpsManager::Api::Opsman do
       end
     end
   end
+
+  describe "#get_installations" do
+    subject(:get_installations){ opsman.get_installations }
+
+    let(:response_body){ '{ "installations": []}' }
+    let(:response){ get_installations }
+    let(:status_code){ 200 }
+    let(:uri){ "#{base_uri}/api/v0/installations" }
+
+    before do
+      stub_request(:get, uri).to_return(status: status_code, body: response_body)
+    end
+
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
+
+    it "should include products in its body" do
+      expect(parsed_response).to eq({ 'installations' => []})
+    end
+
+    it 'should not send authentication on get request' do
+      get_installations
+      expect(WebMock).to have_requested(:get, uri)
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
+
+  describe "#get_installation_logs" do
+    let(:installation_id){ 1 }
+    let(:uri){ "https://#{target}/api/v0/installations/#{installation_id}/logs" }
+    let(:body){ '{"logs":"some-text"}' }
+    let(:status_code){ 200 }
+
+    before do
+      stub_request(:get, uri).
+        to_return(status: status_code, body: body)
+    end
+
+    it 'performs the correct request' do
+      opsman.get_installation_logs(installation_id)
+
+      expect(WebMock).to have_requested(:get, uri)
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
 end

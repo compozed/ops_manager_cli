@@ -2,6 +2,8 @@ require "clamp"
 require "ops_manager/product_deployment"
 require "ops_manager/deployment"
 require "ops_manager/product_template_generator"
+require "ops_manager/product_template_generator"
+require "ops_manager/installation"
 
 class OpsManager
   class Cli < Clamp::Command
@@ -85,9 +87,20 @@ class OpsManager
       parameter "PRODUCT_NAME", "Product Name", required: true
 
       def execute
-        puts ProductTemplateGenerator.new(@product_name).generate
+        puts OpsManager::ProductTemplateGenerator.new(@product_name).generate
       end
+    end
 
+    class GetInstallationLogs < Clamp::Command
+      parameter "INSTALLATION_ID", "Installation ID", required: true
+
+      def execute
+        if @installation_id == "last"
+          puts OpsManager::Installation.all.last.logs
+        else
+          puts OpsManager::Installation.new(@installation_id).logs
+        end
+      end
     end
 
     subcommand "target", "target an ops_manager deployment" , Target
@@ -101,5 +114,6 @@ class OpsManager
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell
     subcommand "delete-unused-products", "Deletes unused products" , DeleteUnusedProducts
     subcommand "get-uaa-token", "get uaa token from ops manager" , GetUaaToken
+    subcommand "get-installation-logs", "get installation log" , GetInstallationLogs
   end
 end

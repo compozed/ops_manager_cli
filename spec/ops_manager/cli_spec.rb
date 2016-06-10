@@ -145,4 +145,49 @@ describe OpsManager::Cli do
       cli.run(`pwd`, args)
     end
   end
+
+  describe 'get-installation-logs' do
+    let(:args) { ['get-installation-logs', installation_id ] }
+    let(:installation_id){ 1 }
+    let(:last_installation_id){ 2 }
+    let(:installation_logs){ 'logs for installation' }
+    let(:last_installation_logs){ 'last installation logs' }
+    let!(:installation) do
+      object_double(OpsManager::Installation.new(installation_id),
+                    logs: installation_logs )
+    end
+    let!(:last_installation) do
+      object_double(OpsManager::Installation.new(installation_id),
+                    logs: last_installation_logs)
+    end
+
+    describe 'when an installation id is provided' do
+      before do
+        allow(OpsManager::Installation)
+          .to receive(:new).with(installation_id)
+          .and_return(installation)
+      end
+
+      it "should return installation logs" do
+        expect_any_instance_of(OpsManager::Cli::GetInstallationLogs)
+          .to receive(:puts).with(installation_logs)
+        cli.run(`pwd`, args)
+      end
+    end
+
+    describe "when provided id is 'last'" do
+      let(:args) { ['get-installation-logs', 'last'] }
+
+      before do
+        allow(OpsManager::Installation).to receive(:all)
+          .and_return([installation, last_installation])
+      end
+
+      it 'should returns logs of the last records installation' do
+        expect_any_instance_of(OpsManager::Cli::GetInstallationLogs)
+          .to receive(:puts).with(last_installation_logs)
+        cli.run(`pwd`, args)
+      end
+    end
+  end
 end
