@@ -79,7 +79,7 @@ class OpsManager
 
     class SSH < Clamp::Command
       def execute
-        `ssh ubuntu@#{OpsManager.target}`
+        `ssh ubuntu@#{OpsManager.get_conf(:target)}`
       end
     end
 

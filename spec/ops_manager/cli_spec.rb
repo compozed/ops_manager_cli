@@ -128,7 +128,7 @@ describe OpsManager::Cli do
     end
   end
 
-  describe 'get-product-settings' do
+  describe 'get-product-template' do
     let(:args) { %w(get-product-template example-product) }
     let(:yml){ "---\nproducts: []" }
     let(:product_template_generator){ double(generate: yml).as_null_object }
