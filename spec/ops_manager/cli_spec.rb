@@ -73,7 +73,7 @@ describe OpsManager::Cli do
     let(:args) { %w(ssh) }
 
     before do
-      allow(OpsManager).to receive(:target).and_return('1.2.3.4')
+      allow(OpsManager).to receive(:get_conf).with(:target).and_return('1.2.3.4')
     end
 
     it "should ssh to target with the ubuntu user" do
