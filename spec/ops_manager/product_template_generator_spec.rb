@@ -7,7 +7,6 @@ describe OpsManager::ProductTemplateGenerator do
   let(:installation_settings){ { 'products' => [{ 'prepared' => true,'identifier' =>product_name, 'jobs' => [] }] } }
   let(:installation_response){ double(code: 200, body: installation_settings.to_json) }
 
-  describe '#generate' do
     before do
       allow(OpsManager::InstallationSettings)
         .to receive(:new).with(installation_settings)
@@ -16,11 +15,13 @@ describe OpsManager::ProductTemplateGenerator do
         .and_return(installation_response)
     end
 
+  describe '#generate_yml' do
     it "should return template" do
-      expect(product_template_generator.generate).to eq(product_template)
+      expect(product_template_generator.generate_yml).to eq(product_template)
     end
+  end
 
-
+  describe '#generate' do
     it 'should remove prepared entry' do
       expect(product_template_generator.generate.to_s).not_to match('prepared')
     end

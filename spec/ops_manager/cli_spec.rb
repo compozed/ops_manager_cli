@@ -130,8 +130,11 @@ describe OpsManager::Cli do
 
   describe 'get-product-template' do
     let(:args) { %w(get-product-template example-product) }
+    let(:product_name){ 'example-product' }
     let(:yml){ "---\nproducts: []" }
-    let(:product_template_generator){ double(generate: yml).as_null_object }
+    let!(:product_template_generator) do
+      object_double(OpsManager::ProductTemplateGenerator.new(product_name), generate_yml: yml).as_null_object
+    end
 
     before do
       allow(OpsManager::ProductTemplateGenerator)
@@ -142,6 +145,23 @@ describe OpsManager::Cli do
 
     it "should return product installation settings" do
       expect_any_instance_of(OpsManager::Cli::GetProductTemplate).to receive(:puts).with( yml )
+      cli.run(`pwd`, args)
+    end
+  end
+
+  describe 'get-director-template' do
+    let(:args) { %w(get-director-template) }
+    let(:yml){ "---\nexample: yml" }
+    let!(:director_template_generator) do
+      object_double(OpsManager::DirectorTemplateGenerator.new, generate_yml: yml).as_null_object
+    end
+
+    before do
+      allow(OpsManager::DirectorTemplateGenerator).to receive(:new).and_return(director_template_generator)
+    end
+
+    it "should return director installation settings" do
+      expect_any_instance_of(OpsManager::Cli::GetDirectorTemplate).to receive(:puts).with( yml )
       cli.run(`pwd`, args)
     end
   end

@@ -10,6 +10,7 @@ class OpsManager
       @product_name = product_name
     end
 
+
     def generate
       delete_partitions
       delete_vm_credentials
@@ -22,7 +23,11 @@ class OpsManager
       delete_product_version
       add_merging_strategy_for_jobs
 
-      { 'products' => [ "(( merge on guid ))" , selected_product ] }.to_yaml
+      { 'products' => [ "(( merge on guid ))" , selected_product ] }
+    end
+
+    def generate_yml
+      generate.to_yaml
         .gsub('"(( merge on guid ))"', '(( merge on guid ))')
         .gsub('"(( merge on identifier ))"', '(( merge on identifier ))')
     end
