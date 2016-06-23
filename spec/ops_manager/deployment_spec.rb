@@ -6,7 +6,7 @@ describe OpsManager::Deployment do
   let(:deployment){ described_class.new }
   let(:target){'1.2.3.4'}
   let(:current_version){ '1.4.2.0' }
-  let(:desired_version){'1.5.5.0'}
+  let(:desired_version){ '1.5.5.0' }
   let(:pivnet_api){ double('pivnet_api').as_null_object }
   let(:username){ 'foo' }
   let(:password){ 'foo' }

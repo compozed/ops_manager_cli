@@ -5,18 +5,36 @@ describe OpsManager::ProductDeployment do
   let(:product_deployment){ described_class.new('product_deployment.yml', force) }
   let(:force){ false }
   let(:name){ 'example-product' }
+  let(:target){'1.2.3.4'}
+  let(:username){ 'foo' }
+  let(:password){ 'bar' }
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:guid) { 'example-product-abc123' }
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
-  let(:version){ '1.6.2.0' }
-  let(:current_version){ version }
+  let(:desired_version){ '1.6.2.0' }
+  let(:current_version){ '1.6.2.0' }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
   let(:installation){ double.as_null_object }
+  let(:config) do
+    double('config',
+           target: target,
+           username: username,
+           password: password,
+           name: name,
+           desired_version: desired_version,
+           filepath: filepath,
+           stemcell: 'stemcell.tgz',
+           installation_settings_file: installation_settings_file
+          )
+  end
 
   before do
     `rm #{filepath} ; cp ../fixtures/#{filepath} .`
-    allow(product_deployment).to receive(:installation)
-      .and_return(product_installation)
+    allow(product_deployment).tap do |pd|
+      pd.to receive(:installation).and_return(product_installation)
+      pd.to receive(:config).and_return(config)
+    end
+
     allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
   end
 
@@ -107,7 +125,7 @@ describe OpsManager::ProductDeployment do
       allow(product_installation).to receive(:prepared?)
         .and_return(installation_prepared)
       allow(product_deployment).tap do |s|
-        s.to receive(:upgrade_product_installation).with(guid, version)
+        s.to receive(:upgrade_product_installation).with(guid, desired_version)
         s.to receive(:upload)
       end
     end
@@ -121,9 +139,9 @@ describe OpsManager::ProductDeployment do
       end
 
 
-      it 'should perform a version upgrade' do
+      it 'should perform a desired_version upgrade' do
         expect(product_deployment).to receive(:upgrade_product_installation)
-          .with(guid, version)
+          .with(guid, desired_version)
         upgrade
       end
 
@@ -198,7 +216,6 @@ describe OpsManager::ProductDeployment do
       run
     end
 
-
     describe "when installation is nil" do
       let(:product_installation){ nil }
 
@@ -209,14 +226,14 @@ describe OpsManager::ProductDeployment do
     end
 
     describe "when installation exists" do
-      let(:version){ '1.6.2.0' }
+      let(:desired_version){ '1.4.10-build.1' }
       before do
         allow(product_deployment).to receive(:upgrade)
         allow(product_deployment).to receive(:deploy)
       end
 
       describe "when version is newer than the current one" do
-        let(:current_version){ '1.5.2.0' }
+        let(:current_version){ '1.4.9-build.7' }
 
         it "perform upgrade" do
           expect(product_deployment).to receive(:upgrade)
@@ -225,7 +242,7 @@ describe OpsManager::ProductDeployment do
       end
 
       describe "when version match current one" do
-        let(:current_version){ version }
+        let(:current_version){ desired_version }
 
         it "perform upgrade" do
           expect(product_deployment).to receive(:deploy)

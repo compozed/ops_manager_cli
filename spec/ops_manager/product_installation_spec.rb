@@ -1,14 +1,27 @@
 require 'spec_helper'
 
 describe OpsManager::ProductInstallation do
+
+  let(:guid){ 'abc123' }
+  let(:current_version){ '1.6.2.0' }
+  let(:prepared){ true }
+  let(:product_installation){ described_class.new(guid, current_version, prepared) }
   let(:name){ 'microbosh' }
-  let(:opsman_api) do
+  let!(:opsman_api) do
     res = double( body: File.read('../fixtures/installation_settings.json'))
-    double(get_installation_settings: res)
+    object_double(OpsManager::Api::Opsman.new, get_installation_settings: res)
   end
 
   before do
     allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+  end
+
+  describe '#current_version' do
+    it 'should ve a semver' do
+      expect(product_installation.current_version).to be_kind_of(OpsManager::Semver)
+
+  end
+
   end
 
   describe '@find' do
@@ -19,7 +32,7 @@ describe OpsManager::ProductInstallation do
     end
 
     it "should return version" do
-      expect(installation.version).to eq('1.5.5.0')
+      expect(installation.current_version.to_s).to eq('1.5.5.0')
     end
 
     it "should fetch installation_settings#prepared entry" do

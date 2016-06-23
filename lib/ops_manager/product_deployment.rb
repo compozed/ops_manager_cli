@@ -29,13 +29,16 @@ class OpsManager
       case
       when installation.nil? || forced_deployment?
         deploy
-      when installation && installation.version < config.desired_version
+      when installation && installation.current_version < desired_version
         upgrade
-      when installation && installation.version == config.desired_version
+      when installation && installation.current_version == desired_version
         deploy
       end
     end
 
+    def desired_version
+      Semver.new( config.desired_version)
+    end
     def upload
       puts "====> Uploading product...".green
       if ProductDeployment.exists?(config.name, config.desired_version)
@@ -51,7 +54,7 @@ class OpsManager
         puts "====> Skipping as this product has a pending installation!".red
         return
       end
-      puts "====> Upgrading #{config.name} version from #{installation.version} to #{config.desired_version}...".green
+      puts "====> Upgrading #{config.name} version from #{installation.current_version.to_s} to #{config.desired_version}...".green
       upload
       upgrade_product_installation(installation.guid, config.desired_version)
       OpsManager::InstallationRunner.trigger!.wait_for_result

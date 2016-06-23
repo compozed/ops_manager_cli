@@ -2,7 +2,7 @@ require 'ops_manager/api/opsman'
 
 class OpsManager
   class ProductInstallation
-    attr_reader :guid, :version
+    attr_reader :guid
 
     def initialize(guid, version, prepared)
       @guid, @version, @prepared = guid, version, prepared
@@ -10,6 +10,10 @@ class OpsManager
 
     def prepared?
       @prepared
+    end
+
+    def current_version
+      Semver.new(@version)
     end
 
     class << self
