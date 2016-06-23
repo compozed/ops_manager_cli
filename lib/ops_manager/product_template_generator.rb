@@ -1,6 +1,7 @@
 class OpsManager
   class ProductTemplateGenerator
     OPS_MANAGER_PASSWORD_LENGTH = 20
+    OPS_MANAGER_SECRET_LENGTH = 20
     OPS_MANAGER_SALT_LENGTH = 16
 
     attr_reader :product_name
@@ -16,6 +17,9 @@ class OpsManager
       delete_prepared
       delete_ops_manager_generated_passwords
       delete_ops_manager_generated_salts
+      delete_ops_manager_generated_secrets
+      delete_private_key_pem
+      delete_product_version
       add_merging_strategy_for_jobs
 
       { 'products' => [ "(( merge on guid ))" , selected_product ] }.to_yaml
@@ -24,19 +28,52 @@ class OpsManager
     end
 
     private
+    def delete_product_version
+      delete_value_from_product_properties_if do |property|
+        property['identifier'] == 'product_version'
+      end
+    end
+
     def delete_ops_manager_generated_passwords
-      delete_value_from_properties_if do |value|
+      delete_value_from_job_properties_if do |value|
         value.fetch('password', '').length == OPS_MANAGER_PASSWORD_LENGTH
       end
     end
 
+    def delete_private_key_pem
+      delete_value_from_product_properties_if do |property|
+        property['value'].is_a?(Hash) && property['value'].has_key?('private_key_pem')
+      end
+
+      delete_value_from_job_properties_if do |value|
+        value.fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
+        value.has_key?('private_key_pem')
+      end
+    end
+
     def delete_ops_manager_generated_salts
-      delete_value_from_properties_if do |value|
+      delete_value_from_job_properties_if do |value|
         value.fetch('salt', '').length == OPS_MANAGER_SALT_LENGTH
       end
     end
 
-    def delete_value_from_properties_if
+    def delete_ops_manager_generated_secrets
+      delete_value_from_product_properties_if do |property|
+        property['value'].is_a?(Hash) && property['value'].fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
+      end
+
+      delete_value_from_job_properties_if do |value|
+        value.fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
+      end
+    end
+
+    def delete_value_from_product_properties_if
+      selected_product.fetch('properties', []).each  do |p|
+        p.delete('value') if p.is_a?(Hash) && yield(p)
+      end
+    end
+
+    def delete_value_from_job_properties_if
       selected_product['jobs'].each do |j|
         j.fetch('properties', []).each  do |p|
           value = p.fetch('value',{})

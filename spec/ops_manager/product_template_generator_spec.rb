@@ -141,6 +141,118 @@ describe OpsManager::ProductTemplateGenerator do
         expect(product_template_generator.generate.to_s).not_to match(random_salt)
       end
     end
+
+    describe 'when product job properties has secret' do
+      let(:random_secret){ '12341234123412341234' }
+      let(:installation_settings)  do
+        { 'products' => [
+          { 'identifier' => product_name ,
+            'jobs' => [ { 'identifier' => 'example-job',
+                          'properties' => [
+                            {
+                              'value' => {
+                                'identity' => 'conf-1',
+                                'secret' => random_secret
+                              }
+                            }
+            ]
+
+        } ]
+        }
+        ]}
+      end
+
+      it 'should remove automatically generated secret' do
+        expect(product_template_generator.generate.to_s).not_to match(random_secret)
+      end
+    end
+
+    describe 'when product properties has secret' do
+      let(:random_secret){ '12341234123412341234' }
+      let(:installation_settings)  do
+        { 'products' => [
+          { 'identifier' => product_name ,
+            'properties' => [
+              {
+                'value' => {
+                  'identity' => 'conf-1',
+                  'secret' => random_secret
+                }
+              }
+          ],
+          'jobs' => [ { 'identifier' => 'example-job' } ]
+        }
+        ]}
+      end
+
+      it 'should remove automatically generated secret' do
+        expect(product_template_generator.generate.to_s).not_to match(random_secret)
+      end
+    end
+
+    describe 'when product properties has secret private_key_pem' do
+      let(:installation_settings)  do
+        { 'products' => [
+          { 'identifier' => product_name ,
+            'properties' => [
+              {
+                'value' => {
+                  'private_key_pem' => 'Private Key'
+                }
+              }
+          ],
+          'jobs' => [ { 'identifier' => 'example-job' } ]
+        }
+        ]}
+      end
+
+      it 'should remove private keys' do
+        expect(product_template_generator.generate.to_s).not_to match( 'Private Key')
+      end
+    end
+
+    describe 'when product job properties has private_key_pem' do
+      let(:installation_settings)  do
+        { 'products' => [
+          { 'identifier' => product_name ,
+            'jobs' => [ {
+            'identifier' => 'example-job' ,
+            'properties' => [{
+              'value' => {
+                'private_key_pem' => 'Private Key'
+              }
+            }]
+          }]
+        }
+        ]}
+      end
+
+      it 'should remove private keys' do
+        expect(product_template_generator.generate.to_s).not_to match( 'Private Key')
+      end
+    end
+
+    describe 'when product version is present' do
+      let(:product_version){ '1.6.13-build.1' }
+      let(:installation_settings)  do
+        { 'products' => [
+          { 'identifier' => product_name ,
+            'jobs' => [ ],
+            'properties' => [
+              {
+                'identifier' => 'product_version',
+                'value' => product_version
+              }
+            ]
+        }
+        ]
+        }
+      end
+
+      it 'should remove the version value' do
+        expect(product_template_generator.generate.to_s).not_to match(product_version)
+      end
+    end
   end
 end
 
