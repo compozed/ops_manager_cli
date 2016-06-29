@@ -110,11 +110,14 @@ describe OpsManager::Cli do
   end
 
   describe 'get-installation-settings' do
-    let(:args) { %w(get-installation-settings /tmp/is.yml) }
+    let(:args) { %w(get-installation-settings) }
+    let(:installation_settings){ '{"foo": "bar"}' }
 
     it "should call product.get_installation_settings" do
-      expect_any_instance_of(OpsManager::Api::Opsman)
-        .to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      allow_any_instance_of(OpsManager::Api::Opsman)
+        .to receive(:get_installation_settings).and_return(double(body: installation_settings))
+      expect_any_instance_of(OpsManager::Cli::GetInstallationSettings)
+        .to receive(:puts).with("---\nfoo: bar\n")
       cli.run(`pwd`, args)
     end
   end

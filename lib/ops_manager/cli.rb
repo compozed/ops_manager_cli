@@ -55,10 +55,18 @@ class OpsManager
     end
 
     class GetInstallationSettings < Clamp::Command
-      parameter "DESTINATION", "where should it place the donwloaded settings", required: true
-
       def execute
-        OpsManager::Api::Opsman.new.get_installation_settings(write_to: @destination)
+        puts parsed_response.to_yaml
+      end
+
+      private
+      def parsed_response
+        response = opsman.get_installation_settings
+        JSON.parse(response.body)
+      end
+
+      def opsman
+        OpsManager::Api::Opsman.new(silent: true)
       end
     end
 
@@ -114,6 +122,7 @@ class OpsManager
         puts OpsManager::DirectorTemplateGenerator.new.generate_yml
       end
     end
+    subcommand "status", "Shows opsman current status info" , Status
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
     subcommand "ssh", "ssh into ops_manager machine" , SSH
