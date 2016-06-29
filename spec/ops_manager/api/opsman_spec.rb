@@ -393,6 +393,7 @@ describe OpsManager::Api::Opsman do
         .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
+
   describe 'get_token' do
     describe 'when credentials are incorrect' do
       before do

@@ -224,4 +224,61 @@ describe OpsManager::Cli do
       end
     end
   end
+
+  describe 'curl' do
+    let(:endpoint){ '/custom/endpoint' }
+    let(:body){ 'result' }
+
+
+    describe 'when no method is provided' do
+      let(:method){ :get }
+      let(:args) { ['curl', endpoint] }
+
+      before do
+        allow_any_instance_of(OpsManager::Api::Opsman)
+          .to receive(:authenticated_get).with(endpoint)
+          .and_return(double(body: body))
+      end
+
+      it 'should perform get with provided endpoint' do
+        expect_any_instance_of(OpsManager::Cli::Curl)
+          .to receive(:puts).with(body)
+        cli.run(`pwd`, args)
+      end
+    end
+
+    describe 'when post' do
+      let(:args) { ['curl', '-X POST', endpoint] }
+
+      before do
+        allow_any_instance_of(OpsManager::Api::Opsman)
+          .to receive(:authenticated_post).with(endpoint)
+          .and_return(double(body: body))
+      end
+
+      it 'should perform post with provided endpoint' do
+        expect_any_instance_of(OpsManager::Cli::Curl)
+          .to receive(:puts).with(body)
+        cli.run(`pwd`, args)
+      end
+    end
+
+    describe 'when method not supported' do
+      let(:args) { ['curl', '-X UNSUPPORTED_METHOD', endpoint] }
+
+      before do
+        allow_any_instance_of(OpsManager::Api::Opsman)
+          .to receive(:authenticated_post).with(endpoint)
+          .and_return(double(body: body))
+      end
+
+      it 'should perform post with provided endpoint' do
+        expect_any_instance_of(OpsManager::Cli::Curl)
+          .to receive(:puts).with('Unsupported method: UNSUPPORTED_METHOD')
+        cli.run(`pwd`, args)
+      end
+    end
+
+
+  end
 end

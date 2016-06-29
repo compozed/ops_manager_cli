@@ -25,21 +25,18 @@ class OpsManager
         say_green( '====> Uploading installation settings...')
         yaml = UploadIO.new(filepath, 'text/yaml')
         opts = { "installation[file]" => yaml}
-        opts = add_authentication(opts)
-        res = multipart_post("/api/installation_settings", opts)
+        res = authenticated_multipart_post("/api/installation_settings", opts)
         raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
         res
       end
 
       def get_staged_products(opts = {})
-        opts = add_authentication(opts)
-        get("/api/v0/staged/products", opts)
+        authenticated_get("/api/v0/staged/products", opts)
       end
 
       def get_installation_settings(opts = {})
         say_green( '====> Downloading installation settings...')
-        opts = add_authentication(opts)
-        get("/api/installation_settings", opts)
+        authenticated_get("/api/installation_settings", opts)
       end
 
       def upload_installation_assets
@@ -51,11 +48,8 @@ class OpsManager
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
-        opts = add_authentication(opts)
-
         say_green( '====> Download installation assets...')
-
-        get("/api/v0/installation_asset_collection", opts)
+        authenticated_get("/api/v0/installation_asset_collection", opts)
       end
 
       def delete_products(opts = {})
@@ -71,22 +65,17 @@ class OpsManager
       end
 
       def get_installation(id)
-        opts = add_authentication
-        res = get("/api/v0/installations/#{id}", opts)
+        res = authenticated_get("/api/v0/installations/#{id}")
         raise OpsManager::InstallationError.new(res.body) if res.body =~  /failed/
         res
       end
 
       def get_installation_logs(id)
-        opts = add_authentication
-        res = get("/api/v0/installations/#{id}/logs", opts)
-        res
+        authenticated_get("/api/v0/installations/#{id}/logs")
       end
 
       def get_installations(opts = {})
-        opts = add_authentication
-        res = get("/api/v0/installations", opts)
-        res
+        authenticated_get('/api/v0/installations')
       end
 
       def upgrade_product_installation(guid, product_version)
@@ -108,9 +97,7 @@ class OpsManager
       end
 
       def get_available_products
-        opts = add_authentication
-        res = get("/api/v0/available_products", opts)
-        res
+        authenticated_get("/api/v0/available_products")
       end
 
       def get_current_version
@@ -122,14 +109,13 @@ class OpsManager
         nil
       end
 
+
       def import_stemcell(filepath)
         return unless filepath
         say_green('====> Uploading stemcell...')
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
-        opts = add_authentication(opts)
-        res = multipart_post("/api/v0/stemcells", opts)
-
+        res = authenticated_multipart_post("/api/v0/stemcells", opts)
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
         res
       end
@@ -154,8 +140,19 @@ class OpsManager
         nil
       end
 
-      private
+      def authenticated_get(endpoint, opts = {})
+        get(endpoint, add_authentication(opts))
+      end
 
+      def authenticated_post(endpoint, opts = {})
+        post(endpoint, add_authentication(opts))
+      end
+
+      def authenticated_multipart_post(endpoint, opts = {})
+        multipart_post(endpoint, add_authentication(opts))
+      end
+
+      private
       def token_issuer
         @token_issuer ||= CF::UAA::TokenIssuer.new(
           "https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true )

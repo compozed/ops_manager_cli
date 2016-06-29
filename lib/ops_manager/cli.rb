@@ -4,6 +4,7 @@ require "ops_manager/deployment"
 require "ops_manager/product_template_generator"
 require "ops_manager/director_template_generator"
 require "ops_manager/installation"
+require 'byebug'
 
 class OpsManager
   class Cli < Clamp::Command
@@ -122,6 +123,28 @@ class OpsManager
         puts OpsManager::DirectorTemplateGenerator.new.generate_yml
       end
     end
+
+    class Curl < Clamp::Command
+      option ['-X', '--http-method'], "HTTP_METHOD", "HTTP Method (GET,POST)", default: 'GET'
+      parameter "ENDPOINT", "OpsManager api endpoint. eg: /v0/installation_settings", required: true
+
+      def execute
+        puts case http_method.strip
+        when 'GET'
+          opsman.authenticated_get(@endpoint).body
+        when 'POST'
+          opsman.authenticated_post(@endpoint).body
+        else
+          "Unsupported method: #{http_method.strip}"
+        end
+      end
+
+      private
+      def opsman
+        OpsManager::Api::Opsman.new(silent: true)
+      end
+    end
+
     subcommand "status", "Shows opsman current status info" , Status
     subcommand "target", "target an ops_manager deployment" , Target
     subcommand "login", "login against ops_manager" , Login
@@ -130,11 +153,12 @@ class OpsManager
     subcommand "deployment", "sets deployment config file path" , Deployment
     subcommand "deploy-product", "deploys product tiles" , DeployProduct
     subcommand "get-installation-settings", "pulls installation settings" , GetInstallationSettings
-    subcommand "get-product-template", "pulls product installation template" , GetProductTemplate
     subcommand "get-director-template", "pulls director installation template" , GetDirectorTemplate
+    subcommand "get-product-template", "pulls product installation template" , GetProductTemplate
+    subcommand "get-installation-logs", "get installation log" , GetInstallationLogs
+    subcommand "get-uaa-token", "get uaa token from ops manager" , GetUaaToken
     subcommand "import-stemcell", "Uploads stemcell to Ops Manager" , ImportStemcell
     subcommand "delete-unused-products", "Deletes unused products" , DeleteUnusedProducts
-    subcommand "get-uaa-token", "get uaa token from ops manager" , GetUaaToken
-    subcommand "get-installation-logs", "get installation log" , GetInstallationLogs
+    subcommand "curl", "curls endpoind with authenticated request" , Curl
   end
 end
