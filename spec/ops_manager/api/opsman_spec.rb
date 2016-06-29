@@ -393,4 +393,16 @@ describe OpsManager::Api::Opsman do
         .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
   end
+  describe 'get_token' do
+    describe 'when credentials are incorrect' do
+      before do
+        allow(token_issuer).to receive(:owner_password_grant)
+          .and_raise(CF::UAA::TargetError.new)
+      end
+
+      it 'it should be nil' do
+        expect(opsman.get_token).to be_nil
+      end
+    end
+  end
 end

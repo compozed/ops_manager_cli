@@ -27,6 +27,15 @@ class OpsManager
     extend Forwardable
     def_delegators :opsman_api, :get_token
 
+    def show_status
+      authenticated = !!opsman_api.get_token ? 'YES'.green : 'NO'.red
+
+      [
+        "Target: #{self.get_conf(:target).green}",
+        "Authenticated: #{authenticated}"
+      ].join("\n")
+    end
+
     def set_target(uri)
       if target_is_pingable?(uri)
         set_conf(:target, uri)

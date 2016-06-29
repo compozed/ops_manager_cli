@@ -16,6 +16,12 @@ class OpsManager
       end
     end
 
+    class Status < Clamp::Command
+      def execute
+        puts OpsManager.show_status
+      end
+    end
+
     class Login < Clamp::Command
       parameter "USERNAME", "opsManager username", required: true
       parameter "PASSWORD", "opsManager password", required: true

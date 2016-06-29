@@ -15,6 +15,36 @@ describe OpsManager do
     expect(OpsManager::VERSION).not_to be nil
   end
 
+  describe '@show_status' do
+    let(:token){ 'valid token' }
+
+    before do
+      described_class.set_conf(:target, target)
+      allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_token).and_return(token)
+    end
+
+    it 'shows target endpoint' do
+      expect(described_class.show_status).to match(/Target: .+1.2.3.4/)
+    end
+
+    describe 'when credentials are correct' do
+      let(:token){ 'valid token' }
+
+      it 'shows target endpoint' do
+        expect(described_class.show_status).to match(/Authenticated: .+YES/)
+      end
+    end
+
+
+    describe 'when credentials are incorrect' do
+      let(:token){ nil }
+
+      it 'should let the user know he is not authenticated' do
+        expect(described_class.show_status).to match(/Authenticated: .+NO/)
+      end
+    end
+  end
+
   describe '@set_target' do
     let(:net_ping){ double(ping?: pingable?) }
     subject(:set_target){ OpsManager.set_target(target) }

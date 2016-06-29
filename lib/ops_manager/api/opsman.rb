@@ -37,7 +37,7 @@ class OpsManager
       end
 
       def get_installation_settings(opts = {})
-       say_green( '====> Downloading installation settings...')
+        say_green( '====> Downloading installation settings...')
         opts = add_authentication(opts)
         get("/api/installation_settings", opts)
       end
@@ -150,6 +150,8 @@ class OpsManager
         token_issuer.owner_password_grant('admin', password, 'opsman.admin').tap do |token|
           logger.info "UAA Token: #{token.inspect}"
         end
+      rescue  CF::UAA::TargetError
+        nil
       end
 
       private

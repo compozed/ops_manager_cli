@@ -12,6 +12,17 @@ describe OpsManager::Cli do
     end
   end
 
+  describe "status" do
+    let(:args) { %w(status) }
+    let(:status_response){ 'opsman status' }
+
+    it "should show ops_manager status" do
+      allow(OpsManager).to receive(:show_status).and_return(status_response)
+      expect_any_instance_of(OpsManager::Cli::Status).to receive(:puts).with(status_response)
+      cli.run(`pwd`, args)
+    end
+  end
+
   describe "login" do
     let(:args) { %w(login foo bar) }
 
