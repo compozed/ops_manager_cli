@@ -13,6 +13,10 @@ class OpsManager
           raise "missing #{attr} on config" unless @config.has_key?(attr)
         end
       end
+
+      def filepath
+        `find #{@config['filepath']}`.split("\n").first
+      end
     end
   end
 end

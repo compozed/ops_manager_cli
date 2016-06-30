@@ -16,15 +16,15 @@ describe OpsManager::ProductDeployment do
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
   let(:installation){ double.as_null_object }
   let(:config) do
-    double('config',
-           target: target,
-           username: username,
-           password: password,
-           name: name,
-           desired_version: desired_version,
-           filepath: filepath,
-           stemcell: 'stemcell.tgz',
-           installation_settings_file: installation_settings_file
+    OpsManager::Configs::ProductDeployment.new(
+      'target' =>  target,
+           'username' => username,
+           'password' => password,
+           'name' => name,
+           'desired_version' => desired_version,
+           'filepath' => filepath,
+           'stemcell' => 'stemcell.tgz',
+           'installation_settings_file' => installation_settings_file
           )
   end
 
