@@ -25,6 +25,8 @@ class OpsManager
               res.read_body do |segment|
                 f.write(segment)
               end
+              logger.info("performing get to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
+              logger.info("get response body #{res.body}")
             end
           ensure
             f.close
