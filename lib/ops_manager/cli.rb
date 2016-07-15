@@ -4,7 +4,6 @@ require "ops_manager/deployment"
 require "ops_manager/product_template_generator"
 require "ops_manager/director_template_generator"
 require "ops_manager/installation"
-require 'byebug'
 
 class OpsManager
   class Cli < Clamp::Command
