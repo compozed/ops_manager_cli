@@ -289,6 +289,7 @@ describe OpsManager::Api::Opsman do
     end
 
     describe 'when there are multiple director product tiles uploaded' do
+      let(:latest_version){ "1.6.11.0" }
       let(:products) do
         [
           {
@@ -297,7 +298,7 @@ describe OpsManager::Api::Opsman do
           },
           {
             "name" => "p-bosh",
-            "product_version" => "1.6.11.0"
+            "product_version" => "1.6.11.1"
           }
         ]
       end
@@ -307,6 +308,17 @@ describe OpsManager::Api::Opsman do
         allow(opsman).to receive(:get_available_products).and_return(products_response)
       end
 
+      it 'should return the latest one' do
+        expect(opsman.get_current_version).to eq("1.6.11.1")
+      end
+
+      describe 'when version ends in .0' do
+       let(:products){ [ { "name" => "p-bosh", "product_version" => "1.6.11.0" } ] }
+
+        it 'should remove .0' do
+          expect(opsman.get_current_version).to eq("1.6.11")
+        end
+      end
     end
   end
 

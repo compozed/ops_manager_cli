@@ -104,7 +104,8 @@ class OpsManager
         products = JSON.parse(get_available_products.body)
         directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
         versions = directors.inject([]){ |r, i| r << OpsManager::Semver.new(i.fetch('product_version')) }
-        versions.sort.last.to_s
+        versions.sort.last.to_s.gsub(/.0$/,'')
+
       rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
         nil
       end
