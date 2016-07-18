@@ -4,15 +4,18 @@ class OpsManager
     def_delegators :opsman_api, :trigger_installation, :get_installation, :get_current_version, :get_staged_products
     attr_reader :id
 
+    def trigger!
+      res = trigger_installation( body: body.join('&') )
+      @id = JSON.parse(res.body).fetch('install').fetch('id').to_i
+      self
+    end
+
     def self.trigger!
-      new
+      new.trigger!
     end
 
     def initialize
-      body = [ 'ignore_warnings=true' ]
       body << staged_products_guids.collect{ |guid| "enabled_errands[#{guid}]{}" }
-      res = trigger_installation( body: body.join('&') )
-      @id = JSON.parse(res.body).fetch('install').fetch('id').to_i
     end
 
     def wait_for_result
@@ -25,6 +28,9 @@ class OpsManager
     end
 
     private
+    def body
+      @body ||= [ 'ignore_warnings=true' ]
+    end
     def opsman_api
       @opsman_api ||= OpsManager::Api::Opsman.new
     end
