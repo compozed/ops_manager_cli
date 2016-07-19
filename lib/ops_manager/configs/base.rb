@@ -18,9 +18,9 @@ class OpsManager
         find_full_path(@config['filepath'])
       end
 
-        def find_full_path(filepath)
+      def find_full_path(filepath)
         `find #{filepath}`.split("\n").first
-        end
+      end
     end
   end
 end
