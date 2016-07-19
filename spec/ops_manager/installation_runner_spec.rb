@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'ops_manager/installation_runner'
 
 describe OpsManager::InstallationRunner do
-  let(:installation){ described_class.new }
+  let(:installation_runner){ described_class.new }
   let(:installation_id){ rand(9999) }
   let(:installation_response){ double('installation_response', body: "{\"install\":{\"id\":#{installation_id}}}" ) }
   let(:opsman_api){ double.as_null_object }
@@ -14,22 +14,20 @@ describe OpsManager::InstallationRunner do
     allow(opsman_api).to receive(:get_staged_products).and_return(double(body: '[]'))
   end
 
-  describe '@initialize' do
-    it 'should set installation.id' do
-      expect(installation.id).to eq(installation_id)
-
-    end
-
+  describe '#trigger' do
     it 'should trigger_installation' do
       expect(opsman_api).to receive(:trigger_installation)
-      installation
+      installation_runner.trigger!
     end
 
-    it 'should default to 1.7' do
-    allow(OpsManager::Api::Opsman).to receive(:new).with('1.7')
-      .and_return(opsman_api)
-      installation
+    it 'should set installation.id' do
+      expect do
+        installation_runner.trigger!
+      end.to change{installation_runner.id }.from(nil).to(installation_id)
     end
+  end
+
+  describe '@initialize' do
 
     it 'should send ignore_warnings=true' do
     end
@@ -38,10 +36,10 @@ describe OpsManager::InstallationRunner do
       let(:get_staged_products_response) do
         double(
           :body =>
-            [
-              { "guid" => "product1"},
-              { "guid" => "product2"}
-            ].to_json
+          [
+            { "guid" => "product1"},
+            { "guid" => "product2"}
+          ].to_json
         )
       end
 
@@ -49,17 +47,17 @@ describe OpsManager::InstallationRunner do
         allow(opsman_api).to receive(:get_staged_products).and_return(get_staged_products_response)
       end
 
-      it 'should set enable_errands with empty hashes' do
+      it 'should set enable_errands for all products' do
         expect(opsman_api).to receive(:trigger_installation)
           .with(body: 'ignore_warnings=true&enabled_errands[product1]{}&enabled_errands[product2]{}')
-        installation
+        installation_runner
       end
     end
   end
 
   describe '@trigger!' do
-    it 'should call new' do
-      expect(described_class).to receive(:new)
+    it 'should defer call to #trigger' do
+      expect_any_instance_of(OpsManager::InstallationRunner).to receive(:trigger!)
       described_class.trigger!
     end
   end
@@ -70,11 +68,12 @@ describe OpsManager::InstallationRunner do
     let(:running){ double(body: "{\"status\":\"running\"}") }
 
     it 'returns on success' do
-      allow(installation).to receive(:sleep)
+      allow_any_instance_of(OpsManager::InstallationRunner).to receive(:sleep)
       expect(opsman_api).to receive(:get_installation)
         .with(installation_id)
         .and_return(running, running, success)
-      installation.wait_for_result
+
+      described_class.trigger!.wait_for_result
     end
   end
 end

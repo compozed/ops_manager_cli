@@ -13,6 +13,8 @@ describe OpsManager::ProductDeployment do
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
   let(:desired_version){ '1.6.2.0' }
   let(:current_version){ '1.6.2.0' }
+  let(:errands){ %w{ errand1 errand2} }
+  let!(:installation_runner){ double_object(OpsManager::InstallationRunner.new).as_null_object }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
   let(:installation){ double.as_null_object }
   let(:config) do
@@ -101,8 +103,10 @@ describe OpsManager::ProductDeployment do
       deploy
     end
 
-    it 'should trigger installation' do
-      expect(OpsManager::InstallationRunner).to receive(:trigger!)
+
+    it 'should trigger installation with provided errands' do
+      allow(OpsManager::InstallationRunner).to receive(:new).with(with_errands: errands).and_return(installation_runner)
+      expect_any_instance_of(OpsManager::InstallationRunner).to receive(:trigger!)
       deploy
     end
 
@@ -115,7 +119,6 @@ describe OpsManager::ProductDeployment do
 
   describe "#upgrade" do
     subject(:upgrade){ product_deployment.upgrade }
-
     let(:product_installation) do
       OpsManager::ProductInstallation.new(guid, '1.6.0.0', true)
     end
