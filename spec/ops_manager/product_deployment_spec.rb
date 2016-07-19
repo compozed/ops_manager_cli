@@ -29,7 +29,6 @@ describe OpsManager::ProductDeployment do
   end
 
   before do
-    `rm #{filepath} ; cp ../fixtures/#{filepath} .`
     allow(product_deployment).tap do |pd|
       pd.to receive(:installation).and_return(product_installation)
       pd.to receive(:config).and_return(config)

@@ -117,14 +117,17 @@ describe OpsManager::Api::Pivnet do
       stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files").
         to_return(:status => 200, :body => product_files_response.to_json, :headers => {})
 
-        stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
-          to_return(:status => 302, :body => "banana", :headers => { 'Location' => stemcell_redirect_uri })
+      stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").
+        to_return(:status => 302, :body => "banana", :headers => { 'Location' => stemcell_redirect_uri })
 
-          stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
+      stub_request(:get, stemcell_redirect_uri ).to_return(:status => 200, :body => "banana", :headers => {})
 
-          stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").
-            to_return(:status => 200, :body => "")
+      stub_request(:post, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance").
+        to_return(:status => 200, :body => "")
+
+      `rm #{stemcell_path}`
     end
+
     it 'should accept stemcell eula before downloading' do
       pivnet_api.download_stemcell(stemcell_version, stemcell_path, filename_regex)
       expect(WebMock).to have_requested(
@@ -138,6 +141,8 @@ describe OpsManager::Api::Pivnet do
         :post,
         "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download").with(:headers => { "Authorization"=>"Token #{pivnet_token}" })
     end
+
+      after{ `rm #{stemcell_path}` }
 
     it 'should write stemcell to file' do
       `rm #{stemcell_path}`

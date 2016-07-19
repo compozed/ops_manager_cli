@@ -324,7 +324,7 @@ describe OpsManager::Api::Opsman do
 
 
   describe "#import_stemcell" do
-    subject(:import_stemcell){ opsman.import_stemcell("../fixtures/stemcell.tgz") }
+    subject(:import_stemcell){ opsman.import_stemcell("stemcell.tgz") }
 
     let(:response_body){ '{}' }
     let(:response){ import_stemcell }
