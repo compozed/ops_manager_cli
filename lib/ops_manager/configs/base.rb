@@ -19,6 +19,7 @@ class OpsManager
       end
 
       def find_full_path(filepath)
+        return unless filepath
         `find #{filepath}`.split("\n").first
       end
     end
