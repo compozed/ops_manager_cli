@@ -14,6 +14,7 @@ class OpsManager
     def generate
       delete_partitions
       delete_vm_credentials
+      delete_guid
       delete_jobs_guid
       delete_prepared
       delete_ops_manager_generated_passwords
@@ -23,7 +24,7 @@ class OpsManager
       delete_product_version
       add_merging_strategy_for_jobs
 
-      { 'products' => [ "(( merge on guid ))" , selected_product ] }
+      { 'products' => [ "(( merge on identifier ))" , selected_product ] }
     end
 
     def generate_yml
@@ -89,6 +90,10 @@ class OpsManager
 
     def delete_prepared
       selected_product.delete("prepared")
+    end
+
+    def delete_guid
+      selected_product.delete("guid")
     end
 
     def add_merging_strategy_for_jobs
