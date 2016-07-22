@@ -40,12 +40,12 @@ class OpsManager
       Semver.new( config.desired_version)
     end
     def upload
-      puts "====> Uploading product...".green
+      print "====> Uploading product...".green
       if ProductDeployment.exists?(config.name, config.desired_version)
-        print "product already exists".green
+        puts "product already exists".green
       else
         upload_product(config.filepath)
-        print "done".green
+        puts "done".green
       end
     end
 

@@ -20,6 +20,8 @@ class OpsManager
         print '.'.green
         sleep 10
       end
+
+      puts ''
     end
 
     private

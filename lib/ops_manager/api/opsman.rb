@@ -16,6 +16,10 @@ class OpsManager
         puts str.green unless silent
       end
 
+      def print_green(str)
+        print str.green unless silent
+      end
+
       def create_user
         body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
@@ -59,7 +63,7 @@ class OpsManager
       end
 
       def trigger_installation(opts = {})
-        say_green( '====> Applying changes...')
+        print_green( '====> Applying changes...')
         opts = add_authentication(opts)
         post('/api/v0/installations', opts)
       end
