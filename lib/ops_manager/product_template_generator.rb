@@ -15,13 +15,15 @@ class OpsManager
       delete_partitions
       delete_vm_credentials
       delete_guid
+      delete_installation_name
+      delete_product_version
       delete_jobs_guid
       delete_prepared
       delete_ops_manager_generated_passwords
       delete_ops_manager_generated_salts
       delete_ops_manager_generated_secrets
       delete_private_key_pem
-      delete_product_version
+      delete_product_version_from_properties
       add_merging_strategy_for_jobs
 
       { 'products' => [ "(( merge on identifier ))" , selected_product ] }
@@ -29,12 +31,11 @@ class OpsManager
 
     def generate_yml
       generate.to_yaml
-        .gsub('"(( merge on guid ))"', '(( merge on guid ))')
         .gsub('"(( merge on identifier ))"', '(( merge on identifier ))')
     end
 
     private
-    def delete_product_version
+    def delete_product_version_from_properties
       delete_value_from_product_properties_if do |property|
         property['identifier'] == 'product_version'
       end
@@ -94,6 +95,14 @@ class OpsManager
 
     def delete_guid
       selected_product.delete("guid")
+    end
+
+    def delete_installation_name
+      selected_product.delete("installation_name")
+    end
+
+    def delete_product_version
+      selected_product.delete("product_version")
     end
 
     def add_merging_strategy_for_jobs

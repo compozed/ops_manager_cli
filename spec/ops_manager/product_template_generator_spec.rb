@@ -4,6 +4,7 @@ describe OpsManager::ProductTemplateGenerator do
   let(:product_template_generator){ described_class.new(product_name) }
   let(:product_name){'dummy-product'}
   let(:guid){ 'dd2b-c21a-c11d-607d-sad1' }
+  let(:installation_name){ 'example-job-123' }
   let(:random_password){ 'dd2bc21ac11d607d73c8' }
   let(:custom_password){ 'custom-password' }
   let(:random_secret){ '12341234123412341234' }
@@ -13,6 +14,8 @@ describe OpsManager::ProductTemplateGenerator do
     {
       'products' => [{
         'prepared' => true,'identifier' =>product_name, 'guid' => guid,
+        'installation_name' => installation_name,
+        'product_version' => product_version,
         'properties' => [
           {
             'value' => {
@@ -90,6 +93,14 @@ describe OpsManager::ProductTemplateGenerator do
   describe '#generate' do
     it 'should remove product guid' do
       expect(product_template_generator.generate.to_s).not_to match(guid)
+    end
+
+    it 'should remove product installation_name' do
+      expect(product_template_generator.generate.to_s).not_to match(installation_name)
+    end
+
+    it 'should remove product product_version' do
+      expect(product_template_generator.generate.to_s).not_to match(product_version)
     end
 
     it 'should remove prepared entry' do

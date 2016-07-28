@@ -45,6 +45,12 @@ describe OpsManager::ProductDeployment do
     end
   end
 
+  describe "#merge_installation_settings" do
+    it "should use spruce to merge the templates"
+    it "should return the merged installation_settings"
+    it "should return RuntimeError with the stderr of the run command"
+  end
+
   describe "@exists?" do
     let(:products_response){ double(body: [{'name' => 'cf', 'product_version' => '1'}].to_json )}
 
