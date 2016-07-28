@@ -81,6 +81,7 @@ describe OpsManager::ProductDeployment do
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
         s.to receive(:get_installation_settings)
+        s.to receive(:add_staged_products)
         s.to receive(:`)
       end
 
@@ -93,6 +94,11 @@ describe OpsManager::ProductDeployment do
 
     it 'should download current installation setting' do
       expect(product_deployment).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      deploy
+    end
+
+    it 'should download current installation setting' do
+      expect(product_deployment).to receive(:add_staged_products).with(name, desired_version)
       deploy
     end
 

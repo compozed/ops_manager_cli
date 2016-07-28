@@ -9,7 +9,7 @@ class OpsManager
     extend Forwardable
     def_delegators :opsman_api, :current_version, :upload_product, :get_installation_settings,
       :upgrade_product_installation, :get_installation, :get_available_products, :upload_installation_settings,
-      :trigger_installation, :import_stemcell
+      :trigger_installation, :import_stemcell, :add_staged_products
 
     include OpsManager::Logging
 
@@ -65,6 +65,7 @@ class OpsManager
     def deploy
       puts "====> Deploying #{config.name} version #{config.desired_version}...".green
       upload
+      add_staged_products(config.name,config.desired_version)
       get_installation_settings({write_to: '/tmp/is.yml'})
       puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')

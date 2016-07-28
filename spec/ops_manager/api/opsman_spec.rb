@@ -414,4 +414,34 @@ describe OpsManager::Api::Opsman do
       end
     end
   end
+
+  describe 'add_staged_products' do
+    let(:product_version){ '1.7.2.0' }
+    let(:uri){ "https://#{target}/api/v0/staged/products" }
+    let(:body){ "name=#{product_name}&product_version=#{product_version}"}
+      let(:http_code){ 200 }
+    let(:product_name) { 'example-product' }
+
+    before do
+      stub_request(:post, uri).
+        to_return(:status => http_code, :body => '{}')
+    end
+
+    it 'performs the correct request' do
+      opsman.add_staged_products(product_name, product_version)
+      expect(WebMock).to have_requested(:post, uri)
+        .with(:body => body, :headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+
+    describe 'when errors' do
+      let(:http_code){ 404 }
+      let(:body){ '{"errors":[\"Product name cant be blank\"]}' }
+
+      it "should not raise OpsManager::ProductDeploymentError" do
+        expect do
+          opsman.add_staged_products(product_name, product_version)
+        end.to raise_exception(OpsManager::ProductDeploymentError)
+      end
+    end
+  end
 end

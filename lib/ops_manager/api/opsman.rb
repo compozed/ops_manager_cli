@@ -64,8 +64,15 @@ class OpsManager
 
       def trigger_installation(opts = {})
         print_green( '====> Applying changes...')
-        opts = add_authentication(opts)
-        post('/api/v0/installations', opts)
+        authenticated_post('/api/v0/installations', opts)
+      end
+
+      def add_staged_products(name, version)
+        print_green( "====> Adding available product to the installation...")
+        body = "name=#{name}&product_version=#{version}"
+        res = authenticated_post('/api/v0/staged/products', body: body)
+        raise OpsManager::ProductDeploymentError.new(res.body) unless res.code == '200'
+        res
       end
 
       def get_installation(id)
