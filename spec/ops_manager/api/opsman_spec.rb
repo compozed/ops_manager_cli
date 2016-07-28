@@ -145,6 +145,8 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
+    let(:body){ "setup[decryption_passphrase]=bar&setup[decryption_passphrase_confirmation]=bar&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}" }
+      let(:uri){ "#{base_uri}/api/v0/setup" }
     subject(:create_user){ opsman.create_user }
     let(:response){ create_user }
 
@@ -152,22 +154,16 @@ describe OpsManager::Api::Opsman do
       stub_request(:post, uri).
         with(:body => body).
         to_return(:status => 200, :body => "", :headers => {})
-
     end
 
-    describe 'when version 1.7.x' do
-      let(:body){ 'setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=bar&setup[admin_password_confirmation]=bar' }
-      let(:uri){ "#{base_uri}/api/v0/setup" }
+    it "should successfully create first user" do
+      expect(response.code).to eq('200')
+    end
 
-      it "should successfully create first user" do
-        expect(response.code).to eq('200')
-      end
-
-      it 'should not send any authentication on post request' do
-        create_user
-        expect(WebMock).not_to have_requested(:post, uri)
-          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
-      end
+    it 'should set passpharse==password' do
+      create_user
+      expect(WebMock).to have_requested(:post, uri)
+        .with(:body => body)
     end
   end
 

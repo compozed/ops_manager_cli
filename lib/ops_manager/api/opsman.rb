@@ -21,7 +21,7 @@ class OpsManager
       end
 
       def create_user
-        body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
+        body= "setup[decryption_passphrase]=#{password}&setup[decryption_passphrase_confirmation]=#{password}&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
       end
 
