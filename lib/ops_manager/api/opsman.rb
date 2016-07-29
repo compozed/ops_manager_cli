@@ -72,6 +72,7 @@ class OpsManager
         body = "name=#{name}&product_version=#{version}"
         res = authenticated_post('/api/v0/staged/products', body: body)
         raise OpsManager::ProductDeploymentError.new(res.body) unless res.code == '200'
+        say_green('done')
         res
       end
 
