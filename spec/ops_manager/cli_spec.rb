@@ -124,10 +124,16 @@ describe OpsManager::Cli do
 
   describe 'import-stemcell' do
     let(:args) { %w(import-stemcell /tmp/is.yml) }
+    let!(:opsman_api) do
+      object_double(OpsManager::Api::Opsman.new).as_null_object
+    end
+
+    before do
+      allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+    end
 
     it "should call ops_manager.import_stemcell" do
-      expect_any_instance_of(OpsManager)
-        .to receive(:import_stemcell).with('/tmp/is.yml')
+      expect(opsman_api).to receive(:import_stemcell).with('/tmp/is.yml')
       cli.run(`pwd`, args)
     end
   end
