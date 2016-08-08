@@ -419,7 +419,7 @@ describe OpsManager::Api::Opsman do
     let(:product_version){ '1.7.2.0' }
     let(:uri){ "https://#{target}/api/v0/staged/products" }
     let(:body){ "name=#{product_name}&product_version=#{product_version}"}
-      let(:http_code){ 200 }
+    let(:http_code){ 200 }
     let(:product_name) { 'example-product' }
 
     before do
@@ -433,7 +433,7 @@ describe OpsManager::Api::Opsman do
         .with(:body => body, :headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
 
-    describe 'when errors' do
+    describe 'when resource not found' do
       let(:http_code){ 404 }
       let(:body){ '{"errors":[\"Product name cant be blank\"]}' }
 

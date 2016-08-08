@@ -37,8 +37,9 @@ class OpsManager
     end
 
     def desired_version
-      Semver.new( config.desired_version)
+      Semver.new(config.desired_version)
     end
+
     def upload
       print "====> Uploading product...".green
       if ProductDeployment.exists?(config.name, config.desired_version)
@@ -62,10 +63,16 @@ class OpsManager
       puts "====> Finish!".green
     end
 
+    def add_to_installation
+      unless installation
+        add_staged_products(config.name, config.desired_version)
+      end
+    end
+
     def deploy
       puts "====> Deploying #{config.name} version #{config.desired_version}...".green
       upload
-      add_staged_products(config.name,config.desired_version)
+      add_to_installation
       get_installation_settings({write_to: '/tmp/is.yml'})
       puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
