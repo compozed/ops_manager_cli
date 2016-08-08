@@ -3,6 +3,8 @@ class OpsManager
     def generate
       merge_director_template_products
       delete_schema_version
+      delete_director_ssl
+      delete_uaa_ssl
       delete_guid
       delete_ip_assignments
       installation_settings.to_h
@@ -36,9 +38,19 @@ class OpsManager
     def delete_guid
       @installation_settings.delete('guid')
     end
+
+    def delete_director_ssl
+      director_product_template["products"][1].delete("director_ssl")
+    end
+
+    def delete_uaa_ssl
+      director_product_template["products"][1].delete("uaa_ssl")
+    end
+
     def director_product_template
       @director_product_template ||= OpsManager::ProductTemplateGenerator.new('p-bosh').generate
     end
+
 
     def installation_settings_response
       OpsManager::Api::Opsman.new(silent: true).get_installation_settings

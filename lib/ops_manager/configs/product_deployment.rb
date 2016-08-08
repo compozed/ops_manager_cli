@@ -7,6 +7,10 @@ class OpsManager
         super(config)
         validate_presence_of!(:name, :desired_version)
       end
+
+      def stemcell
+        find_full_path(@config['stemcell'])
+      end
     end
   end
 end

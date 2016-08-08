@@ -145,6 +145,8 @@ describe OpsManager::Api::Opsman do
   end
 
   describe '#create_user' do
+    let(:body){ "setup[decryption_passphrase]=bar&setup[decryption_passphrase_confirmation]=bar&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}" }
+      let(:uri){ "#{base_uri}/api/v0/setup" }
     subject(:create_user){ opsman.create_user }
     let(:response){ create_user }
 
@@ -152,22 +154,16 @@ describe OpsManager::Api::Opsman do
       stub_request(:post, uri).
         with(:body => body).
         to_return(:status => 200, :body => "", :headers => {})
-
     end
 
-    describe 'when version 1.7.x' do
-      let(:body){ 'setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=bar&setup[admin_password_confirmation]=bar' }
-      let(:uri){ "#{base_uri}/api/v0/setup" }
+    it "should successfully create first user" do
+      expect(response.code).to eq('200')
+    end
 
-      it "should successfully create first user" do
-        expect(response.code).to eq('200')
-      end
-
-      it 'should not send any authentication on post request' do
-        create_user
-        expect(WebMock).not_to have_requested(:post, uri)
-          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
-      end
+    it 'should set passpharse==password' do
+      create_user
+      expect(WebMock).to have_requested(:post, uri)
+        .with(:body => body)
     end
   end
 
@@ -324,7 +320,7 @@ describe OpsManager::Api::Opsman do
 
 
   describe "#import_stemcell" do
-    subject(:import_stemcell){ opsman.import_stemcell("../fixtures/stemcell.tgz") }
+    subject(:import_stemcell){ opsman.import_stemcell("stemcell.tgz") }
 
     let(:response_body){ '{}' }
     let(:response){ import_stemcell }
@@ -415,6 +411,36 @@ describe OpsManager::Api::Opsman do
 
       it 'it should be nil' do
         expect(opsman.get_token).to be_nil
+      end
+    end
+  end
+
+  describe 'add_staged_products' do
+    let(:product_version){ '1.7.2.0' }
+    let(:uri){ "https://#{target}/api/v0/staged/products" }
+    let(:body){ "name=#{product_name}&product_version=#{product_version}"}
+    let(:http_code){ 200 }
+    let(:product_name) { 'example-product' }
+
+    before do
+      stub_request(:post, uri).
+        to_return(:status => http_code, :body => '{}')
+    end
+
+    it 'performs the correct request' do
+      opsman.add_staged_products(product_name, product_version)
+      expect(WebMock).to have_requested(:post, uri)
+        .with(:body => body, :headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+
+    describe 'when resource not found' do
+      let(:http_code){ 404 }
+      let(:body){ '{"errors":[\"Product name cant be blank\"]}' }
+
+      it "should not raise OpsManager::ProductDeploymentError" do
+        expect do
+          opsman.add_staged_products(product_name, product_version)
+        end.to raise_exception(OpsManager::ProductDeploymentError)
       end
     end
   end

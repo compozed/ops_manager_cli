@@ -74,7 +74,7 @@ class OpsManager
       parameter "STEMCELL_FILEPATH", "Stemcell filepath", required: true
 
       def execute
-        OpsManager.new.import_stemcell(@stemcell_filepath)
+        OpsManager::Api::Opsman.new.import_stemcell(@stemcell_filepath)
       end
     end
 

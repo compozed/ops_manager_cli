@@ -15,7 +15,12 @@ class OpsManager
       end
 
       def filepath
-        `find #{@config['filepath']}`.split("\n").first
+        find_full_path(@config['filepath'])
+      end
+
+      def find_full_path(filepath)
+        return unless filepath
+        `find #{filepath}`.split("\n").first
       end
     end
   end

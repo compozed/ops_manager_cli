@@ -31,7 +31,6 @@ describe OpsManager::ProductDeployment do
   end
 
   before do
-    `rm #{filepath} ; cp ../fixtures/#{filepath} .`
     allow(product_deployment).tap do |pd|
       pd.to receive(:installation).and_return(product_installation)
       pd.to receive(:config).and_return(config)
@@ -46,6 +45,12 @@ describe OpsManager::ProductDeployment do
       expect(OpsManager::ProductInstallation).to receive(:find).with(name)
       product_deployment.installation
     end
+  end
+
+  describe "#merge_installation_settings" do
+    it "should use spruce to merge the templates"
+    it "should return the merged installation_settings"
+    it "should return RuntimeError with the stderr of the run command"
   end
 
   describe "@exists?" do
@@ -70,6 +75,31 @@ describe OpsManager::ProductDeployment do
     end
   end
 
+  describe '#add_to_installation' do
+    subject(:add_to_installation){ product_deployment.add_to_installation }
+
+    before { allow(product_deployment).to receive(:installation).and_return(installation) }
+
+    describe 'when installation exists' do
+      let(:installation){ double.as_null_object }
+
+      it 'should not perform the add_staged_product' do
+        expect_any_instance_of(OpsManager::Api::Opsman).not_to receive(:add_staged_products)
+        add_to_installation
+      end
+    end
+
+    describe 'when installation does not exists' do
+      let(:installation){ nil }
+
+      it 'should not perform the add_staged_product' do
+        expect_any_instance_of(OpsManager::Api::Opsman).to receive(:add_staged_products)
+        add_to_installation
+      end
+    end
+
+  end
+
   describe "#deploy" do
     subject(:deploy){ product_deployment.deploy }
 
@@ -78,9 +108,9 @@ describe OpsManager::ProductDeployment do
         s.to receive(:upload)
         s.to receive(:upload_installation_settings)
         s.to receive(:get_installation_settings)
+        s.to receive(:add_to_installation)
         s.to receive(:`)
       end
-
     end
 
     it 'performs a product_deployment upload' do
@@ -90,6 +120,11 @@ describe OpsManager::ProductDeployment do
 
     it 'should download current installation setting' do
       expect(product_deployment).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      deploy
+    end
+
+    it 'should download current installation setting' do
+      expect(product_deployment).to receive(:add_to_installation)
       deploy
     end
 

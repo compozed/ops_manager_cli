@@ -16,8 +16,12 @@ class OpsManager
         puts str.green unless silent
       end
 
+      def print_green(str)
+        print str.green unless silent
+      end
+
       def create_user
-        body= "setup[decryption_passphrase]=passphrase&setup[decryption_passphrase_confirmation]=passphrase&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
+        body= "setup[decryption_passphrase]=#{password}&setup[decryption_passphrase_confirmation]=#{password}&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
       end
 
@@ -59,9 +63,17 @@ class OpsManager
       end
 
       def trigger_installation(opts = {})
-        say_green( '====> Applying changes...')
-        opts = add_authentication(opts)
-        post('/api/v0/installations', opts)
+        print_green('====> Applying changes...')
+        authenticated_post('/api/v0/installations', opts)
+      end
+
+      def add_staged_products(name, version)
+        print_green( "====> Adding available product to the installation...")
+        body = "name=#{name}&product_version=#{version}"
+        res = authenticated_post('/api/v0/staged/products', body: body)
+        raise OpsManager::ProductDeploymentError.new(res.body) if res.code == '404'
+        say_green('done')
+        res
       end
 
       def get_installation(id)

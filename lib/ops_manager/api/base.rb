@@ -44,8 +44,6 @@ class OpsManager
         http = http_for(uri)
         request = Net::HTTP::Post.new(uri.request_uri)
 
-        request.basic_auth(username, password) if self.respond_to?(:username)
-
         if opts.has_key?(:headers)
           opts.delete(:headers).each_pair do |k,v|
             request[k] = v

@@ -9,8 +9,9 @@ describe OpsManager::DirectorTemplateGenerator do
   let(:product_template) do
     {
       'products' => [
-        '(( merge on guid ))',
+        '(( merge on identifier ))',
         { 'identifier' => 'p-bosh',
+          'director_ssl' => {},
           'jobs' => [ '(( merge on identifier ))' ] }
       ]
     }
@@ -64,14 +65,29 @@ describe OpsManager::DirectorTemplateGenerator do
       expect(generate['products'][1]['identifier']).to eq('p-bosh')
     end
 
-    it 'should include product merge strategy' do
-      expect(generate['products'][0]).to eq('(( merge on guid ))')
+    it 'should include product merge strategy on identifier' do
+      expect(generate['products'][0]).to eq('(( merge on identifier ))')
     end
 
     it 'should remove installation_schema_versiion' do
       expect(generate).not_to have_key('installation_schema_version')
     end
 
+    it 'should remove product guid' do
+      expect(generate).not_to have_key('guid')
+    end
+
+    it 'should not include product director_ssl' do
+      expect(generate['products'][1]).not_to have_key('director_ssl')
+    end
+
+    it 'should not include product uaa_ssl' do
+      expect(generate['products'][1]).not_to have_key('uaa_ssl')
+    end
+
+    it 'should remove producty director_ssl' do
+      expect(generate).not_to have_key('director_ssl')
+    end
 
     it 'should remove ip assignments' do
       expect(generate).not_to have_key('ip_assignments')
