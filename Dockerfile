@@ -1,7 +1,7 @@
 FROM ruby:2.3.0
 
 ENV GEM_NAME ops_manager_cli
-ENV GEM_VERSION 0.2.7
+ENV GEM_VERSION 0.2.8
 ENV OVFTOOL_VERSION 4.1.0-2459827
 ENV OVFTOOL_INSTALLER vmware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle 
 ARG DOWNLOAD_URL=https://storage.googleapis.com/mortarchive/pub/ovftool/${OVFTOOL_INSTALLER} 

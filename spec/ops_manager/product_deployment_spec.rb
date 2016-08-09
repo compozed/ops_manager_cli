@@ -14,7 +14,7 @@ describe OpsManager::ProductDeployment do
   let(:desired_version){ '1.6.2.0' }
   let(:current_version){ '1.6.2.0' }
   let(:errands){ %w{ errand1 errand2} }
-  let!(:installation_runner){ double_object(OpsManager::InstallationRunner.new).as_null_object }
+  let!(:installation_runner){ object_double(OpsManager::InstallationRunner.new).as_null_object }
   let(:product_installation){ OpsManager::ProductInstallation.new(guid, current_version, true) }
   let(:installation){ double.as_null_object }
   let(:config) do
@@ -32,16 +32,14 @@ describe OpsManager::ProductDeployment do
 
   before do
     allow(product_deployment).tap do |pd|
-      pd.to receive(:installation).and_return(product_installation)
       pd.to receive(:config).and_return(config)
     end
-
+    allow(OpsManager::ProductInstallation).to receive(:find).and_return(product_installation)
     allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
   end
 
   describe "#installation" do
     it "should look for its ProductInstallation" do
-      allow(product_deployment).to receive(:installation).and_call_original
       expect(OpsManager::ProductInstallation).to receive(:find).with(name)
       product_deployment.installation
     end
@@ -135,13 +133,6 @@ describe OpsManager::ProductDeployment do
 
     it 'should upload new installation settings' do
       expect(product_deployment).to receive(:upload_installation_settings).with('/tmp/new_is.yml')
-      deploy
-    end
-
-
-    it 'should trigger installation with provided errands' do
-      allow(OpsManager::InstallationRunner).to receive(:new).with(with_errands: errands).and_return(installation_runner)
-      expect_any_instance_of(OpsManager::InstallationRunner).to receive(:trigger!)
       deploy
     end
 

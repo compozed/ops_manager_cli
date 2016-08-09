@@ -444,4 +444,23 @@ describe OpsManager::Api::Opsman do
       end
     end
   end
+
+  describe "#get_staged_products_errands" do
+    let(:product_guid){ 'example-product-31695d885b442a75beee' }
+    let(:uri){ "https://#{target}/api/v0/staged/products/#{product_guid}/errands" }
+    let(:body){ '{"errands":[{"name":"shared-errand","post_deploy":false,"pre_delete":true}]}'}
+    let(:status_code){ 200 }
+
+    before do
+      stub_request(:get, uri).
+        to_return(status: status_code, body: body)
+    end
+
+    it 'performs the correct request' do
+      opsman.get_staged_products_errands(product_guid)
+
+      expect(WebMock).to have_requested(:get, uri)
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
 end

@@ -86,6 +86,10 @@ class OpsManager
         authenticated_get("/api/v0/installations/#{id}/logs")
       end
 
+      def get_staged_products_errands(product_guid)
+        authenticated_get("/api/v0/staged/products/#{product_guid}/errands" )
+      end
+
       def get_installations(opts = {})
         authenticated_get('/api/v0/installations')
       end
