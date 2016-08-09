@@ -36,9 +36,7 @@ class OpsManager
     end
 
     def errands_body
-      staged_products_guids.collect do |product_guid|
-        post_deploy_errands_body_for(product_guid)
-      end
+      staged_products_guids.collect { |product_guid| post_deploy_errands_body_for(product_guid) }
     end
 
     def post_deploy_errands_body_for(product_guid)
@@ -65,6 +63,7 @@ class OpsManager
 
     def errands_for(product_guid)
       res = get_staged_products_errands(product_guid)
+
       if res.code == 200
         JSON.parse(res.body)['errands']
       else
