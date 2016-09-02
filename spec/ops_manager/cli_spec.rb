@@ -33,25 +33,15 @@ describe OpsManager::Cli do
   end
 
   # ./ops_manager deploy -c conf.yml
-  describe "deploy" do
-    let(:args) { %w(deploy) }
+  describe "deploy-appliance" do
+    let(:args) { %w(deploy-appliance ops_manager_deployment.yml) }
 
     it "should call ops_manager.deploy" do
-      expect(OpsManager::Deployment).to receive(:new).and_call_original
-      expect_any_instance_of(OpsManager::Deployment).to receive(:run)
+      expect(OpsManager::ApplianceDeployment).to receive(:new).and_call_original
+      expect_any_instance_of(OpsManager::ApplianceDeployment).to receive(:run)
       cli.run(`pwd`, args)
     end
   end
-
-  describe "deployment" do
-    let(:args) { %w(deployment ops_manager_deployment.yml) }
-
-    it "should call OpsManager.deployment= with path to config file" do
-      expect(OpsManager).to receive(:deployment=).with('ops_manager_deployment.yml')
-      cli.run(`pwd`, args)
-    end
-  end
-
 
   # ./ops_manager deploy-product -c conf.yml
   describe "deploy-product" do
@@ -79,20 +69,6 @@ describe OpsManager::Cli do
       end
     end
   end
-
-  describe "ssh" do
-    let(:args) { %w(ssh) }
-
-    before do
-      allow(OpsManager).to receive(:get_conf).with(:target).and_return('1.2.3.4')
-    end
-
-    it "should ssh to target with the ubuntu user" do
-      expect_any_instance_of(OpsManager::Cli::SSH).to receive(:`).with('ssh ubuntu@1.2.3.4')
-      cli.run(`pwd`, args)
-    end
-  end
-
 
   describe "get-uaa-token" do
     let(:args) { %w(get-uaa-token) }
@@ -284,7 +260,5 @@ describe OpsManager::Cli do
         cli.run(`pwd`, args)
       end
     end
-
-
   end
 end

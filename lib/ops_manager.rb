@@ -44,10 +44,6 @@ class OpsManager
       end
     end
 
-    def deployment=(filepath)
-      set_conf(:deployment, filepath)
-    end
-
     def login(username, password)
       set_conf(:username, username)
       set_conf(:password, password)

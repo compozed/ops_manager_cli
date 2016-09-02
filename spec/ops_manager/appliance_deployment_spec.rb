@@ -1,9 +1,9 @@
 require 'spec_helper'
-require "ops_manager/deployment"
+require "ops_manager/appliance_deployment"
 require 'yaml'
 
-describe OpsManager::Deployment do
-  let(:deployment){ described_class.new }
+describe OpsManager::ApplianceDeployment do
+  let(:deployment){ described_class.new(config_file) }
   let(:target){'1.2.3.4'}
   let(:current_version){ '1.4.2.0' }
   let(:desired_version){ '1.5.5.0' }
@@ -14,6 +14,7 @@ describe OpsManager::Deployment do
   let(:installation){ double.as_null_object }
   let(:installation_settings){ double('installation_settings').as_null_object }
   let(:target){ '1.2.3.4' }
+  let(:config_file){ 'ops_manager_deployment.yml' }
   let(:config) do
     double('config',
            name: 'ops-manager',
@@ -28,7 +29,6 @@ describe OpsManager::Deployment do
     OpsManager.set_conf(:target, ENV['TARGET'] || target)
     OpsManager.set_conf(:username, ENV['USERNAME'] || 'foo')
     OpsManager.set_conf(:password, ENV['PASSWORD'] || 'bar')
-    OpsManager.set_conf(:deployment, ENV['DEPLOYMENT'] || 'ops_manager_deployment.yml')
 
     allow(OpsManager::InstallationSettings).to receive(:new).and_return(installation_settings)
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
@@ -36,6 +36,12 @@ describe OpsManager::Deployment do
 
     allow(deployment).to receive(:get_current_version).and_return(current_version)
     allow(deployment).to receive(:parsed_installation_settings).and_return(current_version)
+  end
+
+  describe 'initialize' do
+    it 'should set config file' do
+      expect(deployment.config_file).to eq(config_file)
+    end
   end
 
   %w{ stop_current_vm deploy_vm }.each do |m|

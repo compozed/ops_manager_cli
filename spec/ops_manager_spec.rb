@@ -101,22 +101,6 @@ describe OpsManager do
     end
   end
 
-  describe '@deployment=' do
-    it 'should set deployment config file path' do
-      expect do
-        OpsManager.deployment= 'path/to/config'
-      end.to change{ OpsManager.get_conf :deployment }
-    end
-  end
-
-  describe '@deployment=' do
-    it 'should set deployment config file path' do
-      expect do
-        OpsManager.deployment= 'path/to/config'
-      end.to change{ OpsManager.get_conf :deployment }
-    end
-  end
-
   describe '@target_and_login' do
     before do
       allow(OpsManager).to receive(:set_target)

@@ -3,12 +3,18 @@ require "ops_manager/api/pivnet"
 require "ops_manager/installation_settings"
 require 'ops_manager/configs/opsman_deployment'
 
-class OpsManager::Deployment
+class OpsManager::ApplianceDeployment
   extend Forwardable
   def_delegators :pivnet_api, :download_stemcell
   def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
     :get_installation_settings, :upload_installation_assets, :import_stemcell, :target,
     :password, :username, :get_current_version ,:ops_manager_version=
+
+  attr_reader :config_file
+
+  def initialize(config_file)
+    @config_file = config_file
+  end
 
   def run
     OpsManager.set_conf(:target, config.ip)
@@ -34,7 +40,6 @@ class OpsManager::Deployment
   def deploy
     deploy_vm(desired_vm_name , config.ip)
   end
-
 
   %w{ stop_current_vm deploy_vm }.each do |m|
     define_method(m) do
@@ -100,8 +105,7 @@ class OpsManager::Deployment
   end
 
   def config
-    deployment_manifest = OpsManager.get_conf(:deployment)
-    parsed_yml = ::YAML.load_file(deployment_manifest)
+    parsed_yml = ::YAML.load_file(@config_file)
     @config ||= OpsManager::Configs::OpsmanDeployment.new(parsed_yml)
   end
 
