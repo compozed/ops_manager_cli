@@ -1,65 +1,64 @@
-# OpsManager
+# OpsManagerCli
 
-Performs Ops Manager deployments (vsphere support only).
+Command line tool to interact with Ops Manager through its API, because GUIs are evil.
 
-## Pre-requisites
+Questions? Pop in our [slack channel](https://cloudfoundry.slack.com/messages/ops_manager_cli/)!
 
- - `ovftools` (version 4.1.0 or higher) installed (available in user PATH) on your workstation
+## Core features
 
-## Installation
+- Deploy/Upgrade Ops Manager appliance
+- Deploy/Upgrade product tiles
+- Generate config settings templates for product tiles deployments
 
-**NOTE: this installation process will only work once the gem gets publish and open source.**
+## Other features:
 
-Add this line to your application's Gemfile:
+- Show installation settings
+- Show installation logs
+- Get UAA token
+- Uploads stemcell to Ops Manager
+- Delete unused products
 
-    gem 'ops_manager'
+## Dependencies
 
-And then execute:
+ - [ovftools](https://www.vmware.com/support/developer/ovf/) (version 4.1.0 or higher)
+ - [spruce](https://github.com/geofffranks/spruce#installation) 
 
-    $ bundle
+All dependencies must be installed and available in user PATH
 
-Or install it yourself as:
+## installing
 
-    $ gem install ops_manager
+    gem install ops_manager
 
 ## Usage
 
-### Help
+### List available commands
 
-prints out available commands with their usage
-
-    ./ops_manager help
-
+    ops_manager 
 
 ### Target 
 
-    ./ops_manager target ops_manager_address
+    ops_manager target OPSMAN_URL
 
 
 ### Login 
 
-    ./ops_manager login username password
+    ops_manager login USERNAME PASSWORD
 
 
-### Deploy or upgrade 
+### Deploy/Upgrade Ops Manager appliance
 
-**target** and **login** are optional and can be provided in the YAML conf file.
+**config example:** [ops_manager_deployment.yml](spec/dummy/ops_manager_deployment.yml)
 
-Once you have created the config you can run a deployment:
-
-    ./ops_manager deploy [config/ops_manager_example.yml](spec/dummy/ops_manager_deployment.yml)
+    ops_manager deploy ops_manager_deployment.yml
 
 
-### Deploy or upgrade product tile
+### Deploy/Upgrade product tile
 
-**target** and **login** are optional and can be provided in the YAML conf file.
+**Before running:** `target` and `login`. You can do this through through config file too.
 
-    ./ops_manager deploy-product [config/product_example.yml](spec/dummy/ops_manager_deployment.yml)
+**config example:** [product_deployment.yml](spec/dummy/product_deployment.yml)
 
-
-### Provision stemcell(TBD)
-
-    ./ops_manager provision-stemcell -p ./path/to/stemcell 
+    ./ops_manager deploy-product product_deployment.yml
 
 
 ## Building Docker image
@@ -73,19 +72,6 @@ Once you have created the config you can run a deployment:
     docker tag -f compozed/ops_manager_cli PRI_REGISTRY:PORT/compozed/ops_manager_cli
     docker push PRI_REGISTRY:PORT/compozed/ops_manager_cli
 
-## Development
-
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
-
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
-
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/compozed/ops_manager. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](contributor-covenant.org) code of conduct.
-
-
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
