@@ -27,7 +27,7 @@ All dependencies must be installed and available in user PATH
 
 ## installing
 
-    gem install ops_manager
+    gem install ops_manager_cli
 
 ## Usage
 
@@ -49,7 +49,7 @@ All dependencies must be installed and available in user PATH
 
 **config example:** [ops_manager_deployment.yml](spec/dummy/ops_manager_deployment.yml)
 
-    ops_manager deploy ops_manager_deployment.yml
+    ops_manager deploy-appliance ops_manager_deployment.yml
 
 
 ### Deploy/Upgrade product tile
