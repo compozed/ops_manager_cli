@@ -6,8 +6,8 @@ require 'ops_manager/version'
 Gem::Specification.new do |spec|
   spec.name          = "ops_manager_cli"
   spec.version       = OpsManager::VERSION
-  spec.authors       = ["Alan Moran", "Satheesh Uppalapati"]
-  spec.email         = ["bonzofenix@gmail.com", "satheesh.uppalapati@gmail.com"]
+  spec.authors       = ["CompoZed"]
+  spec.email         = []
 
   spec.summary       = %q{ Performs Ops Manager deployments.  }
   spec.license       = "MIT"
