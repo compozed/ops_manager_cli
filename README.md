@@ -88,6 +88,12 @@ The ops_manager_cli tool can be installed in a docker container typically in con
     docker tag -f compozed/ops_manager_cli PRI_REGISTRY:PORT/compozed/ops_manager_cli
     docker push PRI_REGISTRY:PORT/compozed/ops_manager_cli
 
+
+## Contributing
+
+See our [CONTRUBUTING](CONTRIBUTING.md) section for more information.
+
+
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
