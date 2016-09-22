@@ -119,7 +119,7 @@ class OpsManager
 
     class Curl < Clamp::Command
       option ['-X', '--http-method'], "HTTP_METHOD", "HTTP Method (GET,POST)", default: 'GET'
-      parameter "ENDPOINT", "OpsManager api endpoint. eg: /v0/installation_settings", required: true
+      parameter "ENDPOINT", "OpsManager api endpoint. eg: /api/v0/installation_settings", required: true
 
       def execute
         puts case http_method.strip
