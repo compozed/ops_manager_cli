@@ -1,7 +1,7 @@
 class OpsManager
   class InstallationRunner
     extend Forwardable
-    def_delegators :opsman_api, :trigger_installation, :get_installation, :get_current_version,
+    def_delegators :opsman_api, :trigger_installation, :get_installation,
       :get_staged_products, :get_staged_products_errands
     attr_reader :id
 

@@ -273,7 +273,6 @@ describe OpsManager::Api::Opsman do
   end
 
   describe 'get_diagnostic_report' do
-
     let(:uri){"https://#{target}/api/v0/diagnostic_report"}
     before do
       stub_request(:get, uri).
@@ -286,54 +285,18 @@ describe OpsManager::Api::Opsman do
       expect(WebMock).to have_requested(:get, uri).
         with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
-  end
 
-  describe 'get_current_version' do
     [ Net::OpenTimeout, Errno::ETIMEDOUT ,
       Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|
       describe "when there is no ops manager and request errors: #{error}" do
 
         it "should be nil" do
           allow_any_instance_of(Net::HTTP).to receive(:request).and_raise(error)
-          expect(opsman.get_current_version).to be_nil
-        end
-      end
-    end
-
-    describe 'when there are multiple director product tiles uploaded' do
-      let(:latest_version){ "1.6.11.0" }
-      let(:products) do
-        [
-          {
-            "name" => "p-bosh",
-            "product_version" => "1.6.8.0"
-          },
-          {
-            "name" => "p-bosh",
-            "product_version" => "1.6.11.1"
-          }
-        ]
-      end
-
-      before do
-        products_response = double('fake_products', body: products.to_json)
-        allow(opsman).to receive(:get_available_products).and_return(products_response)
-      end
-
-      it 'should return the latest one' do
-        expect(opsman.get_current_version).to eq("1.6.11.1")
-      end
-
-      describe 'when version ends in .0' do
-       let(:products){ [ { "name" => "p-bosh", "product_version" => "1.6.11.0" } ] }
-
-        it 'should remove .0' do
-          expect(opsman.get_current_version).to eq("1.6.11")
+          expect(opsman.get_diagnostic_report).to be_nil
         end
       end
     end
   end
-
 
   describe "#import_stemcell" do
     subject(:import_stemcell){ opsman.import_stemcell("stemcell.tgz") }

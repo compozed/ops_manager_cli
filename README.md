@@ -26,11 +26,17 @@ Questions? Pop in our [slack channel](https://cloudfoundry.slack.com/messages/op
 
 ### Limitations:
 
-- No support for enabling and running errands (future work)
+- No support for enabling and running errands for ops_manager **< 1.7.x**
+
 
 ### Test with Ops Manager Version
 
-- up to 1.7.11.0
+- up to 1.8.2.0
+
+## Upgrading OpsManager appliance from **1.7.x** to **1.8.x**
+
+On ops_manager_cli **>=0.4.0** support for upgrading to **1.8.x** was removed.
+Use ops_manager_cli **0.3.1** to upgrade from **1.7.x** -> **1.8.x**. 
 
 ## Dependencies
 

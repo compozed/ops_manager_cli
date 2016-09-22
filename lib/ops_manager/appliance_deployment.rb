@@ -7,8 +7,8 @@ class OpsManager::ApplianceDeployment
   extend Forwardable
   def_delegators :pivnet_api, :download_stemcell
   def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
-    :get_installation_settings, :upload_installation_assets, :import_stemcell, :target,
-    :password, :username, :get_current_version ,:ops_manager_version=
+    :get_installation_settings, :get_diagnostic_report, :upload_installation_assets,
+    :import_stemcell, :target, :password, :username, :ops_manager_version=
 
   attr_reader :config_file
 
@@ -71,13 +71,27 @@ class OpsManager::ApplianceDeployment
     @new_vm_name ||= "#{config.name}-#{config.desired_version}"
   end
 
-  private
   def current_version
-    @current_version ||= OpsManager::Semver.new(get_current_version)
+    return unless diagnostic_report
+    version = parsed_diagnostic_report
+      .fetch("versions")
+      .fetch("release_version")
+    version.gsub!(/.0$/,'')
+    @current_version ||= OpsManager::Semver.new(version)
   end
 
   def desired_version
     @desired_version ||= OpsManager::Semver.new(config.desired_version)
+  end
+
+  private
+
+  def diagnostic_report
+    @diagnostic_report ||= get_diagnostic_report
+  end
+
+  def parsed_diagnostic_report
+    JSON.parse(diagnostic_report.body)
   end
 
   def current_vm_name

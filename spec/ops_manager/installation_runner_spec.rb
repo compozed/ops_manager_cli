@@ -13,7 +13,6 @@ describe OpsManager::InstallationRunner do
   before do
     allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
     allow(opsman_api).to receive(:trigger_installation).and_return(installation_response)
-    allow(opsman_api).to receive(:get_current_version).and_return('1.5')
     allow(opsman_api).to receive(:get_staged_products).and_return(get_staged_products_response)
     allow(opsman_api).to receive(:get_staged_products_errands).with(product_guid).and_return(get_staged_products_errands_response)
   end
