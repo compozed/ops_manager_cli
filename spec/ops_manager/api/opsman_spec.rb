@@ -272,6 +272,22 @@ describe OpsManager::Api::Opsman do
     end
   end
 
+  describe 'get_diagnostic_report' do
+
+    let(:uri){"https://#{target}/api/v0/diagnostic_report"}
+    before do
+      stub_request(:get, uri).
+        to_return(:status => 200, :body => '{}')
+    end
+
+    it 'should perform get to diagnostic_report api endpoint' do
+      opsman.get_diagnostic_report
+
+      expect(WebMock).to have_requested(:get, uri).
+        with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
+
   describe 'get_current_version' do
     [ Net::OpenTimeout, Errno::ETIMEDOUT ,
       Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|

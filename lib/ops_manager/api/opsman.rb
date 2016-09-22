@@ -116,6 +116,10 @@ class OpsManager
         authenticated_get("/api/v0/available_products")
       end
 
+      def get_diagnostic_report
+        authenticated_get("/api/v0/diagnostic_report")
+      end
+
       def get_current_version
         products = JSON.parse(get_available_products.body)
         directors = products.select{ |i| i.fetch('name') =~/p-bosh|microbosh/ }
