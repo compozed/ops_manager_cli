@@ -29,11 +29,6 @@ describe OpsManager::ApplianceDeployment do
   end
 
   before do
-    allow(appliance_deployment).to receive(:get_diagnostic_report)
-      .and_return(diagnostic_report)
-  end
-
-  before do
     OpsManager.set_conf(:target, ENV['TARGET'] || target)
     OpsManager.set_conf(:username, ENV['USERNAME'] || 'foo')
     OpsManager.set_conf(:password, ENV['PASSWORD'] || 'bar')
@@ -144,8 +139,8 @@ describe OpsManager::ApplianceDeployment do
     describe 'describe when diagnostic_report is nil' do
       let(:diagnostic_report) { nil }
 
-      it 'should return nil' do
-        expect(appliance_deployment.current_version).to be_nil
+      it 'should return empty Semver' do
+        expect(appliance_deployment.current_version).to be_empty
       end
     end
   end

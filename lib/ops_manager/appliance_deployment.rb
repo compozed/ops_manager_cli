@@ -72,12 +72,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def current_version
-    return unless diagnostic_report
-    version = parsed_diagnostic_report
-      .fetch("versions")
-      .fetch("release_version")
-    version.gsub!(/.0$/,'')
-    @current_version ||= OpsManager::Semver.new(version)
+    @current_version ||= OpsManager::Semver.new(version_from_diagnostic_report)
   end
 
   def desired_version
@@ -88,6 +83,14 @@ class OpsManager::ApplianceDeployment
 
   def diagnostic_report
     @diagnostic_report ||= get_diagnostic_report
+  end
+
+  def version_from_diagnostic_report
+    return unless diagnostic_report
+    version = parsed_diagnostic_report
+      .fetch("versions")
+      .fetch("release_version")
+    version.gsub(/.0$/,'')
   end
 
   def parsed_diagnostic_report
