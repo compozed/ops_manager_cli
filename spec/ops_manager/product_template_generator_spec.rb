@@ -1,14 +1,16 @@
 require 'spec_helper'
 
+def genpass(length); rand(36**length).to_s(36); end
+
 describe OpsManager::ProductTemplateGenerator do
   let(:product_template_generator){ described_class.new(product_name) }
   let(:product_name){'dummy-product'}
   let(:guid){ 'dd2b-c21a-c11d-607d-sad1' }
   let(:installation_name){ 'example-job-123' }
-  let(:random_password){ 'dd2bc21ac11d607d73c8' }
+  let(:random_password){ genpass(described_class::OPS_MANAGER_PASSWORD_LENGTH) }
+  let(:random_secret){ genpass(described_class::OPS_MANAGER_SECRET_LENGTH) }
+  let(:random_salt){ genpass(described_class::OPS_MANAGER_SALT_LENGTH) }
   let(:custom_password){ 'custom-password' }
-  let(:random_secret){ '12341234123412341234' }
-  let(:random_salt){ '1234123412341234' }
   let(:product_version){ '1.6.13-build.1' }
   let(:installation_settings) do
     {
@@ -46,13 +48,13 @@ describe OpsManager::ProductTemplateGenerator do
               },
               {
                 'value' => {
-                  'identity' => 'conf-1',
+                  'identity' => 'conf-3',
                   'salt' => random_salt
                 }
               },
               {
                 'value' => {
-                  'identity' => 'conf-1',
+                  'identity' => 'conf-4',
                   'secret' => random_secret
                 }
               },
@@ -81,6 +83,7 @@ describe OpsManager::ProductTemplateGenerator do
   describe '#generate_yml' do
     let(:generated_hash){ { "products" => [ "(( merge on identifier ))", { 'identifier' => product_name } ] } }
     let(:product_template){"---\nproducts:\n- (( merge on identifier ))\n- identifier: #{product_name}\n"}
+
     before do
       allow(product_template_generator).to receive(:generate).and_return(generated_hash)
     end

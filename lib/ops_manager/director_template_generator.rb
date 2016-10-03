@@ -7,12 +7,14 @@ class OpsManager
       delete_uaa_ssl
       delete_guid
       delete_ip_assignments
+      add_merging_strategy_for_networks
+
       installation_settings.to_h
     end
 
     def generate_yml
       generate.to_yaml
-        .gsub('"(( merge on guid ))"', '(( merge on guid ))')
+        .gsub('"(( merge on name ))"', '(( merge on name ))')
         .gsub('"(( merge on identifier ))"', '(( merge on identifier ))')
     end
 
@@ -24,7 +26,13 @@ class OpsManager
     end
 
     def merge_director_template_products
-      installation_settings.merge!('products' => director_product_template.fetch('products'))
+      installation_settings.merge!('products' => product_template.fetch('products'))
+    end
+
+    def add_merging_strategy_for_networks
+      installation_settings['infrastructure']['networks'].tap do |networks|
+        networks.unshift("(( merge on name ))") if networks
+      end
     end
 
     def delete_schema_version
@@ -40,15 +48,15 @@ class OpsManager
     end
 
     def delete_director_ssl
-      director_product_template["products"][1].delete("director_ssl")
+      product_template["products"][1].delete("director_ssl")
     end
 
     def delete_uaa_ssl
-      director_product_template["products"][1].delete("uaa_ssl")
+      product_template["products"][1].delete("uaa_ssl")
     end
 
-    def director_product_template
-      @director_product_template ||= OpsManager::ProductTemplateGenerator.new('p-bosh').generate
+    def product_template
+      @product_template ||= OpsManager::ProductTemplateGenerator.new('p-bosh').generate
     end
 
 

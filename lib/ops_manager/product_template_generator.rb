@@ -1,7 +1,7 @@
 class OpsManager
   class ProductTemplateGenerator
-    OPS_MANAGER_PASSWORD_LENGTH = 20
-    OPS_MANAGER_SECRET_LENGTH = 20
+    OPS_MANAGER_PASSWORD_LENGTH = 32
+    OPS_MANAGER_SECRET_LENGTH = 32
     OPS_MANAGER_SALT_LENGTH = 16
 
     attr_reader :product_name
@@ -25,6 +25,7 @@ class OpsManager
       delete_private_key_pem
       delete_product_version_from_properties
       add_merging_strategy_for_jobs
+      add_merging_strategy_for_job_properties
 
       { 'products' => [ "(( merge on identifier ))" , selected_product ] }
     end
@@ -107,6 +108,12 @@ class OpsManager
 
     def add_merging_strategy_for_jobs
       selected_product['jobs'].unshift("(( merge on identifier ))")
+    end
+
+    def add_merging_strategy_for_job_properties
+      selected_product['jobs'].each do |j|
+        j['properties'].unshift("(( merge on identifier ))") if j['properties']
+      end
     end
 
     def delete_partitions
