@@ -211,6 +211,16 @@ describe OpsManager::ProductDeployment do
       end
     end
 
+    describe 'when tile path is not present(config.filepath)' do
+      let(:product_exists?){ false }
+      let(:filepath) { nil }
+
+      it 'Should skip product upload' do
+        expect(product_deployment).not_to receive(:upload_product)
+        upload
+      end
+    end
+
     describe 'when product is not present' do
       let(:product_exists?){ false }
 
