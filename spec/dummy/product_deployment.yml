@@ -6,4 +6,4 @@ name: 'example-product'
 desired_version: '1.6.2.0'
 filepath: 'example-product-1.6.2.pivotal'
 stemcell: 'stemcell.tgz'
-installation_settings_file: '../fixtures/installation_settings.json'
+installation_settings_file: '../fixtures/installation_settings.json' # Generate it with ./ops_manager generate-product-template example-product
