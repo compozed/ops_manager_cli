@@ -14,7 +14,7 @@ describe OpsManager::Api::Opsman do
 
   before do
     allow(token_issuer).to receive(:owner_password_grant)
-      .with('admin', password, 'opsman.admin')
+      .with(username, password, 'opsman.admin')
       .and_return(uaa_token)
     allow(CF::UAA::TokenIssuer).to receive(:new)
       .with("https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true)
