@@ -64,7 +64,9 @@ class OpsManager
 
       def trigger_installation(opts = {})
         print_green('====> Applying changes...')
-        authenticated_post('/api/v0/installations', opts)
+        res = authenticated_post('/api/v0/installations', opts)
+        raise OpsManager::InstallationError.new(res.body) if res.code =~  /422/
+        res
       end
 
       def add_staged_products(name, version)

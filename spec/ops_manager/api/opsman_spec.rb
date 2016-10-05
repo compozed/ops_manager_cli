@@ -146,7 +146,7 @@ describe OpsManager::Api::Opsman do
 
   describe '#create_user' do
     let(:body){ "setup[decryption_passphrase]=bar&setup[decryption_passphrase_confirmation]=bar&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}" }
-      let(:uri){ "#{base_uri}/api/v0/setup" }
+    let(:uri){ "#{base_uri}/api/v0/setup" }
     subject(:create_user){ opsman.create_user }
     let(:response){ create_user }
 
@@ -168,15 +168,35 @@ describe OpsManager::Api::Opsman do
   end
 
   describe "#trigger_installation" do
-    let(:body){ '{"install":{"id":10}}' }
     let(:uri){ "https://#{target}/api/v0/installations" }
+    subject(:trigger_installation){ opsman.trigger_installation }
 
     before do
       stub_request(:post, uri).
-        with(:body => body).
-        to_return(:status => 200, :body => "", :headers => {})
+        to_return(status: http_code, body: body)
     end
 
+    describe 'when success' do
+      let(:body){ '{"install":{"id":10}}' }
+      let(:http_code){ 200 }
+
+      it 'performs the correct request' do
+        trigger_installation
+        expect(WebMock).to have_requested(:post, uri)
+          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+      end
+    end
+
+    describe 'when installation is incomplete' do
+      let(:http_code){ 422 }
+      let(:body){ '{"errors":["Installation is incomplete."]}' }
+
+      it "should rasie OpsManager::InstallationError" do
+        expect do
+          trigger_installation
+        end.to raise_exception(OpsManager::InstallationError)
+      end
+    end
   end
 
   describe "#get_installation" do
