@@ -109,11 +109,9 @@ describe OpsManager::Api::Pivnet do
     let(:stemcell_redirect_uri){ "https://abc123.cloudfront.net/product_files/Pivotal-CF/bosh-stemcell-3146.8-vsphere-esxi-ubuntu-trusty-go_agent.tgz" }
 
     before do
-      # curl -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Token xo3saxf1AfjYxzrVNsa5" -X GET https://network.pivotal.io/api/v2/products/stemcells/releases
       stub_request(:get, 'https://network.pivotal.io/api/v2/products/stemcells/releases').
         to_return(:status => 200, :body => stemcell_releases_response.to_json, :headers => {})
 
-      # curl -i -H "Accept: application/json" -H "Content-Type: application/json" -H "Authorization: Token xo5saxf1AfjYxzrVNsa5" -X GET https://network.pivotal.io/api/v2/products/stemcells/releases/1562/product_files
       stub_request(:get, "https://network.pivotal.io/api/v2/products/stemcells/releases/#{release_id}/product_files").
         to_return(:status => 200, :body => product_files_response.to_json, :headers => {})
 
