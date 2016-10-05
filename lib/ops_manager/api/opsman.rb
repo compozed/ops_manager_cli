@@ -145,7 +145,7 @@ class OpsManager
       end
 
       def get_token
-        token_issuer.owner_password_grant('admin', password, 'opsman.admin').tap do |token|
+        token_issuer.owner_password_grant(username, password, 'opsman.admin').tap do |token|
           logger.info "UAA Token: #{token.inspect}"
         end
       rescue  CF::UAA::TargetError
