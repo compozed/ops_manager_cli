@@ -24,7 +24,7 @@ describe OpsManager::Api::Opsman do
     OpsManager.set_conf(:username, ENV['USERNAME'] || username)
     OpsManager.set_conf(:password, ENV['PASSWORD'] || password)
 
-    allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
+    # allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
   describe '#upload_product' do
@@ -117,7 +117,7 @@ describe OpsManager::Api::Opsman do
     let(:uri){ "https://#{target}/api/installation_settings" }
     before do
       stub_request(:post, uri).
-        to_return(status: http_code, body: '{"errors":["error 1", "error 2"]}')
+        to_return(status: http_code, body: body)
     end
 
     describe 'when success' do
@@ -406,6 +406,7 @@ describe OpsManager::Api::Opsman do
         to_return(:status => http_code, :body => '{}')
     end
 
+
     it 'performs the correct request' do
       opsman.add_staged_products(product_name, product_version)
       expect(WebMock).to have_requested(:post, uri)
@@ -416,7 +417,18 @@ describe OpsManager::Api::Opsman do
       let(:http_code){ 404 }
       let(:body){ '{"errors":[\"Product name cant be blank\"]}' }
 
-      it "should not raise OpsManager::ProductDeploymentError" do
+      it "should raise OpsManager::ProductDeploymentError" do
+        expect do
+          opsman.add_staged_products(product_name, product_version)
+        end.to raise_exception(OpsManager::ProductDeploymentError)
+      end
+    end
+
+    describe 'when version is malformed' do
+      let(:http_code){ 500 }
+      let(:body){ '{"error":"Malformed version number string v2"}' }
+
+      it "should raise OpsManager::ProductDeploymentError" do
         expect do
           opsman.add_staged_products(product_name, product_version)
         end.to raise_exception(OpsManager::ProductDeploymentError)

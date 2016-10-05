@@ -71,7 +71,7 @@ class OpsManager
         print_green( "====> Adding available product to the installation...")
         body = "name=#{name}&product_version=#{version}"
         res = authenticated_post('/api/v0/staged/products', body: body)
-        raise OpsManager::ProductDeploymentError.new(res.body) if res.code == '404'
+        raise OpsManager::ProductDeploymentError.new(res.body) if res.code =~ /404|500/
         say_green('done')
         res
       end
