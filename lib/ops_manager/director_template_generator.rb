@@ -21,8 +21,8 @@ class OpsManager
     private
     def installation_settings
       return @installation_settings if @installation_settings
-      parsed_installation_settings = JSON.parse(installation_settings_response.body)
-      @installation_settings = OpsManager::InstallationSettings.new(parsed_installation_settings)
+      res = OpsManager::Api::Opsman.new(silent: true).get_installation_settings
+      @installation_settings = JSON.parse(res.body)
     end
 
     def merge_director_template_products
@@ -36,15 +36,15 @@ class OpsManager
     end
 
     def delete_schema_version
-      @installation_settings.delete('installation_schema_version')
+      installation_settings.delete('installation_schema_version')
     end
 
     def delete_ip_assignments
-      @installation_settings.delete('ip_assignments')
+      installation_settings.delete('ip_assignments')
     end
 
     def delete_guid
-      @installation_settings.delete('guid')
+      installation_settings.delete('guid')
     end
 
     def delete_director_ssl
@@ -57,11 +57,6 @@ class OpsManager
 
     def product_template
       @product_template ||= OpsManager::ProductTemplateGenerator.new('p-bosh').generate
-    end
-
-
-    def installation_settings_response
-      OpsManager::Api::Opsman.new(silent: true).get_installation_settings
     end
   end
 end

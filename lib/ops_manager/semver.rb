@@ -5,6 +5,14 @@ class OpsManager
       super(s.split('.').map { |e| e.to_i })
     end
 
+    def major
+      self[0]
+    end
+
+    def minor
+      self[1]
+    end
+
     def < x
       (self <=> x) < 0
     end

@@ -6,20 +6,6 @@ require "uaa"
 class OpsManager
   module Api
     class Opsman < OpsManager::Api::Base
-      attr_reader :silent
-
-      def initialize(opts = {})
-        @silent = opts[:silent]
-      end
-
-      def say_green(str)
-        puts str.green unless silent
-      end
-
-      def print_green(str)
-        print str.green unless silent
-      end
-
       def create_user
         body= "setup[decryption_passphrase]=#{password}&setup[decryption_passphrase_confirmation]=#{password}&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=#{username}&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}"
         post("/api/v0/setup" , body: body)
@@ -58,8 +44,7 @@ class OpsManager
 
       def delete_products(opts = {})
         say_green( '====> Deleating unused products...')
-        opts = add_authentication(opts)
-        delete('/api/v0/products', opts)
+        authenticated_delete('/api/v0/products', opts)
       end
 
       def trigger_installation(opts = {})
@@ -99,8 +84,7 @@ class OpsManager
       def upgrade_product_installation(guid, product_version)
         say_green( "====> Bumping product installation #{guid} product_version to #{product_version}...")
         opts = { to_version: product_version }
-        opts = add_authentication(opts)
-        res = put("/api/v0/staged/products/#{guid}", opts)
+        res = authenticated_put("/api/v0/staged/products/#{guid}", opts)
         raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
         res
       end
@@ -154,17 +138,6 @@ class OpsManager
         nil
       end
 
-      def authenticated_get(endpoint, opts = {})
-        get(endpoint, add_authentication(opts))
-      end
-
-      def authenticated_post(endpoint, opts = {})
-        post(endpoint, add_authentication(opts))
-      end
-
-      def authenticated_multipart_post(endpoint, opts = {})
-        multipart_post(endpoint, add_authentication(opts))
-      end
 
       private
       def token_issuer
@@ -176,11 +149,8 @@ class OpsManager
         @access_token ||= get_token.info['access_token']
       end
 
-
-      def add_authentication(opts={})
-        opts[:headers] ||= {}
-        opts[:headers]['Authorization'] ||= "Bearer #{access_token}"
-        opts
+      def authorization_header
+        "Bearer #{access_token}"
       end
     end
   end

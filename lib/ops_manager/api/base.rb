@@ -1,7 +1,19 @@
 class OpsManager
   module Api
     class Base
+      attr_reader :silent
+
       include OpsManager::Logging
+
+      def initialize(opts = {})
+        @silent = opts[:silent]
+      end
+
+      %w{ get post put delete multipart_post}.each do |m|
+        define_method "authenticated_#{m}" do |endpoint, opts = {}|
+          send(m, endpoint, add_authentication(opts))
+        end
+      end
 
       def get(endpoint, opts = {})
         uri = uri_for(endpoint)
@@ -135,6 +147,20 @@ class OpsManager
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           http.read_timeout = 1200
         end
+      end
+
+      def add_authentication(opts={})
+        opts[:headers] ||= {}
+        opts[:headers]['Authorization'] ||= authorization_header
+        opts
+      end
+
+      def say_green(str)
+        puts str.green unless silent
+      end
+
+      def print_green(str)
+        print str.green unless silent
       end
     end
   end
