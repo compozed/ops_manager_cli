@@ -5,13 +5,13 @@ Command line tool to interact with Pivotal Operations Manager through its API, b
 
 Questions? Pop in our [slack channel](https://cloudfoundry.slack.com/messages/ops_manager_cli/)!
 
-*Please note that the APIs of Ops Manager is experimental at this point.  Changes to the APIs with new Ops Manager releases may break functionality.  The project also does not offer any support for the usage of this in any environments.*
+*Please note that the APIs of Ops Manager is experimental at this point.  Changes to the APIs with new Ops Manager releases may break functionality.*
 
 ## Features
 
 ### Core features
 
-- Support for deploying on vSphere infrastructure only
+- Support for deploying on vSphere infrastructure
 - Deploy/Upgrade Ops Manager appliance
 - Deploy/Upgrade product tiles
 - Generate config settings templates for product tiles deployments
@@ -31,7 +31,7 @@ Questions? Pop in our [slack channel](https://cloudfoundry.slack.com/messages/op
 
 ### Test with Ops Manager Version
 
-- up to 1.8.2.0
+- up to 1.8.3.0
 
 ## Upgrading OpsManager appliance from **1.7.x** to **1.8.x**
 
