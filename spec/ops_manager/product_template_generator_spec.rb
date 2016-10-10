@@ -73,9 +73,6 @@ describe OpsManager::ProductTemplateGenerator do
   let(:installation_response){ double(code: 200, body: installation_settings.to_json) }
 
   before do
-    allow(OpsManager::InstallationSettings)
-      .to receive(:new).with(installation_settings)
-      .and_return(installation_settings)
     allow_any_instance_of(OpsManager::Api::Opsman).to receive(:get_installation_settings)
       .and_return(installation_response)
   end

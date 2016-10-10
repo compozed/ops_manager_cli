@@ -24,7 +24,7 @@ describe OpsManager::Api::Opsman do
     OpsManager.set_conf(:username, ENV['USERNAME'] || username)
     OpsManager.set_conf(:password, ENV['PASSWORD'] || password)
 
-    allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
+    # allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
   describe '#upload_product' do
@@ -117,7 +117,7 @@ describe OpsManager::Api::Opsman do
     let(:uri){ "https://#{target}/api/installation_settings" }
     before do
       stub_request(:post, uri).
-        to_return(status: http_code, body: '{"errors":["error 1", "error 2"]}')
+        to_return(status: http_code, body: body)
     end
 
     describe 'when success' do
@@ -146,7 +146,7 @@ describe OpsManager::Api::Opsman do
 
   describe '#create_user' do
     let(:body){ "setup[decryption_passphrase]=bar&setup[decryption_passphrase_confirmation]=bar&setup[eula_accepted]=true&setup[identity_provider]=internal&setup[admin_user_name]=foo&setup[admin_password]=#{password}&setup[admin_password_confirmation]=#{password}" }
-      let(:uri){ "#{base_uri}/api/v0/setup" }
+    let(:uri){ "#{base_uri}/api/v0/setup" }
     subject(:create_user){ opsman.create_user }
     let(:response){ create_user }
 
@@ -168,15 +168,35 @@ describe OpsManager::Api::Opsman do
   end
 
   describe "#trigger_installation" do
-    let(:body){ '{"install":{"id":10}}' }
     let(:uri){ "https://#{target}/api/v0/installations" }
+    subject(:trigger_installation){ opsman.trigger_installation }
 
     before do
       stub_request(:post, uri).
-        with(:body => body).
-        to_return(:status => 200, :body => "", :headers => {})
+        to_return(status: http_code, body: body)
     end
 
+    describe 'when success' do
+      let(:body){ '{"install":{"id":10}}' }
+      let(:http_code){ 200 }
+
+      it 'performs the correct request' do
+        trigger_installation
+        expect(WebMock).to have_requested(:post, uri)
+          .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+      end
+    end
+
+    describe 'when installation is incomplete' do
+      let(:http_code){ 422 }
+      let(:body){ '{"errors":["Installation is incomplete."]}' }
+
+      it "should rasie OpsManager::InstallationError" do
+        expect do
+          trigger_installation
+        end.to raise_exception(OpsManager::InstallationError)
+      end
+    end
   end
 
   describe "#get_installation" do
@@ -406,6 +426,7 @@ describe OpsManager::Api::Opsman do
         to_return(:status => http_code, :body => '{}')
     end
 
+
     it 'performs the correct request' do
       opsman.add_staged_products(product_name, product_version)
       expect(WebMock).to have_requested(:post, uri)
@@ -416,7 +437,18 @@ describe OpsManager::Api::Opsman do
       let(:http_code){ 404 }
       let(:body){ '{"errors":[\"Product name cant be blank\"]}' }
 
-      it "should not raise OpsManager::ProductDeploymentError" do
+      it "should raise OpsManager::ProductDeploymentError" do
+        expect do
+          opsman.add_staged_products(product_name, product_version)
+        end.to raise_exception(OpsManager::ProductDeploymentError)
+      end
+    end
+
+    describe 'when version is malformed' do
+      let(:http_code){ 500 }
+      let(:body){ '{"error":"Malformed version number string v2"}' }
+
+      it "should raise OpsManager::ProductDeploymentError" do
         expect do
           opsman.add_staged_products(product_name, product_version)
         end.to raise_exception(OpsManager::ProductDeploymentError)

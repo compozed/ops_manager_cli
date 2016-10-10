@@ -2,62 +2,39 @@ class OpsManager
   module Api
     class Pivnet < OpsManager::Api::Base
 
-      def initialize
-        get_authentication
+      def get_product_releases(product_slug, opts = {})
+        authenticated_get("/api/v2/products/#{product_slug}/releases", opts)
       end
 
-      def download_stemcell(stemcell_version, stemcell_path, filename_regex)
-        puts "====> Downloading stemcell #{ stemcell_path }...".green
+      def accept_product_release_eula(product_slug, release_id)
+        puts 'banana!!! !!'
+        say_green("====> Accepting #{product_slug} release #{release_id} eula ...")
+        authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/eula_acceptance")
+      end
 
-        release_id = get_release_for(stemcell_version).fetch('id')
-        product_file = get_product_file_for(release_id, filename_regex)
-        product_file_id = product_file.fetch('id')
+      def get_product_release_files(product_slug, release_id)
+        authenticated_get("/api/v2/products/#{product_slug}/releases/#{release_id}/product_files")
+      end
 
-        accept_release_eula(release_id)
-        download_product(release_id, product_file_id, stemcell_path)
+      def download_product_release_file(product_slug, release_id, file_id, opts = {})
+        say_green "====> Downloading #{opts[:write_to]} stemcell ..."
+        authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/product_files/#{file_id}/download", opts)
       end
 
       def get_authentication
-        puts "====> Authentication to Pivnet".green
-        opts = { headers: { 'Authorization' => "Token #{pivnet_token}" } }
-        res = get("/api/v2/authentication", opts)
+        say_green "====> Authentication to Pivnet"
+        res = authenticated_get("/api/v2/authentication")
         raise OpsManager::PivnetAuthenticationError.new(res.body) unless res.code == '200'
         res
       end
 
       private
-
-      def accept_release_eula(release_id)
-        puts "====> Accepting stemcell eula ...".green
-        opts = { headers: { 'Authorization' => "Token #{pivnet_token}" } }
-        post("/api/v2/products/stemcells/releases/#{release_id}/eula_acceptance", opts)
-      end
-
-      def download_product(release_id, product_file_id, stemcell_path)
-        opts = { write_to: stemcell_path, headers: { 'Authorization' => "Token #{pivnet_token}" } }
-        post("/api/v2/products/stemcells/releases/#{release_id}/product_files/#{product_file_id}/download", opts)
-      end
-
-      def get_stemcell_releases(opts = {})
-        get("/api/v2/products/stemcells/releases", opts)
-      end
-
-      def get_product_files(release_id, opts = {})
-        get("/api/v2/products/stemcells/releases/#{release_id}/product_files",opts)
-      end
-
-      def get_release_for(stemcell_version)
-        releases = JSON.parse(get_stemcell_releases.body).fetch('releases')
-        releases.select{ |r| r.fetch('version') == stemcell_version }.first
-      end
-
-      def get_product_file_for(release_id, filename_regex)
-        products = JSON.parse(get_product_files(release_id).body).fetch('product_files')
-        products.select{ |r| r.fetch('aws_object_key') =~ filename_regex }.first
-      end
-
       def target
         @target ||= "network.pivotal.io"
+      end
+
+      def authorization_header
+        "Token #{pivnet_token}"
       end
 
       def pivnet_token

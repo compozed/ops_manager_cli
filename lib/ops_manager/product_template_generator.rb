@@ -143,12 +143,9 @@ class OpsManager
     end
 
     def installation_settings
-      parsed_installation_settings = JSON.parse(installation_settings_response.body)
-      OpsManager::InstallationSettings.new(parsed_installation_settings)
-    end
-
-    def installation_settings_response
-      OpsManager::Api::Opsman.new(silent: true).get_installation_settings
+      return @installation_settings if @installation_settings
+      res = OpsManager::Api::Opsman.new(silent: true).get_installation_settings
+      @installation_settings = JSON.parse(res.body)
     end
   end
 end
