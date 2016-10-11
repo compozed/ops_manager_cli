@@ -43,16 +43,15 @@ describe OpsManager::Deployments::Vsphere do
 
     %w{username password}.each do |m|
       describe "when vcenter_#{m} has unescaped character" do
-        before { config.opts['vcenter'][m] = "domain\\vcenter_#{m}" }
+        before { config.opts['vcenter'][m] = "domain\\vcenter_+)#{m}" }
 
         it "should URL encode the #{m}" do
-          expect(vsphere).to receive(:`).with(/domain%5Cvcenter_#{m}/)
+          expect(vsphere).to receive(:`).with(/domain\\%5Cvcenter_\\\+\\\)#{m}/)
           deploy_vm
         end
       end
     end
   end
-
 
   describe 'stop_current_vm' do
     let(:vm_name){ 'ops-manager-1.4.2.0' }
