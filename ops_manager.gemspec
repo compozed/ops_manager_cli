@@ -28,4 +28,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency "net-ping"
   spec.add_dependency "cf-uaa-lib"
   spec.add_dependency "session_config"
+  spec.add_dependency "rubysl-shellwords"
 end

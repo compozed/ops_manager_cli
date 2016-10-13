@@ -1,5 +1,6 @@
 require 'rbvmomi'
 require "uri"
+require 'shellwords'
 require "ops_manager/logging"
 
 class OpsManager
@@ -30,11 +31,11 @@ class OpsManager
       end
 
       def vcenter_username
-        URI.encode(config.opts['vcenter']['username'])
+        Shellwords.escape(URI.encode(config.opts['vcenter']['username']))
       end
 
       def vcenter_password
-        URI.encode(config.opts['vcenter']['password'])
+        Shellwords.escape(URI.encode(config.opts['vcenter']['password']))
       end
     end
   end
