@@ -64,7 +64,7 @@ class OpsManager
     def errands_for(product_guid)
       res = get_staged_products_errands(product_guid)
 
-      if res.code == 200
+      if res.code == '200'
         JSON.parse(res.body)['errands']
       else
         []

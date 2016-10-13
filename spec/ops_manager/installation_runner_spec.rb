@@ -22,7 +22,7 @@ describe OpsManager::InstallationRunner do
     let(:get_staged_products_response){ double( body: [ { "guid" =>  product_guid }].to_json, code: 200) }
     let(:get_staged_products_errands_response) do
       double(
-        code: 200,
+        code: '200',
         body:
         { "errands" => [
           { "name" => "errand1",
