@@ -130,7 +130,7 @@ class OpsManager::ApplianceDeployment
 
   def provision_stemcells
     Dir.glob("#{current_stemcell_dir}/*").each do |stemcell_filepath|
-      upload_stemcell(stemcell_filepath)
+      import_stemcell(stemcell_filepath)
     end
   end
 

@@ -7,7 +7,6 @@ class OpsManager
       end
 
       def accept_product_release_eula(product_slug, release_id)
-        puts 'banana!!! !!'
         say_green("====> Accepting #{product_slug} release #{release_id} eula ...")
         authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/eula_acceptance")
       end

@@ -240,9 +240,9 @@ describe OpsManager::ApplianceDeployment do
     end
 
     it 'should upload all the stemcells in /tmp/current_stemcells' do
-      expect(appliance_deployment).to receive(:upload_stemcell)
+      expect(opsman_api).to receive(:import_stemcell)
         .with('/tmp/current_stemcells/stemcell-1.tgz')
-      expect(appliance_deployment).to receive(:upload_stemcell)
+      expect(opsman_api).to receive(:import_stemcell)
         .with('/tmp/current_stemcells/stemcell-2.tgz')
       provision_stemcells
     end
