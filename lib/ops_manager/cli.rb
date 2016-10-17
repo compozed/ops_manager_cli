@@ -75,7 +75,7 @@ class OpsManager
     class DeleteUnusedProducts < Clamp::Command
 
       def execute
-        OpsManager.new.delete_products
+        OpsManager::Api::Opsman.new.delete_products
       end
     end
 

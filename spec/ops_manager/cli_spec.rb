@@ -2,6 +2,12 @@ require "spec_helper"
 
 describe OpsManager::Cli do
   let(:cli){ described_class }
+  let!(:opsman_api){ object_double(OpsManager::Api::Opsman.new).as_null_object }
+
+
+  before do
+    allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+  end
 
   describe "target" do
     let(:args) { %w(target 1.2.3.4) }
@@ -73,10 +79,11 @@ describe OpsManager::Cli do
   describe "get-uaa-token" do
     let(:args) { %w(get-uaa-token) }
     let(:uaa_token){ rand(9999) }
-    let(:opsman_api){ double(get_token: double(info: { 'access_token'=> uaa_token})) }
 
     before do
-      allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+      allow(opsman_api).to receive(:get_token).and_return(
+        double(info: { 'access_token'=> uaa_token})
+      )
     end
 
     it "should get-uaa-token to target with the ubuntu user" do
@@ -90,8 +97,7 @@ describe OpsManager::Cli do
     let(:installation_settings){ '{"foo": "bar"}' }
 
     it "should call product.get_installation_settings" do
-      allow_any_instance_of(OpsManager::Api::Opsman)
-        .to receive(:get_installation_settings).and_return(double(body: installation_settings))
+      allow(opsman_api).to receive(:get_installation_settings).and_return(double(body: installation_settings))
       expect_any_instance_of(OpsManager::Cli::GetInstallationSettings)
         .to receive(:puts).with("---\nfoo: bar\n")
       cli.run(`pwd`, args)
@@ -100,13 +106,6 @@ describe OpsManager::Cli do
 
   describe 'import-stemcell' do
     let(:args) { %w(import-stemcell /tmp/is.yml) }
-    let!(:opsman_api) do
-      object_double(OpsManager::Api::Opsman.new).as_null_object
-    end
-
-    before do
-      allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
-    end
 
     it "should call ops_manager.import_stemcell" do
       expect(opsman_api).to receive(:import_stemcell).with('/tmp/is.yml')
@@ -118,8 +117,7 @@ describe OpsManager::Cli do
     let(:args) { %w(delete-unused-products) }
 
     it "should call ops_manager.delete_products" do
-      expect_any_instance_of(OpsManager)
-        .to receive(:delete_products)
+      expect(opsman_api).to receive(:delete_products)
       cli.run(`pwd`, args)
     end
   end
@@ -217,9 +215,8 @@ describe OpsManager::Cli do
       let(:args) { ['curl', endpoint] }
 
       before do
-        allow_any_instance_of(OpsManager::Api::Opsman)
-          .to receive(:authenticated_get).with(endpoint)
-          .and_return(double(body: body))
+        allow(opsman_api).to receive(:authenticated_get)
+          .with(endpoint).and_return(double(body: body))
       end
 
       it 'should perform get with provided endpoint' do
@@ -233,9 +230,8 @@ describe OpsManager::Cli do
       let(:args) { ['curl', '-X POST', endpoint] }
 
       before do
-        allow_any_instance_of(OpsManager::Api::Opsman)
-          .to receive(:authenticated_post).with(endpoint)
-          .and_return(double(body: body))
+        allow(opsman_api).to receive(:authenticated_post)
+          .with(endpoint).and_return(double(body: body))
       end
 
       it 'should perform post with provided endpoint' do
@@ -249,9 +245,8 @@ describe OpsManager::Cli do
       let(:args) { ['curl', '-X UNSUPPORTED_METHOD', endpoint] }
 
       before do
-        allow_any_instance_of(OpsManager::Api::Opsman)
-          .to receive(:authenticated_post).with(endpoint)
-          .and_return(double(body: body))
+        allow(opsman_api).to receive(:authenticated_post)
+          .with(endpoint).and_return(double(body: body))
       end
 
       it 'should perform post with provided endpoint' do
