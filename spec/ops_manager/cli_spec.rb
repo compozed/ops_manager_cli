@@ -240,4 +240,12 @@ describe OpsManager::Cli do
       end
     end
   end
+
+  describe 'version' do
+    let(:args) { %w(version) }
+    it "should call show OpsManager::VERSION" do
+      expect_any_instance_of(OpsManager::Cli::Version).to receive(:puts).with(OpsManager::VERSION)
+      cli.run(`pwd`, args)
+    end
+  end
 end

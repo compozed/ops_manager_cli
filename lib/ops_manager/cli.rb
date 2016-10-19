@@ -126,6 +126,12 @@ class OpsManager
       end
     end
 
+    class Version < Clamp::Command
+      def execute
+        puts OpsManager::VERSION
+      end
+    end
+
     # Core commands
     subcommand "status", "Test credentials and shows status", Status
     subcommand "target", "Target an OpsManager appliance", Target
@@ -136,6 +142,7 @@ class OpsManager
     subcommand "get-product-template", "Generates Product tile installation template", GetProductTemplate
 
     # Other commands
+    subcommand "version", "Shows OpsManagerCLI version", Version
     subcommand "curl", "Authenticated curl requests(POST/GET)", Curl
     subcommand "delete-unused-products", "Deletes unused product tiles", DeleteUnusedProducts
     subcommand "get-installation-settings", "Gets installation settings", GetInstallationSettings
