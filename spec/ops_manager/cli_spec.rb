@@ -76,22 +76,6 @@ describe OpsManager::Cli do
     end
   end
 
-  describe "get-uaa-token" do
-    let(:args) { %w(get-uaa-token) }
-    let(:uaa_token){ rand(9999) }
-
-    before do
-      allow(opsman_api).to receive(:get_token).and_return(
-        double(info: { 'access_token'=> uaa_token})
-      )
-    end
-
-    it "should get-uaa-token to target with the ubuntu user" do
-      expect_any_instance_of(OpsManager::Cli::GetUaaToken).to receive('puts').with(uaa_token)
-      cli.run(`pwd`, args)
-    end
-  end
-
   describe 'get-installation-settings' do
     let(:args) { %w(get-installation-settings) }
     let(:installation_settings){ '{"foo": "bar"}' }

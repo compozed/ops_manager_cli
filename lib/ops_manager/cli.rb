@@ -79,18 +79,6 @@ class OpsManager
       end
     end
 
-    class GetUaaToken < Clamp::Command
-      def execute
-        puts OpsManager::Api::Opsman.new.get_token.info.fetch('access_token')
-      end
-    end
-
-    class SSH < Clamp::Command
-      def execute
-        `ssh ubuntu@#{OpsManager.get_conf(:target)}`
-      end
-    end
-
     class GetProductTemplate < Clamp::Command
       parameter "PRODUCT_NAME", "Product tile name. Example: p-cf", required: true
 
@@ -149,11 +137,10 @@ class OpsManager
 
     # Other commands
     subcommand "curl", "Authenticated curl requests(POST/GET)", Curl
+    subcommand "delete-unused-products", "Deletes unused product tiles", DeleteUnusedProducts
     subcommand "get-installation-settings", "Gets installation settings", GetInstallationSettings
     subcommand "get-installation-logs", "Gets installation logs", GetInstallationLogs
-    subcommand "get-uaa-token", "Gets uaa token from OpsManager", GetUaaToken
     subcommand "import-stemcell", "Uploads stemcell to OpsManager", ImportStemcell
-    subcommand "delete-unused-products", "Deletes unused product tiles", DeleteUnusedProducts
 
   end
 end
