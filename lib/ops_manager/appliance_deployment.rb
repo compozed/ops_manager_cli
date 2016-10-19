@@ -31,11 +31,13 @@ class OpsManager::ApplianceDeployment
       deploy
       create_first_user
     when current_version < desired_version then
-      puts "OpsManager at #{config.ip} version is #{current_version}. Upgrading to #{desired_version}.../".green
+      puts "OpsManager at #{config.ip} version is #{current_version}. Upgrading to #{desired_version} .../".green
       upgrade
     when current_version == desired_version then
       puts "OpsManager at #{config.ip} version is already #{config.desired_version}. Skiping ...".green
     end
+
+    puts '====> Finish!'.green
   end
 
   def deploy
@@ -49,9 +51,9 @@ class OpsManager::ApplianceDeployment
   end
 
   def create_first_user
-    puts '====> Creating initial user...'.green
+    puts '====> Creating initial user'.green
     until( create_user.code.to_i == 200) do
-      print '.'.green ; sleep 1
+      print ' .'.green ; sleep 1
     end
   end
 
@@ -63,8 +65,6 @@ class OpsManager::ApplianceDeployment
     upload_installation_assets
     provision_stemcells
     OpsManager::InstallationRunner.trigger!.wait_for_result
-
-    puts "====> Finish!".green
   end
 
   def list_current_stemcells

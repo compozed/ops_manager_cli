@@ -12,11 +12,12 @@ class OpsManager
       end
 
       def upload_installation_settings(filepath = 'installation_settings.json')
-        say_green( '====> Uploading installation settings...')
+        print_green '====> Uploading installation settings ...'
         yaml = UploadIO.new(filepath, 'text/yaml')
         opts = { "installation[file]" => yaml}
         res = authenticated_multipart_post("/api/installation_settings", opts)
         raise OpsManager::InstallationSettingsError.new(res.body) unless res.code == '200'
+        say_green 'done'
         res
       end
 
@@ -25,9 +26,9 @@ class OpsManager
       end
 
       def get_installation_settings(opts = {})
-        say_green '====> Downloading installation settings ...'
+        print_green '====> Downloading installation settings ...'
         res = authenticated_get("/api/installation_settings", opts)
-        print_green 'done'
+        say_green 'done'
         res
       end
 
@@ -42,26 +43,28 @@ class OpsManager
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
-        say_green '====> Download installation assets...'
+        say_green '====> Download installation assets ...'
         res = authenticated_get("/api/v0/installation_asset_collection", opts)
         say_green 'done'
         res
       end
 
       def delete_products(opts = {})
-        say_green '====> Deleating unused products...'
-        authenticated_delete('/api/v0/products', opts)
+        print_green '====> Deleating unused products ...'
+        res = authenticated_delete('/api/v0/products', opts)
+        say_green 'done'
+        res
       end
 
       def trigger_installation(opts = {})
-        print_green('====> Applying changes...')
+        print_green('====> Applying changes')
         res = authenticated_post('/api/v0/installations', opts)
         raise OpsManager::InstallationError.new(res.body) if res.code =~  /422/
         res
       end
 
       def add_staged_products(name, version)
-        print_green( "====> Adding available product to the installation...")
+        print_green( "====> Adding available product to the installation ...")
         body = "name=#{name}&product_version=#{version}"
         res = authenticated_post('/api/v0/staged/products', body: body)
         raise OpsManager::ProductDeploymentError.new(res.body) if res.code =~ /404|500/
@@ -84,17 +87,18 @@ class OpsManager
       end
 
       def get_installations(opts = {})
-        say_green '====> Getting installations ...'
+        print_green '====> Getting installations ...'
         res = authenticated_get('/api/v0/installations')
-        print_green 'done'
+        say_green 'done'
         res
       end
 
       def upgrade_product_installation(guid, product_version)
-        say_green( "====> Bumping product installation #{guid} product_version to #{product_version}...")
+        print_green "====> Bumping product installation #{guid} product_version to #{product_version} ..."
         opts = { to_version: product_version }
         res = authenticated_put("/api/v0/staged/products/#{guid}", opts)
         raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
+        say_green 'done'
         res
       end
 
@@ -119,8 +123,8 @@ class OpsManager
 
       def import_stemcell(filepath)
         return unless filepath
-        print_green '====> Uploading stemcell...'
         tar = UploadIO.new(filepath, 'multipart/form-data')
+        print_green "====> Uploading stemcell: #{tar} ..."
         opts = { "stemcell[file]" => tar }
         res = nil
 
