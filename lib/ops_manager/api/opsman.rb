@@ -96,7 +96,7 @@ class OpsManager
 
       def upload_product(filepath)
         file = "#{filepath}"
-        cmd = "curl -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{file}' -X POST -H 'Authorization: Bearer #{access_token}'"
+        cmd = "curl -s -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{file}' -X POST -H 'Authorization: Bearer #{access_token}'"
         logger.info "running cmd: #{cmd}"
         body = `#{cmd}`
         logger.info "Upload product response: #{body}"
@@ -115,11 +115,12 @@ class OpsManager
 
       def import_stemcell(filepath)
         return unless filepath
-        say_green('====> Uploading stemcell...')
+        say_green '====> Uploading stemcell...'
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
         res = authenticated_multipart_post("/api/v0/stemcells", opts)
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
+        say_green 'done'
         res
       end
 

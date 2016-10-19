@@ -32,7 +32,7 @@ describe OpsManager::Api::Opsman do
     let(:product_filepath){ 'example-product.pivotal' }
 
     it 'performs the correct curl' do
-      expect(opsman).to receive(:`).with("curl -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{product_filepath}' -X POST -H 'Authorization: Bearer UAA_ACCESS_TOKEN'").and_return('{}')
+      expect(opsman).to receive(:`).with("curl -s -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{product_filepath}' -X POST -H 'Authorization: Bearer UAA_ACCESS_TOKEN'").and_return('{}')
       upload_product
     end
 
