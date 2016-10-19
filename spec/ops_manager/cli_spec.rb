@@ -161,7 +161,7 @@ describe OpsManager::Cli do
   end
 
   describe 'get-installation-logs' do
-    let(:args) { ['get-installation-logs', installation_id ] }
+    let(:args) { ['get-installation-logs', installation_id.to_s ] }
     let(:installation_id){ 1 }
     let(:last_installation_id){ 2 }
     let(:installation_logs){ 'logs for installation' }

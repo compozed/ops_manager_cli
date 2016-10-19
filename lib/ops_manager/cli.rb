@@ -106,7 +106,7 @@ class OpsManager
         if @installation_id == "last"
           puts OpsManager::Installation.all.last.logs
         else
-          puts OpsManager::Installation.new(@installation_id).logs
+          puts OpsManager::Installation.new(@installation_id.to_i).logs
         end
       end
     end
