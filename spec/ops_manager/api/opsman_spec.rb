@@ -2,7 +2,7 @@ require 'spec_helper'
 require 'ops_manager/api/opsman'
 
 describe OpsManager::Api::Opsman do
-  let(:opsman){ OpsManager::Api::Opsman.new }
+  let(:opsman){ OpsManager::Api::Opsman.new(silent: true) }
   let(:target){ '1.2.3.4' }
   let(:username){ 'foo' }
   let(:password){ 'bar' }
@@ -23,8 +23,6 @@ describe OpsManager::Api::Opsman do
     OpsManager.set_conf(:target, ENV['TARGET'] || target)
     OpsManager.set_conf(:username, ENV['USERNAME'] || username)
     OpsManager.set_conf(:password, ENV['PASSWORD'] || password)
-
-    # allow(opsman).to receive(:`) if OpsManager.get_conf(:target) == target
   end
 
   describe '#upload_product' do
@@ -342,6 +340,19 @@ describe OpsManager::Api::Opsman do
       it "should skip" do
         expect(opsman).not_to receive(:puts).with(/====> Uploading stemcell.../)
         opsman.import_stemcell(nil)
+      end
+    end
+
+    describe 'when ops manager authentication is starting' do
+      let(:starting){ double(code: '503', body: '{"errors":{"base":["Authentication is starting up."]}}') }
+      let(:success){ double(code: '200', body: '{}') }
+
+      before{ allow(opsman).to receive(:authenticated_multipart_post).and_return(starting, starting, success) }
+
+      it 'should retry 3 times' do
+        allow(opsman).to receive(:sleep).with(60)
+        expect(opsman).to receive(:authenticated_multipart_post).exactly(3).times
+        import_stemcell
       end
     end
 

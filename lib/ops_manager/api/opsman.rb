@@ -122,7 +122,16 @@ class OpsManager
         print_green '====> Uploading stemcell...'
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
-        res = authenticated_multipart_post("/api/v0/stemcells", opts)
+        res = nil
+
+        3.times do
+          res = authenticated_multipart_post("/api/v0/stemcells", opts)
+          case res.code
+            when '200' ; break
+            when '503' ; sleep(60)
+          end
+        end
+
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
         say_green 'done'
         res
