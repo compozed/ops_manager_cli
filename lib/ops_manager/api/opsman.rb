@@ -25,27 +25,31 @@ class OpsManager
       end
 
       def get_installation_settings(opts = {})
-        say_green( '====> Downloading installation settings...')
-        authenticated_get("/api/installation_settings", opts)
+        say_green '====> Downloading installation settings ...'
+        res = authenticated_get("/api/installation_settings", opts)
+        print_green 'done'
+        res
       end
 
       def upload_installation_assets
-        print_green( '====> Uploading installation assets...')
+        print_green( '====> Uploading installation assets ...')
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
         opts = {:passphrase => @password, "installation[file]" => zip }
         res = multipart_post( "/api/v0/installation_asset_collection", opts)
-        say_green('done')
+        say_green 'done'
         res
       end
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
-        say_green( '====> Download installation assets...')
-        authenticated_get("/api/v0/installation_asset_collection", opts)
+        say_green '====> Download installation assets...'
+        res = authenticated_get("/api/v0/installation_asset_collection", opts)
+        say_green 'done'
+        res
       end
 
       def delete_products(opts = {})
-        say_green( '====> Deleating unused products...')
+        say_green '====> Deleating unused products...'
         authenticated_delete('/api/v0/products', opts)
       end
 
@@ -115,7 +119,7 @@ class OpsManager
 
       def import_stemcell(filepath)
         return unless filepath
-        say_green '====> Uploading stemcell...'
+        print_green '====> Uploading stemcell...'
         tar = UploadIO.new(filepath, 'multipart/form-data')
         opts = { "stemcell[file]" => tar }
         res = authenticated_multipart_post("/api/v0/stemcells", opts)
