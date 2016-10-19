@@ -7,8 +7,10 @@ class OpsManager
       end
 
       def accept_product_release_eula(product_slug, release_id)
-        say_green("====> Accepting #{product_slug} release #{release_id} eula ...")
-        authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/eula_acceptance")
+        print_green("====> Accepting #{product_slug} release #{release_id} eula ...")
+        res = authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/eula_acceptance")
+        say_green "done"
+        res
       end
 
       def get_product_release_files(product_slug, release_id)
@@ -16,8 +18,10 @@ class OpsManager
       end
 
       def download_product_release_file(product_slug, release_id, file_id, opts = {})
-        say_green "====> Downloading #{opts[:write_to]} stemcell ..."
-        authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/product_files/#{file_id}/download", opts)
+        print_green "====> Downloading stemcell: #{opts[:write_to]} ..."
+        res = authenticated_post("/api/v2/products/#{product_slug}/releases/#{release_id}/product_files/#{file_id}/download", opts)
+        say_green "done"
+        res
       end
 
       def get_authentication

@@ -30,10 +30,12 @@ class OpsManager
       end
 
       def upload_installation_assets
-        say_green( '====> Uploading installation assets...')
+        print_green( '====> Uploading installation assets...')
         zip = UploadIO.new("#{Dir.pwd}/installation_assets.zip", 'application/x-zip-compressed')
         opts = {:passphrase => @password, "installation[file]" => zip }
-        multipart_post( "/api/v0/installation_asset_collection", opts)
+        res = multipart_post( "/api/v0/installation_asset_collection", opts)
+        say_green('done')
+        res
       end
 
       def get_installation_assets
