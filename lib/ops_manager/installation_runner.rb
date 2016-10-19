@@ -6,7 +6,7 @@ class OpsManager
     attr_reader :id
 
     def trigger!
-      res = trigger_installation( body: body.join('&') )
+      res = trigger_installation( body: body )
       @id = JSON.parse(res.body).fetch('install').fetch('id').to_i
       self
     end
@@ -27,8 +27,7 @@ class OpsManager
     def body
       @body ||= [ 'ignore_warnings=true' ]
       @body << errands_body
-
-      @body
+      @body.join('&')
     end
 
     def opsman_api
@@ -42,10 +41,10 @@ class OpsManager
     def post_deploy_errands_body_for(product_guid)
       post_deploy_errands = post_deploy_errands_for(product_guid)
 
-      unless post_deploy_errands.empty?
-        post_deploy_errands.collect{ |e| "enabled_errands[#{product_guid}][post_deploy_errands][]=#{e}" }
-      else
+      if post_deploy_errands.empty?
         "enabled_errands[#{product_guid}]{}"
+      else
+        post_deploy_errands.collect{ |e| "enabled_errands[#{product_guid}][post_deploy_errands][]=#{e}" }
       end
     end
 
