@@ -17,7 +17,7 @@ class OpsManager
 
     def wait_for_result
       while JSON.parse(get_installation(id).body).fetch('status') == 'running'
-        print '.'.green
+        print ' .'.green
         sleep 10
       end
       puts ''

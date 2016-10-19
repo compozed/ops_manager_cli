@@ -80,7 +80,10 @@ class OpsManager
       end
 
       def get_installations(opts = {})
-        authenticated_get('/api/v0/installations')
+        say_green '====> Getting installations ...'
+        res = authenticated_get('/api/v0/installations')
+        print_green 'done'
+        res
       end
 
       def upgrade_product_installation(guid, product_version)

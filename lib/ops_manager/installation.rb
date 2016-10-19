@@ -32,7 +32,7 @@ class OpsManager
     end
 
     def opsman_api
-      @opsman_api ||= OpsManager::Api::Opsman.new
+      @opsman_api ||= OpsManager::Api::Opsman.new(silent: true)
     end
   end
 end
