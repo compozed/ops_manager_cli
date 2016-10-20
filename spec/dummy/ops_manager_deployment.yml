@@ -8,7 +8,7 @@ username: foo
 password: bar
 pivnet_token: abc123
 opts:
-  ova_path: ops-manager.ova
+  ova_path: ops-manager.ova # you can also specify the path with *. e.g.: ops-manager-ova/*.ova. This is usefull when using concourse and the pivnet-resource
   portgroup: 'dummy-portgroup'
   netmask: '255.255.255.0'
   gateway: '1.2.3.1'
