@@ -11,32 +11,27 @@ Questions? Pop in our [slack channel](https://cloudfoundry.slack.com/messages/op
 
 ### Core features
 
-- Support for deploying on vSphere infrastructure
+- Support vSphere infrastructure (easy to extend to any cloud provider)
 - Deploy/Upgrade Ops Manager appliance
 - Deploy/Upgrade product tiles
 - Generate config settings templates for product tiles deployments
+- Run errands on deploy/upgrade for ops_manager **< 1.7.x**
 
 ### Other features:
 
 - Show installation settings
 - Show installation logs
-- Get UAA token
 - Uploads stemcell to Ops Manager
 - Delete unused products
-
-### Limitations:
-
-- No support for enabling and running errands for ops_manager **< 1.7.x**
+- Curl ops_manager API
 
 
-### Test with Ops Manager Version
+## Upgrading OpsManager appliance 
 
-- up to 1.8.3.0
+To upgrade from **1.7.x** -> **1.8.x** use ops_manager_cli **0.3.1** 
 
-## Upgrading OpsManager appliance from **1.7.x** to **1.8.x**
+Use ops_manager_cli **>=0.4.0** once you are on **1.8.x**.
 
-On ops_manager_cli **>=0.4.0** support for upgrading to **1.8.x** was removed.
-Use ops_manager_cli **0.3.1** to upgrade from **1.7.x** -> **1.8.x**. 
 
 ## Dependencies
 
@@ -86,13 +81,16 @@ The ops_manager_cli tool can be installed in a docker container typically in con
 
 ### Building Docker image
 
-    bundle exec rake build
-    docker build -t compozed/ops_manager_cli # Optional: --build-arg DOWNLOAD_URL=http://your_blobstore.com/ovftool.bundle
+    git co vX.X.X
+    bundle exec rake build 
+    docker build  \
+      --build-arg DOWNLOAD_URL=http://your_blobstore.com/VMware-ovftool-4.1.0-2459827-lin.x86_64.bundle \
+      -t compozed/ops_manager_cli:vX.X.X
 
 
 ### Provisioning docker image to private registry
 
-    docker tag -f compozed/ops_manager_cli PRI_REGISTRY:PORT/compozed/ops_manager_cli
+    docker tag -f compozed/ops_manager_cli:vX.X.X PRI_REGISTRY:PORT/compozed/ops_manager_cli:vX.X.X
     docker push PRI_REGISTRY:PORT/compozed/ops_manager_cli
 
 
