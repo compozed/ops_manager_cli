@@ -22,6 +22,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec"
   spec.add_development_dependency "webmock"
   spec.add_development_dependency "byebug"
+  spec.add_development_dependency "github_changelog_generator"
   spec.add_dependency "rbvmomi"
   spec.add_dependency "multipart-post"
   spec.add_dependency "clamp"
