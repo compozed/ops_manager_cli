@@ -1,16 +1,12 @@
 # Change Log
 
-## [Unreleased](https://github.com/compozed/ops_manager_cli/tree/HEAD)
-
-[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.1...HEAD)
+## [v0.4.1](https://github.com/compozed/ops_manager_cli/tree/v0.4.1) (2016-10-21)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.0...v0.4.1)
 
 **Fixed bugs:**
 
 - Director template generator does not delete UAA sensitive data [\#13](https://github.com/compozed/ops_manager_cli/issues/13)
 - Product template generator does not delete stemcell metadata properties [\#12](https://github.com/compozed/ops_manager_cli/issues/12)
-
-## [v0.4.1](https://github.com/compozed/ops_manager_cli/tree/v0.4.1) (2016-10-21)
-[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.0...v0.4.1)
 
 ## [v0.4.0](https://github.com/compozed/ops_manager_cli/tree/v0.4.0) (2016-10-20)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.3.0...v0.4.0)
