@@ -2,7 +2,7 @@ class OpsManager
   class ProductTemplateGenerator
     OPS_MANAGER_PASSWORD_LENGTH = 32
     OPS_MANAGER_SECRET_LENGTH = 32
-    OPS_MANAGER_SALT_LENGTH = 16
+    OPS_MANAGER_SALT_LENGTH = 14
 
     attr_reader :product_name
 
@@ -10,20 +10,23 @@ class OpsManager
       @product_name = product_name
     end
 
-
     def generate
-      delete_partitions
-      delete_vm_credentials
-      delete_guid
-      delete_installation_name
-      delete_product_version
-      delete_jobs_guid
-      delete_prepared
-      delete_ops_manager_generated_passwords
-      delete_ops_manager_generated_salts
-      delete_ops_manager_generated_secrets
-      delete_private_key_pem
-      delete_product_version_from_properties
+      %w{ prepared guid installation_name product_version stemcell }.each do |property_name|
+        delete_from_product(property_name)
+      end
+
+      %w{ partitions vm_credentials guid }.each do |property_name|
+      delete_from_jobs(property_name)
+      end
+
+      %w{ password secret salt private_key_pem }.each do |property_name|
+        delete_value_from_job_properties(property_name)
+      end
+
+      %w{ secret private_key_pem }.each do |property_name|
+        delete_value_from_product_properties(property_name)
+      end
+
       add_merging_strategy_for_jobs
       add_merging_strategy_for_job_properties
 
@@ -36,75 +39,6 @@ class OpsManager
     end
 
     private
-    def delete_product_version_from_properties
-      delete_value_from_product_properties_if do |property|
-        property['identifier'] == 'product_version'
-      end
-    end
-
-    def delete_ops_manager_generated_passwords
-      delete_value_from_job_properties_if do |value|
-        value.fetch('password', '').length == OPS_MANAGER_PASSWORD_LENGTH
-      end
-    end
-
-    def delete_private_key_pem
-      delete_value_from_product_properties_if do |property|
-        property['value'].is_a?(Hash) && property['value'].has_key?('private_key_pem')
-      end
-
-      delete_value_from_job_properties_if do |value|
-        value.fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
-        value.has_key?('private_key_pem')
-      end
-    end
-
-    def delete_ops_manager_generated_salts
-      delete_value_from_job_properties_if do |value|
-        value.fetch('salt', '').length == OPS_MANAGER_SALT_LENGTH
-      end
-    end
-
-    def delete_ops_manager_generated_secrets
-      delete_value_from_product_properties_if do |property|
-        property['value'].is_a?(Hash) && property['value'].fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
-      end
-
-      delete_value_from_job_properties_if do |value|
-        value.fetch('secret', '').length == OPS_MANAGER_SECRET_LENGTH
-      end
-    end
-
-    def delete_value_from_product_properties_if
-      selected_product.fetch('properties', []).each  do |p|
-        p.delete('value') if p.is_a?(Hash) && yield(p)
-      end
-    end
-
-    def delete_value_from_job_properties_if
-      selected_product['jobs'].each do |j|
-        j.fetch('properties', []).each  do |p|
-          value = p.fetch('value',{})
-          p.delete('value') if value.is_a?(Hash) && yield(value)
-        end
-      end
-    end
-
-    def delete_prepared
-      selected_product.delete("prepared")
-    end
-
-    def delete_guid
-      selected_product.delete("guid")
-    end
-
-    def delete_installation_name
-      selected_product.delete("installation_name")
-    end
-
-    def delete_product_version
-      selected_product.delete("product_version")
-    end
 
     def add_merging_strategy_for_jobs
       selected_product['jobs'].unshift("(( merge on identifier ))")
@@ -116,16 +50,8 @@ class OpsManager
       end
     end
 
-    def delete_partitions
-      delete_from_jobs('partitions')
-    end
-
-    def delete_vm_credentials
-      delete_from_jobs('vm_credentials')
-    end
-
-    def delete_jobs_guid
-      delete_from_jobs('guid')
+    def delete_from_product(name)
+      selected_product.delete(name)
     end
 
     def selected_product
@@ -146,6 +72,22 @@ class OpsManager
       return @installation_settings if @installation_settings
       res = OpsManager::Api::Opsman.new(silent: true).get_installation_settings
       @installation_settings = JSON.parse(res.body)
+    end
+
+    def delete_value_from_product_properties(name)
+      selected_product.fetch('properties', []).each  do |p|
+        value = p.fetch('value',{})
+        p.delete('value') if value.is_a?(Hash) && !!value[name]
+      end
+    end
+
+    def delete_value_from_job_properties(name)
+      selected_product['jobs'].each do |j|
+        j.fetch('properties', []).each  do |p|
+          value = p.fetch('value',{})
+          p.delete('value') if value.is_a?(Hash) && !!value[name]
+        end
+      end
     end
   end
 end

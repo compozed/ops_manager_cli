@@ -4,29 +4,25 @@ def genpass(length); rand(36**length).to_s(36); end
 
 describe OpsManager::ProductTemplateGenerator do
   let(:product_template_generator){ described_class.new(product_name) }
-  let(:product_name){'dummy-product'}
+  let(:product_name){ 'dummy-product' }
   let(:guid){ 'dd2b-c21a-c11d-607d-sad1' }
   let(:installation_name){ 'example-job-123' }
   let(:random_password){ genpass(described_class::OPS_MANAGER_PASSWORD_LENGTH) }
   let(:random_secret){ genpass(described_class::OPS_MANAGER_SECRET_LENGTH) }
   let(:random_salt){ genpass(described_class::OPS_MANAGER_SALT_LENGTH) }
-  let(:custom_password){ 'custom-password' }
   let(:product_version){ '1.6.13-build.1' }
   let(:installation_settings) do
     {
       'products' => [{
-        'prepared' => true,'identifier' =>product_name, 'guid' => guid,
+        'prepared' => true, 'identifier' =>product_name, 'guid' => guid,
         'installation_name' => installation_name,
         'product_version' => product_version,
+         stemcell: { 'some' => 'stemcell meta deta' },
         'properties' => [
           {
             'value' => {
-              'private_key_pem' => 'Private Key'
+              'private_key_pem' => 'Product Private Key'
             }
-          },
-          {
-            'identifier' => 'product_version',
-            'value' => product_version
           }
         ],
         'jobs' => [
@@ -38,12 +34,6 @@ describe OpsManager::ProductTemplateGenerator do
                 'value' => {
                   'identity' => 'conf-1',
                   'password' => random_password
-                }
-              },
-              {
-                'value' => {
-                  'identity' => 'conf-2',
-                  'password' => custom_password
                 }
               },
               {
@@ -60,7 +50,7 @@ describe OpsManager::ProductTemplateGenerator do
               },
               {
                 'value' => {
-                  'private_key_pem' => 'Private Key'
+                  'private_key_pem' => 'Job Private Key'
                 }
               }
             ],
@@ -91,59 +81,62 @@ describe OpsManager::ProductTemplateGenerator do
   end
 
   describe '#generate' do
+    subject(:generated_template){ product_template_generator.generate }
+
     it 'should remove product guid' do
-      expect(product_template_generator.generate.to_s).not_to match(guid)
+      expect(generated_template.to_s).not_to match(guid)
     end
 
     it 'should remove product installation_name' do
-      expect(product_template_generator.generate.to_s).not_to match(installation_name)
+      expect(generated_template.to_s).not_to match(installation_name)
     end
 
     it 'should remove product product_version' do
-      expect(product_template_generator.generate.to_s).not_to match(product_version)
+      expect(generated_template.to_s).not_to match(product_version)
     end
 
     it 'should remove prepared entry' do
-      expect(product_template_generator.generate.to_s).not_to match('prepared')
+      expect(generated_template.to_s).not_to match('prepared')
     end
 
     it 'should remove jobs partitions entry' do
-      expect(product_template_generator.generate.to_s).not_to match('some partition info')
+      expect(generated_template.to_s).not_to match('some partition info')
     end
+
     it 'should remove jobs vm_credentials entry' do
-      expect(product_template_generator.generate.to_s).not_to match('some vm credentials')
+      expect(generated_template.to_s).not_to match('some vm credentials')
     end
 
     it 'should remove job guid entry' do
-      expect(product_template_generator.generate.to_s).not_to match('job-guid-example')
+      expect(generated_template.to_s).not_to match('job-guid-example')
     end
 
     it 'should remove ops_manager generated passwords' do
-      expect(product_template_generator.generate.to_s).not_to match(random_password)
-    end
-
-    it 'should not remove custom passwords' do
-      expect(product_template_generator.generate.to_s).to match('custom-password')
+      expect(generated_template.to_s).not_to match(random_password)
     end
 
     it 'should remove automatically job properties generated salt' do
-      expect(product_template_generator.generate.to_s).not_to match(random_salt)
+      expect(generated_template.to_s).not_to match(random_salt)
     end
 
     it 'should remove automatically job properties with generated secret' do
-      expect(product_template_generator.generate.to_s).not_to match(random_secret)
+      expect(generated_template.to_s).not_to match(random_secret)
     end
 
     it 'should remove job properties private keys' do
-      expect(product_template_generator.generate.to_s).not_to match( 'Private Key')
+      expect(generated_template.to_s).not_to match('Job Private Key')
+    end
+
+    it 'should remove product private keys' do
+      expect(generated_template.to_s).not_to match('Product Private Key')
     end
 
     it 'should remove the product version' do
-      expect(product_template_generator.generate.to_s).not_to match(product_version)
+      expect(generated_template.to_s).not_to match(product_version)
     end
 
-    it 'should remove private keys' do
-      expect(product_template_generator.generate.to_s).not_to match( 'Private Key')
+    it 'should remove stemcell metadata' do
+      expect(generated_template['products'][1]).not_to have_key('stemcell')
     end
   end
 end
