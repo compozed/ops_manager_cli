@@ -7,14 +7,24 @@ describe OpsManager::DirectorTemplateGenerator do
   end
   let(:director_template_generator){ described_class.new }
   let(:product_template) do
-    {
-      'products' => [
-        '(( merge on identifier ))',
-        { 'identifier' => 'p-bosh',
-          'director_ssl' => {},
-          'jobs' => [ '(( merge on identifier ))' ] }
-      ]
-    }
+    { 'products' => [
+      '(( merge on identifier ))',
+      { 'identifier' => 'p-bosh',
+        'director_ssl' => {},
+
+        'uaa_credentials' => {
+          'password' => 'uaa-credentials-password',
+        },
+        'uaa_admin_user_credentials' =>{
+          'password' => 'uaa-admin-user-credentials-password',
+
+        },
+        'uaa_admin_client_credentials' =>{
+          'password' => 'uaa-admin-client-credentials-password',
+        },
+        'jobs' => [ '(( merge on identifier ))' ]
+      }
+    ]}
   end
   let(:installation_settings) do
     {
@@ -55,46 +65,57 @@ describe OpsManager::DirectorTemplateGenerator do
   end
 
   describe '#generate' do
-    subject(:generate){ director_template_generator.generate }
+    subject(:generated_template){ director_template_generator.generate }
 
     it 'should include infrastructure' do
-      expect(generate['infrastructure']).to eq({})
+      expect(generated_template['infrastructure']).to eq({})
     end
 
     it 'should include p-bosh product-template' do
-      expect(generate['products'][1]['identifier']).to eq('p-bosh')
+      expect(generated_template['products'][1]['identifier']).to eq('p-bosh')
     end
 
     it 'should include product merge strategy on identifier' do
-      expect(generate['products'][0]).to eq('(( merge on identifier ))')
+      expect(generated_template['products'][0]).to eq('(( merge on identifier ))')
     end
 
     it 'should remove installation_schema_versiion' do
-      expect(generate).not_to have_key('installation_schema_version')
+      expect(generated_template).not_to have_key('installation_schema_version')
     end
 
     it 'should remove product guid' do
-      expect(generate).not_to have_key('guid')
-    end
-
-    it 'should not include product director_ssl' do
-      expect(generate['products'][1]).not_to have_key('director_ssl')
-    end
-
-    it 'should not include product uaa_ssl' do
-      expect(generate['products'][1]).not_to have_key('uaa_ssl')
+      expect(generated_template).not_to have_key('guid')
     end
 
     it 'should remove producty director_ssl' do
-      expect(generate).not_to have_key('director_ssl')
+      expect(generated_template).not_to have_key('director_ssl')
     end
 
     it 'should remove ip assignments' do
-      expect(generate).not_to have_key('ip_assignments')
+      expect(generated_template).not_to have_key('ip_assignments')
     end
 
     it 'should remove guid' do
-      expect(generate).not_to have_key('guid')
+      expect(generated_template).not_to have_key('guid')
+    end
+    it 'should not include product director_ssl' do
+      expect(generated_template['products'][1]).not_to have_key('director_ssl')
+    end
+
+    it 'should not include product uaa_ssl' do
+      expect(generated_template['products'][1]).not_to have_key('uaa_ssl')
+    end
+
+    it 'should remove uaa_credentials' do
+      expect(generated_template['products'][1]).not_to have_key('uaa_credentials')
+    end
+
+    it 'should remove uaa_admin_user_credentials' do
+      expect(generated_template['products'][1]).not_to have_key('uaa_admin_user_credentials')
+    end
+
+    it 'should remove uaa_admin_client_credentials' do
+      expect(generated_template['products'][1]).not_to have_key('uaa_admin_client_credentials')
     end
   end
 end

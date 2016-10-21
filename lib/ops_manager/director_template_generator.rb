@@ -2,11 +2,16 @@ class OpsManager
   class DirectorTemplateGenerator
     def generate
       merge_director_template_products
-      delete_schema_version
-      delete_director_ssl
-      delete_uaa_ssl
-      delete_guid
-      delete_ip_assignments
+
+    %w{ installation_schema_version ip_assignments guid }.each do |property_name|
+      installation_settings.delete(property_name)
+    end
+
+    %w{ director_ssl uaa_ssl uaa_credentials uaa_admin_user_credentials
+      uaa_admin_client_credentials }.each do |property_name|
+      product_template["products"][1].delete(property_name)
+    end
+
       add_merging_strategy_for_networks
 
       installation_settings.to_h
@@ -33,26 +38,6 @@ class OpsManager
       installation_settings['infrastructure']['networks'].tap do |networks|
         networks.unshift("(( merge on name ))") if networks
       end
-    end
-
-    def delete_schema_version
-      installation_settings.delete('installation_schema_version')
-    end
-
-    def delete_ip_assignments
-      installation_settings.delete('ip_assignments')
-    end
-
-    def delete_guid
-      installation_settings.delete('guid')
-    end
-
-    def delete_director_ssl
-      product_template["products"][1].delete("director_ssl")
-    end
-
-    def delete_uaa_ssl
-      product_template["products"][1].delete("uaa_ssl")
     end
 
     def product_template
