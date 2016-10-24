@@ -41,7 +41,7 @@ class OpsManager
     end
 
     def upload
-      print "====> Uploading product...".green
+      print "====> Uploading product ...".green
       if ProductDeployment.exists?(config.name, config.desired_version)
         puts "product already exists".green
       elsif config.filepath

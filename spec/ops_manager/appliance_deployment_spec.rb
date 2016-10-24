@@ -337,7 +337,7 @@ describe OpsManager::ApplianceDeployment do
         expect(appliance_deployment).to receive(:upgrade)
         expect do
           run
-        end.to output(/OpsManager at #{target} version is #{current_version.to_s}. Upgrading to #{desired_version.to_s}.../).to_stdout
+        end.to output(/OpsManager at #{target} version is #{current_version.to_s}. Upgrading to #{desired_version.to_s} .../).to_stdout
       end
 
       it 'does not performs a deployment' do

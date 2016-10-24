@@ -18,7 +18,7 @@ class OpsManager
       end
 
       def stop_current_vm(name)
-        print "====> Stopping vm #{name}...".green
+        print "====> Stopping vm #{name} ...".green
         dc = vim.serviceInstance.find_datacenter(config.opts['vcenter']['datacenter'])
         logger.info "finding vm: #{name}"
         vm = dc.find_vm(name) or fail "VM not found"
