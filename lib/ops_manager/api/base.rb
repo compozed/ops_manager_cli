@@ -135,7 +135,10 @@ class OpsManager
             request[k] = v
           end
         end
-        http.request(request)
+        http.request(request).tap do |res|
+          logger.info("performing delete to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
+          logger.info("post response body #{res.body}")
+        end
       end
 
       def uri_for(endpoint)

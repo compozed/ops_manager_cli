@@ -210,6 +210,21 @@ describe OpsManager::Cli do
       end
     end
 
+    describe 'when delete' do
+      let(:args) { ['curl', '-X DELETE', endpoint] }
+
+      before do
+        allow(opsman_api).to receive(:authenticated_delete)
+          .with(endpoint).and_return(double(body: body))
+      end
+
+      it 'should perform delete with provided endpoint' do
+        expect_any_instance_of(OpsManager::Cli::Curl)
+            .to receive(:puts).with(body)
+        cli.run(`pwd`, args)
+      end
+    end
+
     describe 'when post' do
       let(:args) { ['curl', '-X POST', endpoint] }
 
