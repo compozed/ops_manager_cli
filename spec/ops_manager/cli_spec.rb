@@ -225,6 +225,21 @@ describe OpsManager::Cli do
       end
     end
 
+    describe 'when put' do
+      let(:args) { ['curl', '-X PUT', '-d \'{"some": "data"}\'', endpoint] }
+
+      before do
+        allow(opsman_api).to receive(:authenticated_put)
+          .with(endpoint, body: '{"some": "data"}').and_return(double(body: body))
+      end
+
+      it 'should perform put with provided endpoint' do
+        expect_any_instance_of(OpsManager::Cli::Curl)
+          .to receive(:puts).with(body)
+        cli.run(`pwd`,args)
+      end
+    end
+
     describe 'when method not supported' do
       let(:args) { ['curl', '-X UNSUPPORTED_METHOD', endpoint] }
 

@@ -107,6 +107,7 @@ class OpsManager
 
     class Curl < Clamp::Command
       option ['-X', '--http-method'], "HTTP_METHOD", "HTTP Method (GET,POST)", default: 'GET'
+      option ['-d', '--data'], "HTTP_POST_DATA", "HTTP Post Data(POST, PUT)", default: ''
       parameter "ENDPOINT", "OpsManager api endpoint. eg: /api/v0/installation_settings", required: true
 
       def execute
@@ -115,6 +116,8 @@ class OpsManager
           opsman.authenticated_get(@endpoint).body
         when 'POST'
           opsman.authenticated_post(@endpoint).body
+        when 'PUT'
+          opsman.authenticated_put(@endpoint, body: strip(@data, "'")).body
         else
           "Unsupported method: #{http_method.strip}"
         end
@@ -123,6 +126,11 @@ class OpsManager
       private
       def opsman
         OpsManager::Api::Opsman.new(silent: true)
+      end
+
+      def strip(string, chars)
+        chars = Regexp.escape(chars)
+        string.strip.gsub(/\A[#{chars}]+|[#{chars}]+\z/, "")
       end
     end
 

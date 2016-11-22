@@ -62,7 +62,6 @@ class OpsManager
           end
         end
 
-
         body = opts[:body] || ''
         request.body= body
 
@@ -82,6 +81,7 @@ class OpsManager
         uri = uri_for(endpoint)
         http = http_for(uri)
         request = Net::HTTP::Put.new(uri.request_uri)
+
         request.set_form_data(opts)
 
         request.basic_auth(username, password) if self.respond_to?(:username)
@@ -91,7 +91,12 @@ class OpsManager
             request[k] = v
           end
         end
-        # body = opts.fetch( :body )
+
+        request['Content-Type'] = 'application/json'
+
+        body = opts[:body] || ''
+        request.body= body
+
         http.request(request).tap do |res|
           logger.info("performing put to #{uri} with opts: #{opts.inspect}  res.code: #{res.code}")
           logger.info("put response body #{res.body}")
