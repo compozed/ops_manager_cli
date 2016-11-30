@@ -1,4 +1,4 @@
-# OpsManagerCli [![Build Status](https://travis-ci.org/compozed/ops_manager_cli.png?branch=master)](https://travis-ci.org/compozed/ops_manager_cli) [![Code Climate](https://codeclimate.com/github/compozed/ops_manager_cli.png)](https://codeclimate.com/github/compozed/ops_manager_cli)
+# OpsManagerCli [![Build Status](https://travis-ci.org/compozed/ops_manager_cli.png?branch=master)](https://travis-ci.org/compozed/ops_manager_cli) [![Code Climate](https://codeclimate.com/github/compozed/ops_manager_cli.png)](https://codeclimate.com/github/compozed/ops_manager_cli) [![Gem Version](https://badge.fury.io/rb/ops_manager_cli.svg)](https://badge.fury.io/rb/ops_manager_cli)
 
 
 Command line tool to interact with Pivotal Operations Manager through its API, because GUIs are evil.
