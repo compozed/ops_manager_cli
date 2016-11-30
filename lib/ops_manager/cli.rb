@@ -106,7 +106,7 @@ class OpsManager
     end
 
     class Curl < Clamp::Command
-      option ['-X', '--http-method'], "HTTP_METHOD", "HTTP Method (GET,POST)", default: 'GET'
+      option ['-X', '--http-method'], "HTTP_METHOD", "HTTP Method (DELETE, GET, POST, PUT)", default: 'GET'
       option ['-d', '--data'], "HTTP_POST_DATA", "HTTP Post Data(POST, PUT)", default: ''
       parameter "ENDPOINT", "OpsManager api endpoint. eg: /api/v0/installation_settings", required: true
 
@@ -114,6 +114,8 @@ class OpsManager
         puts case http_method.strip
         when 'GET'
           opsman.authenticated_get(@endpoint).body
+        when 'DELETE'
+          opsman.authenticated_delete(@endpoint).body
         when 'POST'
           opsman.authenticated_post(@endpoint).body
         when 'PUT'
