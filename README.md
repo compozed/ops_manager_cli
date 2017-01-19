@@ -75,6 +75,35 @@ All dependencies must be installed and available in user PATH
 
     ./ops_manager deploy-product product_deployment.yml
 
+### Regenerating SSL Certificates
+
+Ops Manager generates certificates for BOSH director and UAA automatically before deploying director.
+[Periodically you will want to regenerate this certificates.](https://discuss.pivotal.io/hc/en-us/articles/115000453368)
+There is a workaround on how to do this with ops_manager_cli:
+
+1. Get director template:
+
+        $ ops_manager get-director-template > product_installation_settings.yml
+  
+2. Set director's cert and private key to null:
+
+        # product_installation_settings.yml
+        # For director ssl certs
+        + director_ssl:
+        +   private_key_pem:
+        +   cert_pem:
+
+        # For director ssl certs
+        + uaa_ssl:
+        +   private_key_pem:
+        +   cert_pem:
+
+3. Perform director deployment:
+
+        $ ops_manager deploy-product product_deployment.yml
+
+**Note:** remove this lines unless you want to regenerate certs on every single deployment :)
+
 ## Using with Docker
 
 The ops_manager_cli tool can be installed in a docker container typically in conjunction with [Concourse CI](http://concourse.ci/).  This allows users to build concourse pipelines to deploy and manage their Pivotal Cloud Foundry deployments.
