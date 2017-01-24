@@ -60,6 +60,7 @@ class OpsManager
       puts "====> Upgrading #{config.name} version from #{installation.current_version.to_s} to #{config.desired_version}...".green
       upload
       upgrade_product_installation(installation.guid, config.desired_version)
+      merge_product_installation_settings
       OpsManager::InstallationRunner.trigger!.wait_for_result
 
       puts "====> Finish!".green
@@ -75,12 +76,17 @@ class OpsManager
       puts "====> Deploying #{config.name} version #{config.desired_version}...".green
       upload
       add_to_installation
-      get_installation_settings({write_to: '/tmp/is.yml'})
-      puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
-      upload_installation_settings('/tmp/new_is.yml')
+      merge_product_installation_settings
       OpsManager::InstallationRunner.trigger!.wait_for_result
 
       puts "====> Finish!".green
+    end
+
+
+    def merge_product_installation_settings
+      get_installation_settings({write_to: '/tmp/is.yml'})
+      puts `DEBUG=false spruce merge /tmp/is.yml #{config.installation_settings_file} > /tmp/new_is.yml`
+      upload_installation_settings('/tmp/new_is.yml')
     end
 
     def self.exists?(name, version)

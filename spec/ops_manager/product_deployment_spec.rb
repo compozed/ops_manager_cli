@@ -45,10 +45,31 @@ describe OpsManager::ProductDeployment do
     end
   end
 
-  describe "#merge_installation_settings" do
-    it "should use spruce to merge the templates"
-    it "should return the merged installation_settings"
-    it "should return RuntimeError with the stderr of the run command"
+  describe "#merge_product_installation_settings" do
+    subject(:merge_product_installation_settings){ product_deployment.merge_product_installation_settings }
+
+    before do
+      allow(product_deployment).tap do |s|
+        s.to receive(:get_installation_settings)
+        s.to receive(:`)
+        s.to receive(:upload_installation_settings)
+      end
+    end
+
+    it 'should download current installation setting' do
+      expect(product_deployment).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+      merge_product_installation_settings
+    end
+
+    it 'should spruce merge current installation settings with product installation settings' do
+      expect(product_deployment).to receive(:`).with("DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
+      merge_product_installation_settings
+    end
+
+    it 'should upload new installation settings' do
+      expect(product_deployment).to receive(:upload_installation_settings).with('/tmp/new_is.yml')
+      merge_product_installation_settings
+    end
   end
 
   describe "@exists?" do
@@ -90,12 +111,11 @@ describe OpsManager::ProductDeployment do
     describe 'when installation does not exists' do
       let(:installation){ nil }
 
-      it 'should not perform the add_staged_product' do
+      it 'should perform the add_staged_product' do
         expect_any_instance_of(OpsManager::Api::Opsman).to receive(:add_staged_products)
         add_to_installation
       end
     end
-
   end
 
   describe "#deploy" do
@@ -104,10 +124,8 @@ describe OpsManager::ProductDeployment do
     before do
       allow(product_deployment).tap do |s|
         s.to receive(:upload)
-        s.to receive(:upload_installation_settings)
-        s.to receive(:get_installation_settings)
         s.to receive(:add_to_installation)
-        s.to receive(:`)
+        s.to receive(:merge_product_installation_settings)
       end
     end
 
@@ -116,25 +134,16 @@ describe OpsManager::ProductDeployment do
       deploy
     end
 
-    it 'should download current installation setting' do
-      expect(product_deployment).to receive(:get_installation_settings).with({write_to: '/tmp/is.yml'})
+    it 'should merge product installation settings' do
+      expect(product_deployment).to receive(:merge_product_installation_settings)
       deploy
     end
 
-    it 'should download current installation setting' do
+    it 'should add product to installation' do
       expect(product_deployment).to receive(:add_to_installation)
       deploy
     end
 
-    it 'should spruce merge current installation settings with product installation settings' do
-      expect(product_deployment).to receive(:`).with("DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
-      deploy
-    end
-
-    it 'should upload new installation settings' do
-      expect(product_deployment).to receive(:upload_installation_settings).with('/tmp/new_is.yml')
-      deploy
-    end
 
     it 'should wait for installation' do
       expect(installation).to receive(:wait_for_result)
@@ -156,6 +165,7 @@ describe OpsManager::ProductDeployment do
       allow(product_deployment).tap do |s|
         s.to receive(:upgrade_product_installation).with(guid, desired_version)
         s.to receive(:upload)
+        s.to receive(:merge_product_installation_settings)
       end
     end
 
@@ -167,6 +177,10 @@ describe OpsManager::ProductDeployment do
         upgrade
       end
 
+      it 'should merge product installation settings' do
+        expect(product_deployment).to receive(:merge_product_installation_settings)
+        upgrade
+      end
 
       it 'should perform a desired_version upgrade' do
         expect(product_deployment).to receive(:upgrade_product_installation)
