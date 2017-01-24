@@ -1,5 +1,18 @@
 # Change Log
 
+## [v0.5.0](https://github.com/compozed/ops_manager_cli/tree/v0.5.0) (2017-01-24)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.1...v0.5.0)
+
+**Implemented enhancements:**
+
+- Support DELETE on curl [\#19](https://github.com/compozed/ops_manager_cli/pull/19) ([glyn](https://github.com/glyn))
+
+**Closed issues:**
+
+- Upgrade does not merge product installation settings [\#22](https://github.com/compozed/ops_manager_cli/issues/22)
+- ops\_manager curl -x PUT not working [\#17](https://github.com/compozed/ops_manager_cli/issues/17)
+- When uploading stemcell it does not show the correct output [\#15](https://github.com/compozed/ops_manager_cli/issues/15)
+
 ## [v0.4.1](https://github.com/compozed/ops_manager_cli/tree/v0.4.1) (2016-10-21)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.0...v0.4.1)
 
