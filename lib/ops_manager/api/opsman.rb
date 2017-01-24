@@ -124,7 +124,7 @@ class OpsManager
       def import_stemcell(filepath)
         return unless filepath
         tar = UploadIO.new(filepath, 'multipart/form-data')
-        print_green "====> Uploading stemcell: #{tar} ..."
+        print_green "====> Uploading stemcell: #{filepath} ..."
         opts = { "stemcell[file]" => tar }
         res = nil
 
