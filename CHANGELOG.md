@@ -1,5 +1,12 @@
 # Change Log
 
+## [v0.5.1](https://github.com/compozed/ops_manager_cli/tree/v0.5.1) (2017-01-25)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.0...v0.5.1)
+
+**Closed issues:**
+
+- Upgrading product does not work with opsman\_cli 0.5.0 on opsman 1.9 [\#23](https://github.com/compozed/ops_manager_cli/issues/23)
+
 ## [v0.5.0](https://github.com/compozed/ops_manager_cli/tree/v0.5.0) (2017-01-24)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.1...v0.5.0)
 
