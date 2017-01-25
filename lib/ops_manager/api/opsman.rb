@@ -95,7 +95,7 @@ class OpsManager
 
       def upgrade_product_installation(guid, product_version)
         print_green "====> Bumping product installation #{guid} product_version to #{product_version} ..."
-        opts = { to_version: product_version }
+        opts = { :body => { 'to_version' => product_version }.to_json }
         res = authenticated_put("/api/v0/staged/products/#{guid}", opts)
         raise OpsManager::UpgradeError.new(res.body) unless res.code == '200'
         say_green 'done'
