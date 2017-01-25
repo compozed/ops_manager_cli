@@ -1,7 +1,7 @@
 FROM ruby:2.3.0
 
 ENV GEM_NAME ops_manager_cli
-ENV GEM_VERSION 0.5.0
+ENV GEM_VERSION 0.5.1
 ENV OVFTOOL_VERSION 4.1.0-2459827
 ENV OVFTOOL_INSTALLER VMware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle
 ARG DOWNLOAD_URL
@@ -26,5 +26,4 @@ RUN chmod +x /usr/local/bin/jq
 COPY pkg/${GEM_NAME}-${GEM_VERSION}.gem /tmp/
 
 RUN gem install /tmp/${GEM_NAME}-${GEM_VERSION}.gem
-
 
