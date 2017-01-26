@@ -7,11 +7,22 @@ class OpsManager
     end
 
     def self.logger
-      @logger ||= Logger.new( ENV['DEBUG'].nil? ? 'ops_manager.log' : STDOUT)
+      @logger ||= Logger.new(STDOUT).tap do |l|
+        l.level = log_level
+      end
     end
 
     def self.logger=(logger)
       @logger = logger
+    end
+
+    private
+    def self.log_level
+      if ENV['DEBUG'].nil?
+        Logger::WARN
+      else
+        Logger::INFO
+      end
     end
   end
 end

@@ -2,12 +2,14 @@ require 'spec_helper'
 require 'ops_manager/logging'
 
 describe OpsManager::Logging do
-  class Foo
-    include OpsManager::Logging
-  end
+  class Foo; include OpsManager::Logging; end
 
   describe 'Foo#logger' do
     let(:foo){ Foo.new }
+
+    before do
+      OpsManager::Logging.logger=nil
+    end
 
     it 'should be kind of Logger' do
       expect(foo.logger).to be_kind_of(Logger)
@@ -17,19 +19,22 @@ describe OpsManager::Logging do
       expect(foo.logger).to eq(foo.logger)
     end
 
-    it 'should output logs to a file' do
-      OpsManager::Logging.logger=nil
-      expect(Logger).to receive(:new).with('ops_manager.log')
-      OpsManager::Logging.logger
+    it 'should output logs to stdout' do
+      expect(Logger).to receive(:new).with(STDOUT).and_call_original
+      foo.logger
     end
 
-    describe 'when DEBUG=true' do
+    it 'should log in WARN level' do
+      expect_any_instance_of(Logger).to receive(:level=).with(Logger::WARN)
+      foo.logger
+    end
+
+    describe 'when DEBUG' do
       before { ENV['DEBUG']= 'true' }
 
-      it 'should output logs to a file' do
-        OpsManager::Logging.logger=nil
-        expect(Logger).to receive(:new).with(STDOUT)
-        OpsManager::Logging.logger
+      it 'should log in INFO level' do
+        expect_any_instance_of(Logger).to receive(:level=).with(Logger::INFO)
+        foo.logger
       end
 
       after{ ENV.delete('DEBUG') }
