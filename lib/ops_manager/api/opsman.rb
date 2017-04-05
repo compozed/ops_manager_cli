@@ -117,7 +117,7 @@ class OpsManager
 
       def get_diagnostic_report
         authenticated_get("/api/v0/diagnostic_report")
-      rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
+      rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout, CF::UAA::BadTarget, SocketError
         nil
       end
 
@@ -129,10 +129,22 @@ class OpsManager
         res = nil
 
         3.times do
-          res = authenticated_multipart_post("/api/v0/stemcells", opts)
-          case res.code
-            when '200' ; break
-            when '503' ; sleep(60)
+          begin
+            res = authenticated_multipart_post("/api/v0/stemcells", opts)
+            puts "Response code was: #{res.code}"
+            case res.code
+              when '200' ; break
+              when '502' ; sleep(60)
+              when '503' ; sleep(60)
+            end
+          rescue CF::UAA::BadResponse
+            puts "Caught a BadResponse error.  Sleeping 60 seconds."
+            sleep(60)
+            next
+          rescue
+            puts "Caught an unidentified error.  Sleeping 60 seconds."
+            sleep(60)
+            next
           end
         end
 
@@ -150,14 +162,14 @@ class OpsManager
       end
 
       def target
-        @target ||= OpsManager.get_conf(:target)
+        @target = OpsManager.get_conf(:target)
       end
 
       def get_token
         token_issuer.owner_password_grant(username, password, 'opsman.admin').tap do |token|
           logger.info "UAA Token: #{token.inspect}"
         end
-      rescue  CF::UAA::TargetError
+      rescue  CF::UAA::TargetError, CF::UAA::BadTarget
         nil
       end
 
@@ -169,7 +181,8 @@ class OpsManager
       end
 
       def access_token
-        @access_token ||= get_token.info['access_token']
+        token = get_token
+        @access_token = token ? token.info['access_token'] : nil
       end
 
       def authorization_header

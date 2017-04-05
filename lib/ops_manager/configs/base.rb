@@ -14,6 +14,10 @@ class OpsManager
         end
       end
 
+      def has_key?(attr)
+        @config.has_key?(attr)
+      end
+
       def filepath
         find_full_path(@config['filepath'])
       end

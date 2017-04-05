@@ -305,7 +305,7 @@ describe OpsManager::Api::Opsman do
     end
 
     [ Net::OpenTimeout, Errno::ETIMEDOUT ,
-      Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|
+      Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH, CF::UAA::BadTarget, SocketError ].each do |error|
       describe "when there is no ops manager and request errors: #{error}" do
 
         it "should be nil" do
@@ -417,6 +417,17 @@ describe OpsManager::Api::Opsman do
       before do
         allow(token_issuer).to receive(:owner_password_grant)
           .and_raise(CF::UAA::TargetError.new)
+      end
+
+      it 'it should be nil' do
+        expect(opsman.get_token).to be_nil
+      end
+    end
+
+    describe 'when there is a connection failure' do
+      before do
+        allow(token_issuer).to receive(:owner_password_grant)
+          .and_raise(CF::UAA::BadTarget.new)
       end
 
       it 'it should be nil' do

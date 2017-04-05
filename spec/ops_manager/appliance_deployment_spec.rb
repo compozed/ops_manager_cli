@@ -14,12 +14,14 @@ describe OpsManager::ApplianceDeployment do
   let(:pivnet_token){ 'asd123' }
   let(:installation){ double.as_null_object }
   let(:target){ '1.2.3.4' }
+  let(:hostname){ 'opsmanager.systemdomain.mycompany.com' }
   let(:config_file){ 'ops_manager_deployment.yml' }
   let(:config) do
     double('config',
            name: 'ops-manager',
            desired_version: desired_version.to_s,
            ip: target,
+           hostname: hostname,
            password: password,
            username: username,
            pivnet_token: pivnet_token)
@@ -37,6 +39,7 @@ describe OpsManager::ApplianceDeployment do
     allow(appliance_deployment).to receive(:current_version).and_return(current_version)
     allow(appliance_deployment).to receive(:config).and_return(config)
     allow(appliance_deployment).to receive(:parsed_installation_settings).and_return({})
+    allow(config).to receive(:has_key?).with('hostname').and_return(false)
   end
 
   describe 'initialize' do
@@ -345,6 +348,30 @@ describe OpsManager::ApplianceDeployment do
         expect do
           run
         end.to output(/OpsManager at #{target} version is #{current_version}. Upgrading to #{desired_version.to_s}.../).to_stdout
+      end
+    end
+
+    describe 'when setting conf properties' do
+      let(:current_version){ OpsManager::Semver.new('') }
+
+      it 'sets target to config.hostname when config.hostname exists' do
+        allow(config).to receive(:has_key?).with('hostname').and_return(true)
+        expect(OpsManager).to receive(:set_conf).with(:target, config.ip)
+        expect(OpsManager).to receive(:set_conf).with(:username, config.username)
+        expect(OpsManager).to receive(:set_conf).with(:password, config.password)
+        expect(OpsManager).to receive(:set_conf).with(:pivnet_token, config.pivnet_token)
+        expect(OpsManager).to receive(:set_conf).with(:target, config.hostname)
+        expect do
+          run
+        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
+      end
+
+      it 'does not set target to hostname when config.hostname does not exist' do
+        allow(config).to receive(:has_key?).with('hostname').and_return(false)
+        expect(OpsManager).to_not receive(:set_conf).with(:target, :hostname)
+        expect do
+          run
+        end.to output(/No OpsManager deployed at #{target}. Deploying .../).to_stdout
       end
     end
   end
