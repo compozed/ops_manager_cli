@@ -246,6 +246,12 @@ describe OpsManager::ApplianceDeployment do
         .with('/tmp/current_stemcells/stemcell-2.tgz')
       provision_stemcells
     end
+
+    it 'should reset the opsman token before running imports' do
+      expect(opsman_api).to receive(:reset_access_token).ordered
+      expect(opsman_api).to receive(:import_stemcell).ordered.twice
+      provision_stemcells
+    end
   end
 
   describe '#provision_stemcells' do

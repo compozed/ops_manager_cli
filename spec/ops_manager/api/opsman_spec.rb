@@ -10,12 +10,13 @@ describe OpsManager::Api::Opsman do
   let(:filepath) { 'example-product-1.6.1.pivotal' }
   let(:parsed_response){ JSON.parse(response.body) }
   let(:token_issuer){ double }
-  let(:uaa_token){ double(info: {'access_token' => "UAA_ACCESS_TOKEN" }) }
+  let(:token){ double(info: {'access_token' => "UAA_ACCESS_TOKEN" }) }
+  let(:other_token){ double(info: {'access_token' => "OTHER_UAA_ACCESS_TOKEN" }) }
 
   before do
     allow(token_issuer).to receive(:owner_password_grant)
       .with(username, password, 'opsman.admin')
-      .and_return(uaa_token)
+      .and_return(token, other_token)
     allow(CF::UAA::TokenIssuer).to receive(:new)
       .with("https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true)
       .and_return(token_issuer)
@@ -483,6 +484,14 @@ describe OpsManager::Api::Opsman do
 
       expect(WebMock).to have_requested(:get, uri)
         .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
+
+  describe '#reset_token' do
+    it 'should reset the token' do
+      expect do
+        opsman.reset_access_token
+      end.to change{ opsman.access_token }.from("UAA_ACCESS_TOKEN").to("OTHER_UAA_ACCESS_TOKEN")
     end
   end
 end

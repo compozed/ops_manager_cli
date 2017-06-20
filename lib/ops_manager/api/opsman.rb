@@ -141,6 +141,14 @@ class OpsManager
         res
       end
 
+      def get_token
+        token_issuer.owner_password_grant(username, password, 'opsman.admin').tap do |token|
+          logger.info "UAA Token: #{token.inspect}"
+        end
+      rescue  CF::UAA::TargetError
+        nil
+      end
+
       def username
         @username ||= OpsManager.get_conf(:username)
       end
@@ -153,23 +161,19 @@ class OpsManager
         @target ||= OpsManager.get_conf(:target)
       end
 
-      def get_token
-        token_issuer.owner_password_grant(username, password, 'opsman.admin').tap do |token|
-          logger.info "UAA Token: #{token.inspect}"
-        end
-      rescue  CF::UAA::TargetError
-        nil
+
+      def reset_access_token
+        @access_token = nil
       end
 
+      def access_token
+        @access_token ||= get_token.info['access_token']
+      end
 
       private
       def token_issuer
         @token_issuer ||= CF::UAA::TokenIssuer.new(
           "https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true )
-      end
-
-      def access_token
-        @access_token ||= get_token.info['access_token']
       end
 
       def authorization_header

@@ -9,7 +9,7 @@ class OpsManager::ApplianceDeployment
     :get_product_release_files, :download_product_release_file
   def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
     :get_installation_settings, :get_diagnostic_report, :upload_installation_assets,
-    :import_stemcell, :target, :password, :username, :ops_manager_version=
+    :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token
 
   attr_reader :config_file
 
@@ -130,6 +130,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def provision_stemcells
+    reset_access_token
     Dir.glob("#{current_stemcell_dir}/*").each do |stemcell_filepath|
       import_stemcell(stemcell_filepath)
     end
