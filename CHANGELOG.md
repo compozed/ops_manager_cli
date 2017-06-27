@@ -1,5 +1,15 @@
 # Change Log
 
+## [Unreleased](https://github.com/compozed/ops_manager_cli/tree/HEAD)
+
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.1...HEAD)
+
+**Closed issues:**
+
+- When upgrading opsman the token does not reset [\#27](https://github.com/compozed/ops_manager_cli/issues/27)
+- Support refresh tokens for re-authentication with UAA [\#24](https://github.com/compozed/ops_manager_cli/issues/24)
+- Allow toggling ops\_manager.log [\#21](https://github.com/compozed/ops_manager_cli/issues/21)
+
 ## [v0.5.1](https://github.com/compozed/ops_manager_cli/tree/v0.5.1) (2017-01-25)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.0...v0.5.1)
 
