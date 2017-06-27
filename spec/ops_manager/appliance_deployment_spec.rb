@@ -72,7 +72,7 @@ describe OpsManager::ApplianceDeployment do
 
       %i( download_current_stemcells
          stop_current_vm deploy upload_installation_assets
-         provision_stemcells).each do |m|
+         wait_for_uaa provision_stemcells).each do |m|
            allow(appliance_deployment).to receive(m)
          end
     end
@@ -80,7 +80,7 @@ describe OpsManager::ApplianceDeployment do
     it 'Should perform in the right order' do
       %i( get_installation_assets download_current_stemcells
          stop_current_vm deploy upload_installation_assets
-         provision_stemcells).each do |m|
+         wait_for_uaa provision_stemcells).each do |m|
            expect(appliance_deployment).to receive(m).ordered
          end
          upgrade
@@ -237,6 +237,7 @@ describe OpsManager::ApplianceDeployment do
           '/tmp/current_stemcells/stemcell-1.tgz',
           '/tmp/current_stemcells/stemcell-2.tgz',
         ])
+      allow(opsman_api).to receive(:reset_access_token)
     end
 
     it 'should upload all the stemcells in /tmp/current_stemcells' do
@@ -251,6 +252,44 @@ describe OpsManager::ApplianceDeployment do
       expect(opsman_api).to receive(:reset_access_token).ordered
       expect(opsman_api).to receive(:import_stemcell).ordered.twice
       provision_stemcells
+    end
+  end
+
+  describe '#wait_for_uaa' do
+    subject(:wait_for_uaa){ appliance_deployment.wait_for_uaa }
+
+    before do
+      allow(appliance_deployment).to receive(:sleep)
+    end
+
+
+    describe 'when uaa is available' do
+      before do
+        allow(opsman_api).to receive(:get_ensure_availability)
+          .and_return(double( code:'302', body:'You are being /auth/cloudfoundry redirected'))
+      end
+
+      it 'should exit successfully' do
+        expect(opsman_api).to receive(:get_ensure_availability)
+        wait_for_uaa
+      end
+    end
+
+    describe 'when uaa is not available yet' do
+      before do
+        allow(opsman_api).to receive(:get_ensure_availability)
+          .and_return(
+            double( code:'503', body:'503 Bad Gateway'),
+            double( code:'302', body:'Ops Manager Setup'),
+            double( code:'200', body:'Waiting for authentication system to start...'),
+            double( code:'302', body:'You are being /auth/cloudfoundry redirected')
+        )
+      end
+
+      it 'should wait until uaa is ready' do
+        expect(opsman_api).to receive(:get_ensure_availability).exactly(4).times
+        wait_for_uaa
+      end
     end
   end
 

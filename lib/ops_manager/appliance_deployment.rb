@@ -8,7 +8,7 @@ class OpsManager::ApplianceDeployment
   def_delegators :pivnet_api, :get_product_releases, :accept_product_release_eula,
     :get_product_release_files, :download_product_release_file
   def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
-    :get_installation_settings, :get_diagnostic_report, :upload_installation_assets,
+    :get_installation_settings, :get_diagnostic_report, :upload_installation_assets, :get_ensure_availability,
     :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token
 
   attr_reader :config_file
@@ -63,6 +63,7 @@ class OpsManager::ApplianceDeployment
     stop_current_vm(current_vm_name)
     deploy
     upload_installation_assets
+    wait_for_uaa
     provision_stemcells
     OpsManager::InstallationRunner.trigger!.wait_for_result
   end
@@ -136,7 +137,19 @@ class OpsManager::ApplianceDeployment
     end
   end
 
+  def wait_for_uaa
+    puts '====> Waiting for UAA to become available ...'.green
+    while !uaa_available?
+      sleep(5)
+    end
+  end
+
   private
+  def uaa_available?
+    res = get_ensure_availability
+    res.code.eql? '302' and res.body.include? '/auth/cloudfoundry'
+  end
+
   def diagnostic_report
     @diagnostic_report ||= get_diagnostic_report
   end

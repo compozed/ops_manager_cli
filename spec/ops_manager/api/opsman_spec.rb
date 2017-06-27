@@ -494,4 +494,16 @@ describe OpsManager::Api::Opsman do
       end.to change{ opsman.access_token }.from("UAA_ACCESS_TOKEN").to("OTHER_UAA_ACCESS_TOKEN")
     end
   end
+
+  describe '#get_ensure_availablity' do
+    let(:uri){ "https://#{target}/login/ensure_availability" }
+
+    it 'should perform a get on /login/ensure_availability' do
+      stub_request(:get, uri)
+
+      opsman.get_ensure_availability
+
+      expect(WebMock).to have_requested(:get, uri)
+    end
+  end
 end

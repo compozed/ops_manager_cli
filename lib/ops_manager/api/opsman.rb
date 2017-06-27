@@ -141,6 +141,10 @@ class OpsManager
         res
       end
 
+      def get_ensure_availability
+        get("/login/ensure_availability")
+      end
+
       def get_token
         token_issuer.owner_password_grant(username, password, 'opsman.admin').tap do |token|
           logger.info "UAA Token: #{token.inspect}"
