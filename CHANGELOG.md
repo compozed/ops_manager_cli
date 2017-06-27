@@ -1,21 +1,16 @@
 # Change Log
 
-## [Unreleased](https://github.com/compozed/ops_manager_cli/tree/HEAD)
-
-[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.1...HEAD)
+## [v0.5.2](https://github.com/compozed/ops_manager_cli/tree/v0.5.2) (2017-06-27)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.1...v0.5.2)
 
 **Closed issues:**
 
-- When upgrading opsman the token does not reset [\#27](https://github.com/compozed/ops_manager_cli/issues/27)
 - Support refresh tokens for re-authentication with UAA [\#24](https://github.com/compozed/ops_manager_cli/issues/24)
+- Upgrading product does not work with opsman\_cli 0.5.0 on opsman 1.9 [\#23](https://github.com/compozed/ops_manager_cli/issues/23)
 - Allow toggling ops\_manager.log [\#21](https://github.com/compozed/ops_manager_cli/issues/21)
 
 ## [v0.5.1](https://github.com/compozed/ops_manager_cli/tree/v0.5.1) (2017-01-25)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.0...v0.5.1)
-
-**Closed issues:**
-
-- Upgrading product does not work with opsman\_cli 0.5.0 on opsman 1.9 [\#23](https://github.com/compozed/ops_manager_cli/issues/23)
 
 ## [v0.5.0](https://github.com/compozed/ops_manager_cli/tree/v0.5.0) (2017-01-24)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.4.1...v0.5.0)
@@ -26,7 +21,6 @@
 
 **Closed issues:**
 
-- Upgrade does not merge product installation settings [\#22](https://github.com/compozed/ops_manager_cli/issues/22)
 - ops\_manager curl -x PUT not working [\#17](https://github.com/compozed/ops_manager_cli/issues/17)
 - When uploading stemcell it does not show the correct output [\#15](https://github.com/compozed/ops_manager_cli/issues/15)
 
@@ -36,7 +30,6 @@
 **Fixed bugs:**
 
 - Director template generator does not delete UAA sensitive data [\#13](https://github.com/compozed/ops_manager_cli/issues/13)
-- Product template generator does not delete stemcell metadata properties [\#12](https://github.com/compozed/ops_manager_cli/issues/12)
 
 ## [v0.4.0](https://github.com/compozed/ops_manager_cli/tree/v0.4.0) (2016-10-20)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.3.0...v0.4.0)
@@ -44,14 +37,12 @@
 **Implemented enhancements:**
 
 - Improve output for appliance deploy/upgrade [\#11](https://github.com/compozed/ops_manager_cli/issues/11)
-- Improve output for product deploy/upgrade [\#10](https://github.com/compozed/ops_manager_cli/issues/10)
 - Run errands when applying changes [\#9](https://github.com/compozed/ops_manager_cli/issues/9)
 - 1.8 support [\#5](https://github.com/compozed/ops_manager_cli/pull/5) ([bonzofenix](https://github.com/bonzofenix))
 
 **Fixed bugs:**
 
 - delete-unused-products command not working [\#8](https://github.com/compozed/ops_manager_cli/issues/8)
-- Hardcoded user name admin when logging agains ops\_manager [\#2](https://github.com/compozed/ops_manager_cli/issues/2)
 
 **Closed issues:**
 
