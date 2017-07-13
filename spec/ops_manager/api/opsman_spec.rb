@@ -94,6 +94,19 @@ describe OpsManager::Api::Opsman do
     end
   end
 
+  describe 'get_pending_changes' do
+    let(:uri){ "https://#{target}/api/v0/staged/pending_changes" }
+    before do
+      stub_request(:get, uri).
+        to_return(:status => 200, :body => '{}')
+    end
+
+    it 'should get pending changes successfully' do
+      opsman.get_pending_changes
+      expect(WebMock).to have_requested(:get, uri)
+        .with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
+    end
+  end
 
   describe 'get_installation_settings' do
     let(:uri){ "https://#{target}/api/installation_settings" }

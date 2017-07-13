@@ -25,6 +25,10 @@ class OpsManager
         authenticated_get("/api/v0/staged/products", opts)
       end
 
+      def get_pending_changes(opts = {})
+        authenticated_get("/api/v0/staged/pending_changes", opts)
+      end
+
       def get_installation_settings(opts = {})
         print_green '====> Downloading installation settings ...'
         res = authenticated_get("/api/installation_settings", opts)

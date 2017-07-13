@@ -7,7 +7,7 @@ class OpsManager::ApplianceDeployment
   extend Forwardable
   def_delegators :pivnet_api, :get_product_releases, :accept_product_release_eula,
     :get_product_release_files, :download_product_release_file
-  def_delegators :opsman_api, :create_user, :trigger_installation, :get_installation_assets,
+  def_delegators :opsman_api, :create_user, :get_installation_assets,
     :get_installation_settings, :get_diagnostic_report, :upload_installation_assets, :get_ensure_availability,
     :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token
 
@@ -34,7 +34,12 @@ class OpsManager::ApplianceDeployment
       puts "OpsManager at #{config.ip} version is #{current_version}. Upgrading to #{desired_version} .../".green
       upgrade
     when current_version == desired_version then
-      puts "OpsManager at #{config.ip} version is already #{config.desired_version}. Skiping ...".green
+      if pending_changes?
+        puts "OpsManager at #{config.ip} version has pending changes. Applying changes...".green
+        OpsManager::InstallationRunner.trigger!.wait_for_result
+      else
+        puts "OpsManager at #{config.ip} version is already #{config.desired_version}. Skiping ...".green
+      end
     end
 
     puts '====> Finish!'.green
@@ -205,5 +210,9 @@ class OpsManager::ApplianceDeployment
 
   def current_stemcell_dir
     "/tmp/current_stemcells"
+  end
+
+  def pending_changes?
+    !JSON.parse(get_pending_changes.body).fetch('product_changes').empty?
   end
 end

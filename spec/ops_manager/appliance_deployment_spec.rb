@@ -67,14 +67,14 @@ describe OpsManager::ApplianceDeployment do
     before do
       %i( get_installation_assets get_installation_settings
          get_diagnostic_report ).each do |m|
-        allow(opsman_api).to receive(m)
-      end
-
-      %i( download_current_stemcells
-         stop_current_vm deploy upload_installation_assets
-         wait_for_uaa provision_stemcells).each do |m|
-           allow(appliance_deployment).to receive(m)
+           allow(opsman_api).to receive(m)
          end
+
+         %i( download_current_stemcells
+            stop_current_vm deploy upload_installation_assets
+            wait_for_uaa provision_stemcells).each do |m|
+              allow(appliance_deployment).to receive(m)
+            end
     end
 
     it 'Should perform in the right order' do
@@ -236,7 +236,7 @@ describe OpsManager::ApplianceDeployment do
         .and_return([
           '/tmp/current_stemcells/stemcell-1.tgz',
           '/tmp/current_stemcells/stemcell-2.tgz',
-        ])
+      ])
       allow(opsman_api).to receive(:reset_access_token)
     end
 
@@ -358,7 +358,12 @@ describe OpsManager::ApplianceDeployment do
 
     describe 'when ops-manager has been deployed and current and desired version match' do
       let(:desired_version){ current_version }
+        let(:pending_changes_response){ { "product_changes": [] }}
 
+      before do
+        allow(appliance_deployment).to receive(:get_pending_changes)
+          .and_return(double(status_code: 200, body: pending_changes_response.to_json))
+      end
       it 'does not performs a deployment' do
         expect(appliance_deployment).to_not receive(:deploy)
         expect do
@@ -371,6 +376,17 @@ describe OpsManager::ApplianceDeployment do
         expect do
           run
         end.to output(/OpsManager at #{target} version is already #{current_version.to_s}. Skiping .../).to_stdout
+      end
+
+      describe 'when there are pending changes' do
+        let(:pending_changes_response){ {"product_changes": [{ "guid": "cf" }]} }
+
+        it 'should apply changes' do
+          expect(OpsManager::InstallationRunner).to receive(:trigger!)
+          expect do
+            run
+          end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout
+        end
       end
     end
 
