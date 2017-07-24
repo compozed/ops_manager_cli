@@ -9,7 +9,7 @@ class OpsManager::ApplianceDeployment
     :get_product_release_files, :download_product_release_file
   def_delegators :opsman_api, :create_user, :get_installation_assets,
     :get_installation_settings, :get_diagnostic_report, :upload_installation_assets, :get_ensure_availability,
-    :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token
+    :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token, :get_pending_changes
 
   attr_reader :config_file
 
