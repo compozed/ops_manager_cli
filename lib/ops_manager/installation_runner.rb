@@ -6,7 +6,7 @@ class OpsManager
     attr_reader :id
 
     def trigger!
-      res = trigger_installation( body: body )
+      res = trigger_installation( :headers => {"Content-Type"=>"application/json"}, :body => body )
       @id = JSON.parse(res.body).fetch('install').fetch('id').to_i
       self
     end
@@ -25,27 +25,19 @@ class OpsManager
 
     private
     def body
-      @body ||= [ 'ignore_warnings=true' ]
-      @body << errands_body
-      @body.join('&')
+      @body ||= {'errands' => errands, 'ignore_warnings' => true }.to_json
     end
-
     def opsman_api
       @opsman_api ||= OpsManager::Api::Opsman.new
     end
 
-    def errands_body
-      staged_products_guids.collect { |product_guid| post_deploy_errands_body_for(product_guid) }
-    end
-
-    def post_deploy_errands_body_for(product_guid)
-      post_deploy_errands = post_deploy_errands_for(product_guid)
-
-      if post_deploy_errands.empty?
-        "enabled_errands[#{product_guid}]{}"
-      else
-        post_deploy_errands.collect{ |e| "enabled_errands[#{product_guid}][post_deploy_errands][]=#{e}" }
+    def errands
+      res = { }
+      staged_products_guids.each do |product_guid|
+        errands = errands_for(product_guid).keep_if { |an_errand| an_errand['post_deploy'] }
+        errands.each { |e| res[product_guid] = {'run_post_deploy' => { e['name'] => true}}}
       end
+      res
     end
 
     def staged_products_guids
@@ -56,9 +48,6 @@ class OpsManager
       JSON.parse(get_staged_products.body)
     end
 
-    def post_deploy_errands_for(product_guid)
-      errands_for(product_guid).keep_if{ |errand| errand['post_deploy'] }.map{ |o| o['name']}
-    end
 
     def errands_for(product_guid)
       res = get_staged_products_errands(product_guid)
