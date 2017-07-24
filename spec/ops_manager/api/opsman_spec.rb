@@ -519,4 +519,26 @@ describe OpsManager::Api::Opsman do
       expect(WebMock).to have_requested(:get, uri)
     end
   end
+
+  describe "#pending_changes" do
+    subject(:pending_changes){ opsman.pending_changes }
+
+    let(:response_body){ '{"product_changes":[{"guid":"product-1","action":"update","errands":[]}]}' }
+    let(:response){ pending_changes }
+    let(:status_code){ 200 }
+    let(:uri){ "#{base_uri}/api/v0/staged/pending_changes" }
+
+    before do
+      stub_request(:get, uri).to_return(status: status_code, body: response_body)
+    end
+
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
+
+    it "should include product changes in its body" do
+      expected_value = JSON.parse('{"product_changes":[{"guid":"product-1","action":"update","errands":[]}]}')
+      expect(parsed_response).to eq(expected_value)
+    end
+  end
 end

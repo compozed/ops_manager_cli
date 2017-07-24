@@ -157,6 +157,23 @@ class OpsManager
         nil
       end
 
+      def pending_changes(opts = {})
+        print_green '====> Getting pending changes ...'
+        res = authenticated_get('/api/v0/staged/pending_changes')
+        pendingChanges = JSON.parse(res.body)
+
+        if pendingChanges['product_changes'].count == 0
+          puts "\nNo pending changes"
+        else
+          pendingChanges['product_changes'].each do |product|
+            puts "\n#{product['guid']}"
+          end
+        end
+
+        say_green 'done'
+        res
+      end
+
       def username
         @username ||= OpsManager.get_conf(:username)
       end
