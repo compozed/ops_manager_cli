@@ -72,6 +72,12 @@ class OpsManager
       end
     end
 
+    class PendingChanges < Clamp::Command
+      def execute
+        OpsManager::Api::Opsman.new.pending_changes
+      end
+    end
+
     class DeleteUnusedProducts < Clamp::Command
 
       def execute
@@ -158,6 +164,7 @@ class OpsManager
     subcommand "get-installation-settings", "Gets installation settings", GetInstallationSettings
     subcommand "get-installation-logs", "Gets installation logs", GetInstallationLogs
     subcommand "import-stemcell", "Uploads stemcell to OpsManager", ImportStemcell
+    subcommand "pending-changes", "View pending changes in OpsManager", PendingChanges
 
   end
 end

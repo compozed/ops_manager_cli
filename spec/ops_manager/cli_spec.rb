@@ -88,6 +88,17 @@ describe OpsManager::Cli do
     end
   end
 
+  describe 'pending-changes' do
+    let(:args) { %w(pending-changes) }
+    let(:pending_changes_response) { 'No pending changes' }
+
+    it "should call ops_manager.pending_changes" do
+      allow(opsman_api).to receive(:pending_changes).and_return(pending_changes_response)
+      expect_any_instance_of(OpsManager::Cli::PendingChanges).to receive(:run)
+      cli.run(`pwd`, args)
+    end
+  end
+
   describe 'import-stemcell' do
     let(:args) { %w(import-stemcell /tmp/is.yml) }
 
