@@ -26,6 +26,7 @@ Gem::Specification.new do |spec|
   spec.add_dependency "rbvmomi"
   spec.add_dependency "multipart-post"
   spec.add_dependency "clamp"
+  spec.add_dependency "fog-aws"
   spec.add_dependency "net-ping"
   spec.add_dependency "cf-uaa-lib"
   spec.add_dependency "session_config"
