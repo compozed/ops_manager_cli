@@ -1,4 +1,4 @@
-require 'fog-aws'
+require 'fog/aws'
 
 class OpsManager
   module Appliance
