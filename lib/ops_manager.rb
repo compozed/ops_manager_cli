@@ -84,6 +84,7 @@ end
 require "ops_manager/version"
 require "ops_manager/semver"
 require "ops_manager/deployments/vsphere"
+require "ops_manager/appliance/aws"
 require 'ops_manager/configs/product_deployment'
 require 'ops_manager/configs/opsman_deployment'
 require "ops_manager/cli"
