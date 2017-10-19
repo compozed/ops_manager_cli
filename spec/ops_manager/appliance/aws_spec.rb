@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 describe OpsManager::Appliance::AWS do
-  let(:aws){ described_class.new(config) }
-  let(:connection) do
+  let!(:aws){ described_class.new(config) }
+  let!(:connection) do
     Fog::Compute.new({
       provider: 'AWS',
       aws_access_key_id: 'key',
       aws_secret_access_key: 'secret'
     })
   end
-  let(:config) do
+  let!(:config) do
     {
       name: 'ops-manager-aws',
       provider: 'AWS',
@@ -28,8 +28,8 @@ describe OpsManager::Appliance::AWS do
         disk_size_in_gb: '100',
         instance_profile_name: 'opsman-profile',
 
-        access_key_id: 'key',
-        secret_key_id: 'secret',
+        access_key: 'key',
+        secret_key: 'secret',
       }
     }
   end
@@ -54,22 +54,20 @@ describe OpsManager::Appliance::AWS do
     end
   end
 
-
   before(:all) do
     Fog.mock!
   end
+  after(:each) do
+    Fog::Mock.reset
+  end
 
   describe '#deploy_vm' do
-
-
     it 'should create a vm with the proper config' do
       server = nil
 
       expect do
         server = aws.deploy_vm
       end.to change{ connection.servers.count }.from(0).to(1)
-
-      puts server.inspect
 
       expect(server.tags["Name"]).to eq(config[:name])
       expect(server.flavor_id).to eq(config[:opts][:instance_type])
@@ -93,6 +91,30 @@ describe OpsManager::Appliance::AWS do
     end
   end
 
+  describe '#deploy vm using instance profiles' do
+    let!(:connection) do
+      Fog::Compute.new({
+        provider: "AWS",
+        use_iam_role: true,
+        aws_access_key_id: "",
+        aws_secret_access_key: "",
+      })
+    end
+    it 'should use instance profile roles rather than a keypair, if provided' do
+      config[:opts][:use_iam_profile] = true
+      config[:opts][:access_key] = ""
+      config[:opts][:secret_key] = ""
+      expect do
+        server = aws.deploy_vm
+      end.to change{ connection.servers.count}. from(connection.servers.count).to(connection.servers.count + 1)
+
+      expect(aws.instance_eval { @connection.instance_eval { @use_iam_profile }}).to eq(true)
+    end
+  end
+
   describe '#stop_current_vm' do
+    # stop vm, don't terminate/delete
+    # ensure IP is released though, so new VMs can come online
+    # want to keep it around as an artifact for failure scenarios
   end
 end

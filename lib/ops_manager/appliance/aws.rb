@@ -46,11 +46,20 @@ class OpsManager
       end
 
       def connection
-        @connection ||= Fog::Compute.new({
-          provider: config[:provider],
-          aws_access_key_id: config[:opts][:access_key_id],
-          aws_secret_access_key: config[:opts][:secret_key_id],
-        })
+        if config[:opts][:use_iam_profile]
+          @connection ||= Fog::Compute.new({
+            provider: config[:provider],
+            use_iam_profile: config[:opts][:use_iam_profile],
+            aws_access_key_id: "",
+            aws_secret_access_key: "",
+          })
+        else
+          @connection ||= Fog::Compute.new({
+            provider: config[:provider],
+            aws_access_key_id: config[:opts][:access_key],
+            aws_secret_access_key: config[:opts][:secret_key],
+          })
+        end
       end
     end
   end
