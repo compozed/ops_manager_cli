@@ -2,7 +2,7 @@ require 'ostruct'
 
 class OpsManager
   class Configs
-    class Base < OpenStruct
+    class Base < Hash
       def initialize(config)
         @config = config
         super(config)

@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'ops_manager/configs/product_deployment'
+require 'ops_manager/config/product_deployment'
 
-describe OpsManager::Configs::ProductDeployment do
+describe OpsManager::Config::ProductDeployment do
   let(:product_deployment_config){ described_class.new(config) }
   let(:stemcell){ 'stemcell.tgz' }
   let(:config) do

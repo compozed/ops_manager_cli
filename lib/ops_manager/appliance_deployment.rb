@@ -5,6 +5,8 @@ require 'fileutils'
 
 class OpsManager::ApplianceDeployment
   extend Forwardable
+  attr_reader :config
+
   def_delegators :pivnet_api, :get_product_releases, :accept_product_release_eula,
     :get_product_release_files, :download_product_release_file
   def_delegators :opsman_api, :create_user, :get_installation_assets,
@@ -18,41 +20,34 @@ class OpsManager::ApplianceDeployment
   end
 
   def run
-    OpsManager.set_conf(:target, config.ip)
-    OpsManager.set_conf(:username, config.username)
-    OpsManager.set_conf(:password, config.password)
-    OpsManager.set_conf(:pivnet_token, config.pivnet_token)
+    OpsManager.set_conf(:target, config[:ip])
+    OpsManager.set_conf(:username, config[:username])
+    OpsManager.set_conf(:password, config[:password])
+    OpsManager.set_conf(:pivnet_token, config[:pivnet_token])
 
-    self.extend(OpsManager::Deployments::Vsphere)
 
     case
     when current_version.empty?
-      puts "No OpsManager deployed at #{config.ip}. Deploying ...".green
+      puts "No OpsManager deployed at #{config[:ip]}. Deploying ...".green
       deploy
       create_first_user
     when current_version < desired_version then
-      puts "OpsManager at #{config.ip} version is #{current_version}. Upgrading to #{desired_version} .../".green
+      puts "OpsManager at #{config[:ip]} version is #{current_version}. Upgrading to #{desired_version} .../".green
       upgrade
     when current_version == desired_version then
       if pending_changes?
-        puts "OpsManager at #{config.ip} version has pending changes. Applying changes...".green
+        puts "OpsManager at #{config[:ip]} version has pending changes. Applying changes...".green
         OpsManager::InstallationRunner.trigger!.wait_for_result
       else
-        puts "OpsManager at #{config.ip} version is already #{config.desired_version}. Skiping ...".green
+        puts "OpsManager at #{config[:ip]} version is already #{config[:desired_version]}. Skiping ...".green
       end
     end
 
     puts '====> Finish!'.green
   end
 
-  def deploy
-    deploy_vm(desired_vm_name , config.ip)
-  end
-
-  %w{ stop_current_vm deploy_vm }.each do |m|
-    define_method(m) do
-      raise NotImplementedError
-    end
+  def appliance 
+    @appliance ||= OpsManager::Appliance::Vsphere.new(config)
   end
 
   def create_first_user
@@ -62,10 +57,14 @@ class OpsManager::ApplianceDeployment
     end
   end
 
+  def deploy
+      appliance.deploy_vm
+  end
+
   def upgrade
     get_installation_assets
     download_current_stemcells
-    stop_current_vm(current_vm_name)
+    stop_current_vm
     deploy
     upload_installation_assets
     wait_for_uaa
@@ -124,7 +123,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def new_vm_name
-    @new_vm_name ||= "#{config.name}-#{config.desired_version}"
+    @new_vm_name ||= "#{config[:name]}-#{config[:desired_version]}"
   end
 
   def current_version
@@ -132,7 +131,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def desired_version
-    @desired_version ||= OpsManager::Semver.new(config.desired_version)
+    @desired_version ||= OpsManager::Semver.new(config[:desired_version])
   end
 
   def provision_stemcells
@@ -172,12 +171,9 @@ class OpsManager::ApplianceDeployment
   end
 
   def current_vm_name
-    @current_vm_name ||= "#{config.name}-#{current_version}"
+    @current_vm_name ||= "#{config[:name]}-#{current_version}"
   end
 
-  def desired_vm_name
-    @desired_vm_name ||= "#{config.name}-#{config.desired_version}"
-  end
 
   def pivnet_api
     @pivnet_api ||= OpsManager::Api::Pivnet.new
@@ -188,9 +184,9 @@ class OpsManager::ApplianceDeployment
   end
 
   def config
-    parsed_yml = ::YAML.load_file(@config_file)
-    @config ||= OpsManager::Configs::OpsmanDeployment.new(parsed_yml)
+    @config ||= OpsManager::Configs::OpsmanDeployment.new(YAML.load_file(@config_file))
   end
+
 
   def desired_version?(version)
     !!(desired_version.to_s =~/#{version}/)

@@ -9,6 +9,7 @@ describe OpsManager::ApplianceDeployment do
   let(:desired_version){ OpsManager::Semver.new('1.5.5') }
   let(:pivnet_api){ object_double(OpsManager::Api::Pivnet.new) }
   let(:opsman_api){ object_double(OpsManager::Api::Opsman.new) }
+  let(:vsphere){ object_double(OpsManager::Appliance::Vsphere.new(config_file ))}
   let(:username){ 'foo' }
   let(:password){ 'foo' }
   let(:pivnet_token){ 'asd123' }
@@ -16,13 +17,14 @@ describe OpsManager::ApplianceDeployment do
   let(:target){ '1.2.3.4' }
   let(:config_file){ 'ops_manager_deployment.yml' }
   let(:config) do
-    double('config',
-           name: 'ops-manager',
-           desired_version: desired_version.to_s,
-           ip: target,
-           password: password,
-           username: username,
-           pivnet_token: pivnet_token)
+    {
+      name: 'ops-manager',
+      desired_version: desired_version.to_s,
+      ip: target,
+      password: password,
+      username: username,
+      pivnet_token: pivnet_token
+    }
   end
 
   before do
@@ -32,6 +34,7 @@ describe OpsManager::ApplianceDeployment do
 
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
     allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
+    allow(OpsManager::Appliance::Vsphere).to receive(:new).and_return(vsphere)
     allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
 
     allow(appliance_deployment).to receive(:current_version).and_return(current_version)
@@ -45,20 +48,21 @@ describe OpsManager::ApplianceDeployment do
     end
   end
 
-  %w{ stop_current_vm deploy_vm }.each do |m|
-    describe m do
-      it 'should raise not implemented error' do
-        expect{ appliance_deployment.send(m) }.to raise_error(NotImplementedError)
-      end
+  describe '#deploy' do
+    subject(:deploy){ appliance_deployment.deploy }
+
+    it 'Should perform in the right order' do
+      expect(vsphere).to receive(:deploy_vm).ordered
+      deploy
     end
   end
 
-  describe '#deploy' do
+  describe '#stop_current_vm' do
+    subject(:stop_current_vm){ vsphere.stop_current_vm('ops-manager-1.5.5') }
+
     it 'Should perform in the right order' do
-      %i( deploy_vm).each do |method|
-        expect(appliance_deployment).to receive(method).ordered
-      end
-      appliance_deployment.deploy
+      expect(vsphere).to receive(:stop_current_vm).ordered
+      stop_current_vm
     end
   end
 

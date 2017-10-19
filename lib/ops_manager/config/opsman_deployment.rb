@@ -1,7 +1,7 @@
-require 'ops_manager/configs/base'
+require 'ops_manager/config/base'
 
 class OpsManager
-  class Configs
+  module Config
     class OpsmanDeployment < Base
       def initialize(config)
         super(config)

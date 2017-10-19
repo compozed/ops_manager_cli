@@ -33,8 +33,6 @@ describe OpsManager::Appliance::AWS do
       }
     }
   end
-  let(:ops_manager_ami) do
-  end
 
   let!(:keypair_name) do
     connection.key_pairs.create(name: "test-keypair").name
