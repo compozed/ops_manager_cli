@@ -66,10 +66,10 @@ describe OpsManager::Appliance::AWS do
       server = nil
 
       expect do
-        server = aws.deploy_vm
+        server = aws.deploy_vm("test-VM", config[:ip])
       end.to change{ connection.servers.count }.from(0).to(1)
 
-      expect(server.tags["Name"]).to eq(config[:name])
+      expect(server.tags["Name"]).to eq("test-VM")
       expect(server.flavor_id).to eq(config[:opts][:instance_type])
       expect(server.subnet_id).to eq(config[:opts][:subnet_id])
       expect(server.key_name).to eq(config[:opts][:ssh_keypair_name])
@@ -100,12 +100,13 @@ describe OpsManager::Appliance::AWS do
         aws_secret_access_key: "",
       })
     end
+
     it 'should use instance profile roles rather than a keypair, if provided' do
       config[:opts][:use_iam_profile] = true
       config[:opts][:access_key] = ""
       config[:opts][:secret_key] = ""
       expect do
-        server = aws.deploy_vm
+        server = aws.deploy_vm("test-VM", config[:ip])
       end.to change{ connection.servers.count}. from(connection.servers.count).to(connection.servers.count + 1)
 
       expect(aws.instance_eval { @connection.instance_eval { @use_iam_profile }}).to eq(true)
@@ -113,8 +114,19 @@ describe OpsManager::Appliance::AWS do
   end
 
   describe '#stop_current_vm' do
-    # stop vm, don't terminate/delete
-    # ensure IP is released though, so new VMs can come online
-    # want to keep it around as an artifact for failure scenarios
+    server = nil
+    before do
+      server = aws.deploy_vm("test-VM", config[:ip])
+      expect(server).not_to be_nil
+    end
+    it 'should stop a vm, but not delete it, and detach/destroy the IP/NIC that was being used' do
+      expect do 
+        aws.stop_current_vm("test-VM")
+      end.to change{
+        connection.network_interfaces.all("privateIpAddress" => config[:ip]).count
+      }.from(1).to(0)
+
+      expect(connection.servers.get(server.id).state).to eq("stopped")
+    end
   end
 end
