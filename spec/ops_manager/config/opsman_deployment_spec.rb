@@ -12,11 +12,21 @@ describe OpsManager::Config::OpsmanDeployment do
       'password' => 'bar',
       'ip' => '1.2.3.4',
       'pivnet_token' => 'abc123',
-      'opts' => {}
+      'opts' => {
+        'vcenter' => {
+          'host' => '1.2.3.4',
+          'username' => 'foo',
+          'password' => 'bar',
+        }
+      }
     }
   end
 
-  it "should not error when configs are correct" do
+  it 'should symbolize recursively the configs' do
+    expect(opsman_deployment_config[:opts][:vcenter][:host]).to eq('1.2.3.4')
+  end
+
+  it 'should not error when configs are correct' do
       expect do
         opsman_deployment_config
       end.not_to raise_error

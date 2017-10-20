@@ -188,7 +188,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def config
-    @config ||= OpsManager::Configs::OpsmanDeployment.new(YAML.load_file(@config_file))
+    @config ||= OpsManager::Config::OpsmanDeployment.new(YAML.load_file(@config_file))
   end
 
 
