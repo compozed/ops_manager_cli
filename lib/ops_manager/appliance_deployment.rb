@@ -1,6 +1,6 @@
 require "ops_manager/api/opsman"
 require "ops_manager/api/pivnet"
-require 'ops_manager/configs/opsman_deployment'
+require 'ops_manager/config/opsman_deployment'
 require 'fileutils'
 
 class OpsManager::ApplianceDeployment
@@ -47,7 +47,11 @@ class OpsManager::ApplianceDeployment
   end
 
   def appliance 
-    @appliance ||= OpsManager::Appliance::Vsphere.new(config)
+    @appliance ||= if config[:provider] =~/vsphere/i
+      OpsManager::Appliance::Vsphere.new(config)
+    else
+      OpsManager::Appliance::AWS.new(config)
+    end
   end
 
   def create_first_user
@@ -58,7 +62,7 @@ class OpsManager::ApplianceDeployment
   end
 
   def deploy
-      appliance.deploy_vm
+    appliance.deploy_vm
   end
 
   def upgrade

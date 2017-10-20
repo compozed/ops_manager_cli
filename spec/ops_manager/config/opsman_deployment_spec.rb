@@ -1,7 +1,7 @@
 require 'spec_helper'
-require 'ops_manager/configs/opsman_deployment'
+require 'ops_manager/config/opsman_deployment'
 
-describe OpsManager::Configs::OpsmanDeployment do
+describe OpsManager::Config::OpsmanDeployment do
   let(:opsman_deployment_config){ described_class.new(config) }
   let(:config) do
     {

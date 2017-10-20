@@ -1,13 +1,9 @@
 require 'fog/aws'
+require 'ops_manager/appliance/base'
 
 class OpsManager
   module Appliance
-    class AWS
-      attr_reader :config
-
-      def initialize(config)
-        @config = config
-      end
+    class AWS < Base
 
       def deploy_vm
         image_id = ::YAML.load_file(ami_mapping_file)[config[:opts][:region]]
@@ -49,10 +45,6 @@ class OpsManager
       end
 
       private
-      def vm_name
-        @vm_name ||= "#{config[:name]}-#{config[:desired_version]}"
-      end
-
       def ami_mapping_file
         Dir.glob(config[:opts][:ami_mapping_file]).first
       end

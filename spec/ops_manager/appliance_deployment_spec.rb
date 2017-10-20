@@ -9,7 +9,7 @@ describe OpsManager::ApplianceDeployment do
   let(:desired_version){ OpsManager::Semver.new('1.5.5') }
   let(:pivnet_api){ object_double(OpsManager::Api::Pivnet.new) }
   let(:opsman_api){ object_double(OpsManager::Api::Opsman.new) }
-  let(:vsphere){ object_double(OpsManager::Appliance::Vsphere.new(config_file ))}
+  let(:appliance){ object_double(OpsManager::Appliance::Base.new(config_file))}
   let(:username){ 'foo' }
   let(:password){ 'foo' }
   let(:pivnet_token){ 'asd123' }
@@ -34,7 +34,8 @@ describe OpsManager::ApplianceDeployment do
 
     allow(OpsManager::Api::Pivnet).to receive(:new).and_return(pivnet_api)
     allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
-    allow(OpsManager::Appliance::Vsphere).to receive(:new).and_return(vsphere)
+    allow(OpsManager::Appliance::Vsphere).to receive(:new).and_return(appliance)
+    allow(OpsManager::Appliance::AWS).to receive(:new).and_return(appliance)
     allow(OpsManager::InstallationRunner).to receive(:trigger!).and_return(installation)
 
     allow(appliance_deployment).to receive(:current_version).and_return(current_version)
@@ -52,17 +53,40 @@ describe OpsManager::ApplianceDeployment do
     subject(:deploy){ appliance_deployment.deploy }
 
     it 'Should perform in the right order' do
-      expect(vsphere).to receive(:deploy_vm).ordered
+      expect(appliance).to receive(:deploy_vm).ordered
       deploy
     end
   end
 
   describe '#stop_current_vm' do
-    subject(:stop_current_vm){ vsphere.stop_current_vm('ops-manager-1.5.5') }
+    subject(:stop_current_vm){ appliance.stop_current_vm('ops-manager-1.5.5') }
 
     it 'Should perform in the right order' do
-      expect(vsphere).to receive(:stop_current_vm).ordered
+      expect(appliance).to receive(:stop_current_vm).ordered
       stop_current_vm
+    end
+  end
+
+  describe '#appliance' do
+    before do
+      allow(OpsManager::Appliance::Vsphere).to receive(:new).and_call_original
+      allow(OpsManager::Appliance::AWS).to receive(:new).and_call_original
+    end
+
+    describe 'when provider is appliance' do
+      before{ config[:provider] = 'vsphere' }
+      
+      it 'Should create an OpsManager::Appliance::Vsphere' do
+        expect(appliance_deployment.appliance).to be_kind_of(OpsManager::Appliance::Vsphere)
+      end
+  
+    end
+    describe 'when provider is aws' do
+      before{ config[:provider] = 'aws' }
+
+      it 'Should create an OpsManager::Appliance::AWS' do
+        expect(appliance_deployment.appliance).to be_kind_of(OpsManager::Appliance::AWS)
+      end
     end
   end
 

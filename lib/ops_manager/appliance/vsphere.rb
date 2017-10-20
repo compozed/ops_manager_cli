@@ -2,16 +2,13 @@ require 'rbvmomi'
 require "uri"
 require 'shellwords'
 require "ops_manager/logging"
+require 'ops_manager/appliance/base'
 
 class OpsManager
   module Appliance
-    class Vsphere
+    class Vsphere < Base
       include OpsManager::Logging
       attr_reader :config
-
-      def initialize(config)
-        @config = config
-      end
 
       def deploy_vm
         print '====> Deploying ova ...'.green
@@ -42,10 +39,6 @@ class OpsManager
 
       def vcenter_password
         Shellwords.escape(URI.encode(config[:opts][:vcenter][:password]))
-      end
-
-      def vm_name
-        @vm_name ||= "#{config[:name]}-#{config[:desired_version]}"
       end
     end
   end
