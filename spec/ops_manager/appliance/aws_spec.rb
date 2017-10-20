@@ -64,10 +64,10 @@ describe OpsManager::Appliance::AWS do
       server = nil
 
       expect do
-        server = aws.deploy_vm("test-VM", config[:ip])
+        server = aws.deploy_vm
       end.to change{ connection.servers.count }.from(0).to(1)
 
-      expect(server.tags["Name"]).to eq("test-VM")
+      expect(server.tags["Name"]).to eq('ops-manager-aws-1.4.11.0')
       expect(server.flavor_id).to eq(config[:opts][:instance_type])
       expect(server.subnet_id).to eq(config[:opts][:subnet_id])
       expect(server.key_name).to eq(config[:opts][:ssh_keypair_name])
@@ -93,7 +93,7 @@ describe OpsManager::Appliance::AWS do
     let!(:connection) do
       Fog::Compute.new({
         provider: "AWS",
-        use_iam_role: true,
+        use_iam_profile: true,
         aws_access_key_id: "",
         aws_secret_access_key: "",
       })
@@ -104,7 +104,7 @@ describe OpsManager::Appliance::AWS do
       config[:opts][:access_key] = ""
       config[:opts][:secret_key] = ""
       expect do
-        server = aws.deploy_vm("test-VM", config[:ip])
+        aws.deploy_vm
       end.to change{ connection.servers.count}. from(connection.servers.count).to(connection.servers.count + 1)
 
       expect(aws.instance_eval { @connection.instance_eval { @use_iam_profile }}).to eq(true)
@@ -114,12 +114,12 @@ describe OpsManager::Appliance::AWS do
   describe '#stop_current_vm' do
     server = nil
     before do
-      server = aws.deploy_vm("test-VM", config[:ip])
+      server = aws.deploy_vm
       expect(server).not_to be_nil
     end
     it 'should stop a vm, but not delete it, and detach/destroy the IP/NIC that was being used' do
       expect do 
-        aws.stop_current_vm("test-VM")
+        aws.stop_current_vm('ops-manager-aws-1.4.11.0')
       end.to change{
         connection.network_interfaces.all("privateIpAddress" => config[:ip]).count
       }.from(1).to(0)

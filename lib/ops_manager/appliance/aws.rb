@@ -9,7 +9,7 @@ class OpsManager
         @config = config
       end
 
-      def deploy_vm(name, ip)
+      def deploy_vm
         image_id = ::YAML.load_file(ami_mapping_file)[config[:opts][:region]]
 
         server = connection.servers.create(
@@ -21,12 +21,12 @@ class OpsManager
           flavor_id: config[:opts][:instance_type],
           subnet_id: config[:opts][:subnet_id],
           image_id: image_id,
-          private_ip_address: ip,
+          private_ip_address: config[:ip],
           security_group_ids: security_group_ids,
           availability_zone: config[:opts][:availability_zone],
           iam_instance_profile_name: config[:opts][:instance_profile_name],
           tags: {
-            'Name' => name,
+            'Name' => vm_name,
           }
         )
         server.wait_for { ready? }
@@ -49,6 +49,9 @@ class OpsManager
       end
 
       private
+      def vm_name
+        @vm_name ||= "#{config[:name]}-#{config[:desired_version]}"
+      end
 
       def ami_mapping_file
         Dir.glob(config[:opts][:ami_mapping_file]).first
