@@ -318,8 +318,8 @@ describe OpsManager::Api::Opsman do
         with(:headers => {'Authorization'=>'Bearer UAA_ACCESS_TOKEN'})
     end
 
-    [ Net::OpenTimeout, Errno::ETIMEDOUT ,
-      Net::HTTPFatalError.new( '', '' ), Errno::EHOSTUNREACH ].each do |error|
+    [ Net::OpenTimeout, Errno::ETIMEDOUT , Net::HTTPFatalError.new( '', '' ),
+      Errno::EHOSTUNREACH, HTTPClient::ConnectTimeoutError ].each do |error|
       describe "when there is no ops manager and request errors: #{error}" do
 
         it "should be nil" do

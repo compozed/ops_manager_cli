@@ -121,7 +121,7 @@ class OpsManager
 
       def get_diagnostic_report
         authenticated_get("/api/v0/diagnostic_report")
-      rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout
+      rescue Errno::ETIMEDOUT , Errno::EHOSTUNREACH, Net::HTTPFatalError, Net::OpenTimeout, HTTPClient::ConnectTimeoutError
         nil
       end
 
