@@ -10,6 +10,7 @@ describe OpsManager::Config::OpsmanDeployment do
       'desired_version'  => '1.4.11.0',
       'username' => 'foo',
       'password' => 'bar',
+      'ova_path' => "*.ova",
       'ip' => '1.2.3.4',
       'pivnet_token' => 'abc123',
       'opts' => {
@@ -38,6 +39,13 @@ describe OpsManager::Config::OpsmanDeployment do
       expect do
         product_deployment_config
       end.to raise_error
+    end
+  end
+
+  %w{ ova_path }.each do |attr|
+    it "should expand path for #{attr}" do
+      expect(described_class).to receive(:expand_path_for!).with(attr)
+      product_deployment_config
     end
   end
 end

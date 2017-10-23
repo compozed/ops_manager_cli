@@ -12,7 +12,17 @@ describe OpsManager::Config::Base do
       it 'should return first mathing path' do
         expect do
           base.expand_path_for!(:filepath)
-        end.to change{base[:filepath]}.from(filepath).to('example-product-1.6.1.pivotal')
+        end.to change{base[:filepath]}.to( %r{/.*/example-product-1.6.1.pivotal} )
+      end
+    end
+
+    describe 'when it is an uri' do
+      let(:filepath){ 'file://*.pivotal' }
+
+      it 'should successfully expand file:// prefix values' do
+        expect do
+          base.expand_path_for!(:filepath)
+        end.to change{base[:filepath]}.to( %r{file://.*/example-product-1.6.1.pivotal} )
       end
     end
   end
