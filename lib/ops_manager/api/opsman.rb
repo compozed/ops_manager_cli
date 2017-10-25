@@ -208,7 +208,7 @@ class OpsManager
       private
       def check_alive
         get("/")
-      rescue Net::HTTPError, Net::HTTPFatalError, Errno::ETIMEDOUT, Errno::ECONNREFUSED => e
+      rescue Net::OpenTimeout, Net::HTTPError, Net::HTTPFatalError, Errno::ETIMEDOUT, Errno::ECONNREFUSED => e
         Net::HTTPInternalServerError.new(1.0, 500, e.inspect)
       end
 
