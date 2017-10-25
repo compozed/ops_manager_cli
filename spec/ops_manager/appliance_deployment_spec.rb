@@ -54,6 +54,8 @@ describe OpsManager::ApplianceDeployment do
 
     it 'Should perform in the right order' do
       expect(appliance).to receive(:deploy_vm).ordered
+      expect(opsman_api).to receive(:wait_for_https_alive).ordered
+
       deploy
     end
   end
@@ -96,22 +98,29 @@ describe OpsManager::ApplianceDeployment do
       %i( get_installation_assets get_installation_settings
          get_diagnostic_report ).each do |m|
            allow(opsman_api).to receive(m)
-         end
+      end
 
-         %i( download_current_stemcells
-            stop_current_vm deploy upload_installation_assets
-            wait_for_uaa provision_stemcells).each do |m|
-              allow(appliance_deployment).to receive(m)
-            end
+      %i( download_current_stemcells).each do |m|
+        allow(appliance_deployment).to receive(m)
+      end
+
+      allow(appliance).to receive(:stop_current_vm)
+
+      %i( deploy upload_installation_assets
+        wait_for_uaa provision_stemcells).each do |m|
+          allow(appliance_deployment).to receive(m)
+      end
     end
 
     it 'Should perform in the right order' do
-      %i( get_installation_assets download_current_stemcells
-         stop_current_vm deploy upload_installation_assets
-         wait_for_uaa provision_stemcells).each do |m|
-           expect(appliance_deployment).to receive(m).ordered
-         end
-         upgrade
+      %i( get_installation_assets download_current_stemcells).each do |m|
+        expect(appliance_deployment).to receive(m).ordered
+      end
+       expect(appliance).to receive(:stop_current_vm)
+      %i( deploy upload_installation_assets wait_for_uaa provision_stemcells).each do |m|
+        expect(appliance_deployment).to receive(m).ordered
+      end
+      upgrade
     end
 
     it 'should trigger installation' do

@@ -195,7 +195,23 @@ class OpsManager
         @access_token ||= get_token.info['access_token']
       end
 
+      def wait_for_https_alive(limit)
+        @retry_counter = 0
+        res = nil
+        until(@retry_counter >= limit or (res = check_alive).code.to_i < 400) do
+          sleep 1
+          @retry_counter += 1
+        end
+        res
+      end
+
       private
+      def check_alive
+        get("/")
+      rescue Net::HTTPError, Net::HTTPFatalError, Errno::ETIMEDOUT, Errno::ECONNREFUSED => e
+        Net::HTTPInternalServerError.new(1.0, 500, e.inspect)
+      end
+
       def token_issuer
         @token_issuer ||= CF::UAA::TokenIssuer.new(
           "https://#{target}/uaa", 'opsman', nil, skip_ssl_validation: true )

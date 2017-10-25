@@ -543,4 +543,39 @@ describe OpsManager::Api::Opsman do
       expect(parsed_response).to eq(expected_value)
     end
   end
+
+  describe '#wait_for_https_alive' do
+    before do
+      stub_request(:get, "#{base_uri}/").to_return(:status => 200, :body => "", :headers => {})
+    end
+
+    it 'returns an http response on success' do
+      response = opsman.wait_for_https_alive(1)
+      expect(response).to be_a Net::HTTPOK
+      expect(response.code.to_i).to equal(200)
+    end
+
+    it 'times out after <limit> and returns nil' do
+      allow(opsman).to receive(:get).and_raise(Errno::ECONNREFUSED)
+      response = opsman.wait_for_https_alive(2)
+      expect(response).to be_a Net::HTTPInternalServerError
+      expect(opsman.instance_eval { @retry_counter }).to equal(2)
+    end
+
+    it 'retries and returns success in the middle' do
+      raise_initial = true
+      allow(opsman).to receive(:get) do
+        if raise_initial
+          raise_initial = false
+          raise Errno::ECONNREFUSED.new()
+        else
+          Net::HTTPOK.new(1.0, 200, "OK")
+        end
+      end
+      response = opsman.wait_for_https_alive(2)
+      expect(response).to be_a Net::HTTPOK
+      expect(response.code.to_i).to equal(200)
+      expect(opsman.instance_eval { @retry_counter }).to equal(1)
+    end
+  end
 end

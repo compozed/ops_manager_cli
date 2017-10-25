@@ -11,7 +11,8 @@ class OpsManager::ApplianceDeployment
     :get_product_release_files, :download_product_release_file
   def_delegators :opsman_api, :create_user, :get_installation_assets,
     :get_installation_settings, :get_diagnostic_report, :upload_installation_assets, :get_ensure_availability,
-    :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token, :get_pending_changes
+    :import_stemcell, :target, :password, :username, :ops_manager_version= , :reset_access_token, :get_pending_changes,
+    :wait_for_https_alive
 
   attr_reader :config_file
 
@@ -63,12 +64,13 @@ class OpsManager::ApplianceDeployment
 
   def deploy
     appliance.deploy_vm
+    wait_for_https_alive 300
   end
 
   def upgrade
     get_installation_assets
     download_current_stemcells
-    stop_current_vm
+    appliance.stop_current_vm(current_name)
     deploy
     upload_installation_assets
     wait_for_uaa
@@ -121,7 +123,12 @@ class OpsManager::ApplianceDeployment
     list_current_stemcells.each do |stemcell_version|
       release_id = find_stemcell_release(stemcell_version)
       accept_product_release_eula('stemcells', release_id )
-      file_id, file_name = find_stemcell_file(release_id, /vsphere/)
+      stemcell_regex = /vsphere/
+      if config[:provider] == "AWS"
+        stemcell_regex = /aws/
+      end
+
+      file_id, file_name = find_stemcell_file(release_id, stemcell_regex)
       download_product_release_file('stemcells', release_id, file_id, write_to: "#{current_stemcell_dir}/#{file_name}")
     end
   end
@@ -132,6 +139,10 @@ class OpsManager::ApplianceDeployment
 
   def current_version
     @current_version ||= OpsManager::Semver.new(version_from_diagnostic_report)
+  end
+
+  def current_name
+    @current_name ||= "#{config[:name]}-#{current_version}"
   end
 
   def desired_version

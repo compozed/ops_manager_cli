@@ -117,14 +117,14 @@ describe OpsManager::Appliance::AWS do
       server = aws.deploy_vm
       expect(server).not_to be_nil
     end
-    it 'should stop a vm, but not delete it, and detach/destroy the IP/NIC that was being used' do
+    it 'should stop a vm, image it, and then destroy it, to free up the IP' do
       expect do 
         aws.stop_current_vm('ops-manager-aws-1.4.11.0')
       end.to change{
-        connection.network_interfaces.all("privateIpAddress" => config[:ip]).count
-      }.from(1).to(0)
+        connection.images.all().count
+      }.from(0).to(1)
 
-      expect(connection.servers.get(server.id).state).to eq("stopped")
+      expect(connection.servers.get(server.id)).to be_nil
     end
   end
 end

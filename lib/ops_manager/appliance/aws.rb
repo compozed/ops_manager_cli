@@ -32,15 +32,28 @@ class OpsManager
       def stop_current_vm(name)
         server = connection.servers.all("private-ip-address" => config[:ip], "tag:Name" => name).first
         if ! server
-          fail "VM not found matching IP '#{config[:ip]}, named '#{name}'"
+          fail "VM not found matching IP '#{config[:ip]}', named '#{name}'"
         end
         server.stop
         server.wait_for { server.state == "stopped" }
 
-        server.network_interfaces.each do |nic|
-          int = connection.network_interfaces.all("networkInterfaceId" => nic["networkInterfaceId"]).first
-          connection.detach_network_interface(int.attachment['attachmentId'])
-          int.destroy
+        # Create ami of stopped server
+        response = connection.create_image(server.id, "#{name}-backup", "Backup of #{name}")
+        image = connection.images.get( response.data[:body]['imageId'])
+        image.wait_for { image.state == "available" }
+        if image.state != "available"
+          fail "Error creating backup AMI, bailing out before destroying the VM"
+        end
+
+        puts "Saved #{name} to AMI #{image.id} (#{name}-backup) for safe-keeping"
+
+        server.destroy
+        if !Fog.mocking?
+          server.wait_for { server.state == 'terminated' }
+        else
+          # Fog's mock doesn't support transitioning state from terminating -> terminated
+          # so we have to hack this here
+          server.wait_for { server.state == 'terminating' }
         end
       end
 
