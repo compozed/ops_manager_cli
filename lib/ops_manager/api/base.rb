@@ -154,6 +154,9 @@ class OpsManager
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
           http.read_timeout = 1200
+
+          ctx = OpenSSL::SSL::SSLContext.new
+          ctx.ssl_version = :TLSv1_2
         end
       end
 
