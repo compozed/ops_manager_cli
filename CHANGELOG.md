@@ -1,5 +1,22 @@
 # Change Log
 
+## [v0.7.1](https://github.com/compozed/ops_manager_cli/tree/v0.7.1) (2017-10-25)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.0...v0.7.1)
+
+Fix issue when opsman appliance is starting on AWS
+
+## [v0.7.0](https://github.com/compozed/ops_manager_cli/tree/v0.7.0) (2017-10-20)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.4...v0.7.0)
+
+**Closed issues:**
+
+- OpsMAnagerCli should support new errands endpoint in versions \>= 1.10 [\#32](https://github.com/compozed/ops_manager_cli/issues/32)
+
+**Merged pull requests:**
+
+- Added support for ops\_manager\_cli to deploy via AWS [\#34](https://github.com/compozed/ops_manager_cli/pull/34) ([geofffranks](https://github.com/geofffranks))
+- Add pending-changes CLI command [\#26](https://github.com/compozed/ops_manager_cli/pull/26) ([RMeharg](https://github.com/RMeharg))
+
 ## [v0.5.4](https://github.com/compozed/ops_manager_cli/tree/v0.5.4) (2017-06-27)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.3...v0.5.4)
 
