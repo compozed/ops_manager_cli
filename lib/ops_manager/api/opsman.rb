@@ -47,7 +47,7 @@ class OpsManager
 
       def get_installation_assets
         opts = { write_to: "installation_assets.zip" }
-        say_green '====> Download installation assets ...'
+        print_green '====> Download installation assets ...'
         res = authenticated_get("/api/v0/installation_asset_collection", opts)
         say_green 'done'
         res

@@ -118,7 +118,8 @@ class OpsManager::ApplianceDeployment
   # Lists all the available stemcells in the current installation_settings.
   # Downloads those stemcells.
   def download_current_stemcells
-    puts "Downloading existing stemcells ...".green
+    print "====> Downloading existing stemcells ...".green
+    puts "no stemcells found".green if list_current_stemcells.empty?
     FileUtils.mkdir_p current_stemcell_dir
     list_current_stemcells.each do |stemcell_version|
       release_id = find_stemcell_release(stemcell_version)
