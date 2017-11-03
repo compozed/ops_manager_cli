@@ -1,9 +1,10 @@
 # Change Log
 
+## [v0.7.2](https://github.com/compozed/ops_manager_cli/tree/v0.7.2) (2017-11-03)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.1...v0.7.2)
+
 ## [v0.7.1](https://github.com/compozed/ops_manager_cli/tree/v0.7.1) (2017-10-25)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.0...v0.7.1)
-
-Fix issue when opsman appliance is starting on AWS
 
 ## [v0.7.0](https://github.com/compozed/ops_manager_cli/tree/v0.7.0) (2017-10-20)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.5.4...v0.7.0)
