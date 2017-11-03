@@ -123,12 +123,12 @@ describe OpsManager::ProductTemplateGenerator do
       expect(generated_template.to_s).not_to match(random_secret)
     end
 
-    it 'should remove job properties private keys' do
-      expect(generated_template.to_s).not_to match('Job Private Key')
+    it 'should should remove job properties private keys' do
+      expect(generated_template.to_s).to match('Job Private Key')
     end
 
-    it 'should remove product private keys' do
-      expect(generated_template.to_s).not_to match('Product Private Key')
+    it 'should should remove product private keys' do
+      expect(generated_template.to_s).to match('Product Private Key')
     end
 
     it 'should remove the product version' do
