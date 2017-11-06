@@ -27,29 +27,30 @@ class OpsManager
         delete_value_from_product_properties(property_name)
       end
 
-      add_merging_strategy_for_jobs
-      add_merging_strategy_for_job_properties
+      %w{ deployed }.each do |property_name|
+        delete_key_from_product_properties(property_name)
+      end
 
-      { 'products' => [ "(( merge on identifier ))" , selected_product ] }
+      %w{ deployed }.each do |property_name|
+        delete_key_from_job_properties(property_name)
+      end
+
+      %w{ deployed }.each do |property_name|
+        delete_key_from_product_properties_options_properties(property_name)
+      end
+
+      %w{ deployed }.each do |property_name|
+        delete_key_from_job_properties_records_properties(property_name)
+      end
+
+      { 'products' => [ selected_product ] }
     end
 
     def generate_yml
       generate.to_yaml
-        .gsub('"(( merge on identifier ))"', '(( merge on identifier ))')
     end
 
     private
-
-    def add_merging_strategy_for_jobs
-      selected_product['jobs'].unshift("(( merge on identifier ))")
-    end
-
-    def add_merging_strategy_for_job_properties
-      selected_product['jobs'].each do |j|
-        j['properties'].unshift("(( merge on identifier ))") if j['properties']
-      end
-    end
-
     def delete_from_product(name)
       selected_product.delete(name)
     end
@@ -78,6 +79,42 @@ class OpsManager
       selected_product.fetch('properties', []).each  do |p|
         value = p.fetch('value',{})
         p.delete('value') if value.is_a?(Hash) && !!value[name]
+      end
+    end
+
+    def delete_key_from_job_properties(name)
+      selected_product['jobs'].each do |j|
+        j.fetch('properties', []).each  do |p|
+          p.delete(name) 
+        end
+      end
+    end
+
+    def delete_key_from_product_properties(name)
+      selected_product.fetch('properties', []).each  do |p|
+        p.delete(name) 
+      end
+    end
+
+    def delete_key_from_product_properties_options_properties(name)
+      selected_product.fetch('properties',[]).each do |p|
+        p.fetch('options',[]).each do |o|
+          o.fetch('properties', []).each  do |op|
+            op.delete(name) 
+          end
+        end
+      end
+    end
+
+    def delete_key_from_job_properties_records_properties(name)
+      selected_product['jobs'].each do |j|
+        j.fetch('properties',[]).each do |p|
+          p.fetch('records',[]).each do |o|
+            o.fetch('properties', []).each  do |op|
+              op.delete(name) 
+            end
+          end
+        end
       end
     end
 

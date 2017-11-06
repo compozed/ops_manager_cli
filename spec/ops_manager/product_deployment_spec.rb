@@ -63,7 +63,7 @@ describe OpsManager::ProductDeployment do
     end
 
     it 'should spruce merge current installation settings with product installation settings' do
-      expect(product_deployment).to receive(:`).with("DEBUG=false spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
+      expect(product_deployment).to receive(:`).with("DEBUG=false DEFAULT_ARRAY_MERGE_KEY=identifier spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
       merge_product_installation_settings
     end
 

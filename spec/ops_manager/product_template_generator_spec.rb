@@ -20,9 +20,16 @@ describe OpsManager::ProductTemplateGenerator do
          stemcell: { 'some' => 'stemcell meta deta' },
         'properties' => [
           {
+            'deployed' => false,
             'value' => {
               'private_key_pem' => 'Product Private Key'
-            }
+            },
+            'options' => [
+              {
+                'identifier' => 'internal_mysql',
+                'properties' => [ { 'deployed' => false, 'identifier' => 'host' } ]
+              }
+            ]
           }
         ],
         'jobs' => [
@@ -31,10 +38,17 @@ describe OpsManager::ProductTemplateGenerator do
             'partitions' => 'some partition info' ,
             'properties' => [
               {
+                'deployed' => false,
                 'value' => {
                   'identity' => 'conf-1',
                   'password' => random_password
-                }
+                },
+                'records' => [
+                  {
+                    'identifier' => 'internal_mysql',
+                    'properties' => [ { 'deployed' => false, 'identifier' => 'host' } ]
+                  }
+                ]
               },
               {
                 'value' => {
@@ -68,8 +82,8 @@ describe OpsManager::ProductTemplateGenerator do
   end
 
   describe '#generate_yml' do
-    let(:generated_hash){ { "products" => [ "(( merge on identifier ))", { 'identifier' => product_name } ] } }
-    let(:product_template){"---\nproducts:\n- (( merge on identifier ))\n- identifier: #{product_name}\n"}
+    let(:generated_hash){ { "products" => [  { 'identifier' => product_name } ] } }
+    let(:product_template){"---\nproducts:\n- identifier: #{product_name}\n"}
 
     before do
       allow(product_template_generator).to receive(:generate).and_return(generated_hash)
@@ -123,6 +137,10 @@ describe OpsManager::ProductTemplateGenerator do
       expect(generated_template.to_s).not_to match(random_secret)
     end
 
+    it 'should deployed flag from job properties and product properties' do
+      expect(generated_template.to_s).not_to match('deployed')
+    end
+
     it 'should should remove job properties private keys' do
       expect(generated_template.to_s).to match('Job Private Key')
     end
@@ -136,7 +154,7 @@ describe OpsManager::ProductTemplateGenerator do
     end
 
     it 'should remove stemcell metadata' do
-      expect(generated_template['products'][1]).not_to have_key('stemcell')
+      expect(generated_template['products'].first).not_to have_key('stemcell')
     end
   end
 end
