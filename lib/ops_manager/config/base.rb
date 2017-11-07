@@ -16,6 +16,7 @@ class OpsManager
       def expand_path_for!(*attrs)
         attrs.each do |attr|
           path = self[attr] 
+          next if path.nil?
           self[attr] = if path =~ %r{^file://}
             path = Dir.glob(path.gsub!('file://','')).first
             "file://#{path}"

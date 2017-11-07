@@ -15,6 +15,16 @@ describe OpsManager::Config::Base do
         end.to change{base[:filepath]}.from(filepath).to('example-product-1.6.1.pivotal')
       end
     end
+
+    describe 'when key is not present' do
+      let!(:base){ described_class.new({}) }
+
+      it 'should ignore the key' do
+        expect do
+          base.expand_path_for!(:unknown_key)
+        end.not_to raise_error(TypeError)
+      end
+    end
   end
 
 
