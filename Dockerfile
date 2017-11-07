@@ -15,7 +15,7 @@ RUN wget -v ${DOWNLOAD_URL} \
 # ================== Installs Spruce ==============
 RUN wget -v --no-check-certificate https://github.com/geofffranks/spruce/releases/download/v1.13.1/spruce-linux-amd64 \
     && chmod +x spruce-linux-amd64 \
-    && ln -s spruce-linux-amd64 /usr/bin/.
+    && ln -s /spruce-linux-amd64 /usr/bin/spruce
 
 # ================== Installs JQ ==============
 RUN wget -v -O /usr/local/bin/jq --no-check-certificate https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64
