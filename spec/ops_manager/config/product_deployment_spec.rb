@@ -4,11 +4,13 @@ require 'ops_manager/config/product_deployment'
 describe OpsManager::Config::ProductDeployment do
   let(:product_deployment_config){ described_class.new(config) }
   let(:stemcell){ 'stemcell.tgz' }
+  let(:filepath){ 'tile.pivotal' }
   let(:config) do
     {
       'name' => 'example-product',
       'desired_version'  => '1.6.2.0',
-      'stemcell' => stemcell
+      'stemcell' => stemcell,
+      'filepath' => filepath
     }
   end
 
@@ -33,6 +35,16 @@ describe OpsManager::Config::ProductDeployment do
 
       it 'should return first mathing path' do
         expect(product_deployment_config.stemcell).to eq('stemcell.tgz')
+      end
+    end
+  end
+
+  describe '#filepath' do
+    describe 'when filepath is a regex' do
+      let(:filepath){ '*.pivotal' }
+
+      it 'should return first mathing path' do
+        expect(product_deployment_config.filepath).to eq('tile.pivotal')
       end
     end
   end

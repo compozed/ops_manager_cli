@@ -8,7 +8,7 @@ describe OpsManager::ProductDeployment do
   let(:target){'1.2.3.4'}
   let(:username){ 'foo' }
   let(:password){ 'bar' }
-  let(:filepath) { 'example-product-1.6.1.pivotal' }
+  let(:filepath) { 'tile.pivotal' }
   let(:guid) { 'example-product-abc123' }
   let(:installation_settings_file){ '../fixtures/installation_settings.json' }
   let(:desired_version){ '1.6.2.0' }
@@ -63,7 +63,7 @@ describe OpsManager::ProductDeployment do
     end
 
     it 'should spruce merge current installation settings with product installation settings' do
-      expect(product_deployment).to receive(:`).with("VAULT_SKIP_VERIFY=true DEBUG=false DEFAULT_ARRAY_MERGE_KEY=identifier spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
+      expect(product_deployment).to receive(:`).with("DEBUG=false DEFAULT_ARRAY_MERGE_KEY=identifier spruce merge /tmp/is.yml #{installation_settings_file} > /tmp/new_is.yml")
       merge_product_installation_settings
     end
 
@@ -158,7 +158,8 @@ describe OpsManager::ProductDeployment do
     let(:product_installation) do
       OpsManager::ProductInstallation.new(guid, '1.6.0.0', true)
     end
-    let(:filepath) { 'example-product-1.6.2.pivotal' }
+
+    let(:filepath) { 'tile.pivotal' }
     let(:product_exists?){ true }
     before do
       allow(product_installation).to receive(:prepared?)

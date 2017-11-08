@@ -1,5 +1,4 @@
 require 'logger'
-require 'byebug'
 
 class OpsManager
   module Logging
@@ -8,7 +7,7 @@ class OpsManager
     end
 
     def self.logger
-      @logger ||= Logger.new(STDOUT,log_level)
+      @logger ||= Logger.new(STDERR, level: log_level)
     end
 
     def self.logger=(l)

@@ -1,5 +1,4 @@
 require 'spec_helper'
-require 'byebug'
 require 'ops_manager/config/base'
 
 describe OpsManager::Config::Base do
@@ -12,7 +11,7 @@ describe OpsManager::Config::Base do
       it 'should return first mathing path' do
         expect do
           base.expand_path_for!(:filepath)
-        end.to change{base[:filepath]}.from(filepath).to('example-product-1.6.1.pivotal')
+        end.to change{base[:filepath]}.from(filepath).to('tile.pivotal')
       end
     end
 

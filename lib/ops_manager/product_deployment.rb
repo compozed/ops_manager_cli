@@ -43,12 +43,10 @@ class OpsManager
     end
 
     def upload
-      print "====> Uploading product ...".green
       if ProductDeployment.exists?(config[:name], config[:desired_version])
-        puts "product already exists".green
+        puts "====> Product already exists... skipping upload".green
       elsif config[:filepath]
         upload_product(config[:filepath])
-        puts "done".green
       else
         puts "no filepath provided, skipping product upload.".green
       end
@@ -87,7 +85,7 @@ class OpsManager
 
     def merge_product_installation_settings
       get_installation_settings({write_to: '/tmp/is.yml'})
-      puts `VAULT_SKIP_VERIFY=true DEBUG=false DEFAULT_ARRAY_MERGE_KEY=identifier spruce merge /tmp/is.yml #{config[:installation_settings_file]} > /tmp/new_is.yml`
+      puts `DEBUG=false DEFAULT_ARRAY_MERGE_KEY=identifier spruce merge /tmp/is.yml #{config[:installation_settings_file]} > /tmp/new_is.yml`
       upload_installation_settings('/tmp/new_is.yml')
     end
 

@@ -20,7 +20,7 @@ describe OpsManager::Logging do
     end
 
     it 'should output logs to stdout with default log level WARN' do
-      expect(Logger).to receive(:new).with(STDOUT, Logger::WARN).and_call_original
+      expect(Logger).to receive(:new).with(STDERR, level: Logger::WARN).and_call_original
       foo.logger
     end
 
@@ -28,7 +28,7 @@ describe OpsManager::Logging do
       before { ENV['DEBUG']= 'true' }
 
       it 'should log in INFO level' do
-      expect(Logger).to receive(:new).with(STDOUT, Logger::INFO).and_call_original
+      expect(Logger).to receive(:new).with(STDERR, level: Logger::INFO).and_call_original
         foo.logger
       end
 

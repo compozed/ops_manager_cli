@@ -6,7 +6,7 @@ class OpsManager
       def initialize(config)
         super(config)
         validate_presence_of! :name, :desired_version 
-        expand_path_for! :stemcell
+        expand_path_for! :stemcell, :filepath
       end
     end
   end
