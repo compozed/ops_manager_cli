@@ -1,4 +1,4 @@
-FROM ruby:2.3.0
+FROM ruby:2.4.1
 
 ENV GEM_NAME ops_manager_cli
 ENV GEM_VERSION 0.7.3
