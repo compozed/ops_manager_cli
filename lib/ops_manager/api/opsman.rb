@@ -107,12 +107,16 @@ class OpsManager
       end
 
       def upload_product(filepath)
-        file = "#{filepath}"
-        cmd = "curl -s -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{file}' -X POST -H 'Authorization: Bearer #{access_token}'"
-        logger.info "running cmd: #{cmd}"
-        body = `#{cmd}`
-        logger.info "Upload product response: #{body}"
-        raise OpsManager::ProductUploadError if body.include? "error"
+        return unless filepath
+        tar = UploadIO.new(filepath, 'multipart/form-data')
+        print_green "====> Uploading product: #{filepath} ..."
+      #print "====> Uploading product ...".green
+        opts = { "product[file]" => tar }
+        res = authenticated_multipart_post("/api/v0/available_products" , opts)
+
+        raise OpsManager::ProductUploadError.new(res.body) unless res.code == '200'
+        say_green 'done'
+        res
       end
 
       def get_available_products

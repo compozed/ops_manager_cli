@@ -24,7 +24,6 @@ describe OpsManager::Logging do
       foo.logger
     end
 
-
     describe 'when DEBUG' do
       before { ENV['DEBUG']= 'true' }
 

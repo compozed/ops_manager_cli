@@ -26,25 +26,61 @@ describe OpsManager::Api::Opsman do
     OpsManager.set_conf(:password, ENV['PASSWORD'] || password)
   end
 
-  describe '#upload_product' do
-    subject(:upload_product){ opsman.upload_product(product_filepath) }
-    let(:product_filepath){ 'example-product.pivotal' }
+  describe "#upload_product" do
+    subject(:upload_product){ opsman.upload_product("tile.pivotal") }
 
-    it 'performs the correct curl' do
-      expect(opsman).to receive(:`).with("curl -s -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{product_filepath}' -X POST -H 'Authorization: Bearer UAA_ACCESS_TOKEN'").and_return('{}')
-      upload_product
+    let(:response_body){ '{}' }
+    let(:response){ upload_product }
+    let(:status_code){ 200 }
+    let(:uri){ "#{base_uri}/api/v0/available_products" }
+
+    before do
+      stub_request(:post, uri).to_return(status: status_code, body: response_body)
     end
 
-    describe 'when upload product errors' do
-      let(:body){ '{"error":"something went wrong"}' }
+    it "should run successfully" do
+      expect(response.code).to eq("200")
+    end
 
-      before { allow(opsman).to receive(:`).and_return(body) }
+    it "should include products in its body" do
+      expect(parsed_response).to eq({})
+    end
 
-      it 'should raise an exception' do
+    describe "when product is nil" do
+      it "should skip" do
+        expect(opsman).not_to receive(:puts).with(/====> Uploading product.../)
+        opsman.upload_product(nil)
+      end
+    end
+
+    describe "when fails to upload product" do
+      let(:status_code){ 400 }
+      let(:response_body){ '{"error": "someting failed" }' }
+
+      it 'should raise OpsManager::ProductUploadError' do
         expect{ upload_product }.to raise_error{ OpsManager::ProductUploadError }
       end
     end
   end
+ # describe '#upload_product' do
+ #   subject(:upload_product){ opsman.upload_product(product_filepath) }
+ #   let(:product_filepath){ 'example-product.pivotal' }
+
+ #   it 'performs the correct curl' do
+ #     expect(opsman).to receive(:`).with("curl -s -k \"https://#{target}/api/v0/available_products\" -F 'product[file]=@#{product_filepath}' -X POST -H 'Authorization: Bearer UAA_ACCESS_TOKEN'").and_return('{}')
+ #     upload_product
+ #   end
+
+ #   describe 'when upload product errors' do
+ #     let(:body){ '{"error":"something went wrong"}' }
+
+ #     before { allow(opsman).to receive(:`).and_return(body) }
+
+ #     it 'should raise an exception' do
+ #       expect{ upload_product }.to raise_error{ OpsManager::ProductUploadError }
+ #     end
+ #   end
+ # end
 
   describe '#upload_installation_assets' do
     before do
