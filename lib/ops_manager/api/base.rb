@@ -106,6 +106,7 @@ class OpsManager
       def multipart_post(endpoint, opts = {})
         uri = uri_for(endpoint)
         http = http_for(uri)
+        http.read_timeout = 900
 
         request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
 
