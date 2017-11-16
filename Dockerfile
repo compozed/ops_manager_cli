@@ -6,6 +6,11 @@ ENV OVFTOOL_VERSION 4.1.0-2459827
 ENV OVFTOOL_INSTALLER VMware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle
 ARG DOWNLOAD_URL
 
+# ================== Installs sshpass ===============
+RUN echo "deb http://httpredir.debian.org/debian jessie utils" >> sources.list
+RUN apt-get update
+RUN apt-get install -y sshpass
+
 # ================== Installs OVF tools ==============
 RUN echo $DOWNLOAD_URL
 RUN wget -v ${DOWNLOAD_URL} \
@@ -23,6 +28,5 @@ RUN chmod +x /usr/local/bin/jq
 
 # ================== Installs ops_manager_cli gem ==============
 COPY pkg/${GEM_NAME}-${GEM_VERSION}.gem /tmp/
-
 RUN gem install /tmp/${GEM_NAME}-${GEM_VERSION}.gem
 
