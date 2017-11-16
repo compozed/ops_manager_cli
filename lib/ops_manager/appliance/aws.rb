@@ -40,7 +40,7 @@ class OpsManager
         # Create ami of stopped server
         response = connection.create_image(server.id, "#{name}-backup", "Backup of #{name}")
         image = connection.images.get( response.data[:body]['imageId'])
-        image.wait_for { image.state == "available" }
+        image.wait_for 36000 { image.state == "available" }
         if image.state != "available"
           fail "Error creating backup AMI, bailing out before destroying the VM"
         end
