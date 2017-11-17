@@ -98,13 +98,6 @@ describe OpsManager::DirectorTemplateGenerator do
     it 'should remove guid' do
       expect(generated_template).not_to have_key('guid')
     end
-    it 'should not include product director_ssl' do
-      expect(generated_template['products'][1]).not_to have_key('director_ssl')
-    end
-
-    it 'should not include product uaa_ssl' do
-      expect(generated_template['products'][1]).not_to have_key('uaa_ssl')
-    end
 
     it 'should remove uaa_credentials' do
       expect(generated_template['products'][1]).not_to have_key('uaa_credentials')
