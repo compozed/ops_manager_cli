@@ -9,7 +9,7 @@ ARG DOWNLOAD_URL
 # ================== Installs sshpass ===============
 RUN echo "deb http://httpredir.debian.org/debian jessie utils" >> sources.list
 RUN apt-get update
-RUN apt-get install -y sshpass
+RUN apt-get install -y sshpass unzip
 
 # ================== Installs OVF tools ==============
 RUN echo $DOWNLOAD_URL
