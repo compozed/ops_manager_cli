@@ -106,7 +106,6 @@ class OpsManager
       def multipart_post(endpoint, opts = {})
         uri = uri_for(endpoint)
         http = http_for(uri)
-        http.read_timeout = 900
 
         request = Net::HTTP::Post::Multipart.new(uri.request_uri, opts)
 
@@ -154,7 +153,7 @@ class OpsManager
         Net::HTTP.new(uri.host, uri.port).tap do |http|
           http.use_ssl = true
           http.verify_mode = OpenSSL::SSL::VERIFY_NONE
-          http.read_timeout = 1200
+          http.read_timeout = 1800
 
           ctx = OpenSSL::SSL::SSLContext.new
           ctx.ssl_version = :TLSv1_2
