@@ -80,8 +80,12 @@ class OpsManager::ApplianceDeployment
 
   def list_current_stemcells
     JSON.parse(installation_settings).fetch('products').inject([]) do |a, p|
-      a << p['stemcell'].fetch('version')
-    end
+      product_name = "stemcells"
+      if p['stemcell'].fetch('os') =~ /windows/i
+        product_name = "stemcells-windows-server"
+      end
+      a << { version: p['stemcell'].fetch('version'), product: product_name }
+    end.uniq
   end
 
   # Finds available stemcell's pivotal network release.
@@ -89,9 +93,9 @@ class OpsManager::ApplianceDeployment
   # #
   # @param version [String] the version number, eg: '2362.17'
   # @return release_id [Integer] the pivotal netowkr release id of the found stemcell.
-  def find_stemcell_release(version)
+  def find_stemcell_release(version, product_name)
     version  = OpsManager::Semver.new(version)
-    releases = stemcell_releases.collect do |r|
+    releases = stemcell_releases(product_name).collect do |r|
       {
         release_id:  r['id'],
         version:     OpsManager::Semver.new(r['version']),
@@ -109,8 +113,8 @@ class OpsManager::ApplianceDeployment
   # @param release_id [String] the version number, eg: '2362.17'
   # @param filename [Regex] the version number, eg: /vsphere/
   # @return id and name [Array] the pivotal network file ID and Filename for the matching stemcell.
-  def find_stemcell_file(release_id, filename)
-    files = JSON.parse(get_product_release_files('stemcells', release_id).body).fetch('product_files')
+  def find_stemcell_file(release_id, filename, product_name)
+    files = JSON.parse(get_product_release_files(product_name, release_id).body).fetch('product_files')
     file = files.select{ |r| r.fetch('aws_object_key') =~ filename }.first
     return file['id'], file['aws_object_key'].split('/')[-1]
   end
@@ -121,16 +125,18 @@ class OpsManager::ApplianceDeployment
     print "====> Downloading existing stemcells ...".green
     puts "no stemcells found".green if list_current_stemcells.empty?
     FileUtils.mkdir_p current_stemcell_dir
-    list_current_stemcells.each do |stemcell_version|
-      release_id = find_stemcell_release(stemcell_version)
-      accept_product_release_eula('stemcells', release_id )
+    list_current_stemcells.each do |stemcell_info|
+      stemcell_version = stemcell_info[:version]
+      product_name = stemcell_info[:product]
+      release_id = find_stemcell_release(stemcell_version, product_name)
+      accept_product_release_eula(product_name, release_id)
       stemcell_regex = /vsphere/
       if config[:provider] == "AWS"
         stemcell_regex = /aws/
       end
 
-      file_id, file_name = find_stemcell_file(release_id, stemcell_regex)
-      download_product_release_file('stemcells', release_id, file_id, write_to: "#{current_stemcell_dir}/#{file_name}")
+      file_id, file_name = find_stemcell_file(release_id, stemcell_regex, product_name)
+      download_product_release_file(product_name, release_id, file_id, write_to: "#{current_stemcell_dir}/#{file_name}")
     end
   end
 
@@ -212,12 +218,8 @@ class OpsManager::ApplianceDeployment
     @installation_settings ||= get_installation_settings.body
   end
 
-  def get_stemcell_releases
-    get_product_releases('stemcells')
-  end
-
-  def stemcell_releases
-    @stemcell_releases ||= JSON.parse(get_stemcell_releases.body).fetch('releases')
+  def stemcell_releases(product_name)
+    JSON.parse(get_product_releases(product_name).body).fetch('releases')
   end
 
   def current_stemcell_dir

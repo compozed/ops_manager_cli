@@ -139,11 +139,15 @@ describe OpsManager::ApplianceDeployment do
 
     let(:version){ "3062" }
     let(:other_version){ "3063" }
+    let(:windows_version){ "1200" }
     let(:installation_settings) do
       {
         "products" => [
-          { "stemcell": { "version" => version       } },
-          { "stemcell": { "version" => other_version } },
+          { "stemcell": { "version" => version,         "os" => "ubuntu-trusty"} },
+          { "stemcell": { "version" => other_version,   "os" => "ubuntu-trusty"} },
+          { "stemcell": { "version" => version,         "os" => "ubuntu-trusty"} },
+          { "stemcell": { "version" => version,         "os" => "ubuntu-trusty"} },
+          { "stemcell": { "version" => windows_version, "os" => "windowsR2012"} },
         ]
       }
     end
@@ -155,14 +159,18 @@ describe OpsManager::ApplianceDeployment do
     end
 
     describe 'when installation_settings are present' do
-      it 'should return list of current stemcells' do
-        expect(list_current_stemcells).to eq( [ version, other_version ])
+      it 'should return uniqued list of current stemcells, with version and their corresponding product' do
+        expect(list_current_stemcells).to eq([
+          {version: version,         product: "stemcells"},
+          {version: other_version,   product: "stemcells"},
+          {version: windows_version, product: "stemcells-windows-server" },
+        ])
       end
     end
   end
 
   describe '#find_stemcell_release' do
-    subject(:find_stemcell_release){ appliance_deployment.find_stemcell_release(stemcell_version) }
+    subject(:find_stemcell_release){ appliance_deployment.find_stemcell_release(stemcell_version, "arbitrary-stemcells") }
     let(:product_releases_response) do
       {
         'releases' => [
@@ -176,7 +184,7 @@ describe OpsManager::ApplianceDeployment do
 
     before do
       allow(appliance_deployment).to receive(:get_product_releases)
-        .with('stemcells')
+        .with('arbitrary-stemcells')
         .and_return(double(status_code: 200, body: product_releases_response.to_json))
     end
 
@@ -198,7 +206,7 @@ describe OpsManager::ApplianceDeployment do
   end
 
   describe '#find_stemcell_file' do
-    subject(:find_stemcell_file){ appliance_deployment.find_stemcell_file(1, /vsphere/) }
+    subject(:find_stemcell_file){ appliance_deployment.find_stemcell_file(1, /vsphere/, "arbitrary-stemcell") }
 
     let(:stemcell_version){ "3062" }
     let(:product_file_id){ 1 }
@@ -220,7 +228,7 @@ describe OpsManager::ApplianceDeployment do
 
     before do
       allow(appliance_deployment).to receive(:get_product_release_files)
-        .with('stemcells', 1)
+        .with('arbitrary-stemcell', 1)
         .and_return(double(status_code: 200, body: product_files_response.to_json))
     end
 
@@ -238,24 +246,32 @@ describe OpsManager::ApplianceDeployment do
 
   describe '#download_current_stemcells' do
     subject(:download_current_stemcells){ appliance_deployment.download_current_stemcells }
-    let(:current_stemcells){ ["3062.0" , "3063.0" ] }
+    let(:current_stemcells){ [
+      {version: "3062.0", product: "stemcells"},
+      {version: "3063.0", product: "stemcells"},
+      {version: "1200.12", product: "stemcells-windows-server"},
+    ]}
     let(:release_id){ rand(1000..9999) }
     let(:file_id)   { rand(1000..9999) }
     let(:stemcell_filepath){ "bosh-stemcell-3062.0-vcloud-esxi-ubuntu-trusty-go_agent.tgz" }
+    let(:windows_filepath){ "light-bosh-stemcell-1200.12-vsphere-xen-hvm-windows2012R2-go_agent.tgz" }
 
     before do
       allow(appliance_deployment).tap do |ad|
         ad.to receive(:list_current_stemcells).and_return(current_stemcells)
         ad.to receive(:find_stemcell_release).and_return(release_id)
-        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/).and_return([file_id, stemcell_filepath])
+        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells").and_return([file_id, stemcell_filepath])
+        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells-windows-server").and_return([file_id, windows_filepath])
         ad.to receive(:accept_product_release_eula)
         ad.to receive(:download_product_release_file)
       end
     end
 
-    it 'should download all stemcell' do
+    it 'should download all stemcells from the appropriate products' do
       expect(appliance_deployment).to receive(:download_product_release_file)
         .with('stemcells', release_id, file_id, write_to: "/tmp/current_stemcells/#{stemcell_filepath}" ).twice
+      expect(appliance_deployment).to receive(:download_product_release_file)
+        .with('stemcells-windows-server', release_id, file_id, write_to: "/tmp/current_stemcells/#{windows_filepath}" )
       download_current_stemcells
     end
 
