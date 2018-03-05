@@ -114,7 +114,7 @@ The ops_manager_cli tool can be installed in a docker container typically in con
     bundle exec rake build 
     docker build  \
       --build-arg DOWNLOAD_URL=http://your_blobstore.com/VMware-ovftool-4.1.0-2459827-lin.x86_64.bundle \
-      -t compozed/ops_manager_cli:vX.X.X
+      -t compozed/ops_manager_cli:vX.X.X .
 
 
 ### Provisioning docker image to private registry
