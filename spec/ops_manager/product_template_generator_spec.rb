@@ -64,7 +64,8 @@ describe OpsManager::ProductTemplateGenerator do
               },
               {
                 'value' => {
-                  'private_key_pem' => 'Job Private Key'
+                  'private_key_pem' => 'Job Private Key',
+                  'cert_pem' => 'Job Cert'
                 }
               }
             ],
@@ -142,11 +143,11 @@ describe OpsManager::ProductTemplateGenerator do
     end
 
     it 'should should remove job properties private keys' do
-      expect(generated_template.to_s).to match('Job Private Key')
+      expect(generated_template.to_s).not_to match('Job Private Key')
     end
 
     it 'should should remove product private keys' do
-      expect(generated_template.to_s).to match('Product Private Key')
+      expect(generated_template.to_s).not_to match('Product Private Key')
     end
 
     it 'should remove the product version' do
@@ -156,6 +157,7 @@ describe OpsManager::ProductTemplateGenerator do
     it 'should remove stemcell metadata' do
       expect(generated_template['products'].first).not_to have_key('stemcell')
     end
+
   end
 end
 

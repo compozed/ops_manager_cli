@@ -19,11 +19,11 @@ class OpsManager
       delete_from_jobs(property_name)
       end
 
-      %w{ password secret salt }.each do |property_name|
+      %w{ password secret salt private_key_pem cert_pem }.each do |property_name|
         delete_value_from_job_properties(property_name)
       end
 
-      %w{ secret }.each do |property_name|
+      %w{ secret private_key_pem cert_pem }.each do |property_name|
         delete_value_from_product_properties(property_name)
       end
 
@@ -126,5 +126,15 @@ class OpsManager
         end
       end
     end
+
+    def delete_certs_from_template
+      selected_product['jobs'].each do |j|
+        j.fetch('properties',[]).each do |p|
+          
+        end
+      end
+
+    end
+
   end
 end
