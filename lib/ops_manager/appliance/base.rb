@@ -16,7 +16,8 @@ class OpsManager
 
       private
       def vm_name
-        @vm_name ||= "#{config[:name]}-#{config[:desired_version]}"
+        desired_version = OpsManager::Semver.new(config[:desired_version])
+        @vm_name ||= "#{config[:name]}-#{desired_version}"
       end
     end
   end
