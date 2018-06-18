@@ -1,5 +1,27 @@
 # Change Log
 
+## [v0.7.6](https://github.com/compozed/ops_manager_cli/tree/v0.7.6) (2018-06-18)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.5...v0.7.6)
+
+**Closed issues:**
+
+- Upgrading Product Issue - The enabled\_errands parameter is no longer supported [\#35](https://github.com/compozed/ops_manager_cli/issues/35)
+- Ops Manager cannot deploy appliance when there is no Ops Manager appliance deployed [\#31](https://github.com/compozed/ops_manager_cli/issues/31)
+- OpsMAnagerCli should check if there are pending changes in the current installation before performing an opsman upgrade [\#30](https://github.com/compozed/ops_manager_cli/issues/30)
+- director generator does not remove fixed stemcell versions [\#18](https://github.com/compozed/ops_manager_cli/issues/18)
+- Remove ovftools dependency and use rbvmomi instead to deploy appliance [\#14](https://github.com/compozed/ops_manager_cli/issues/14)
+
+**Merged pull requests:**
+
+- Make it work with ruby other than 2.4 [\#38](https://github.com/compozed/ops_manager_cli/pull/38) ([teancom](https://github.com/teancom))
+- Remove pem values from product templates [\#37](https://github.com/compozed/ops_manager_cli/pull/37) ([suppalapati13](https://github.com/suppalapati13))
+
+## [v0.7.5](https://github.com/compozed/ops_manager_cli/tree/v0.7.5) (2018-01-18)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.4...v0.7.5)
+
+## [v0.7.4](https://github.com/compozed/ops_manager_cli/tree/v0.7.4) (2017-11-22)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.2...v0.7.4)
+
 ## [v0.7.2](https://github.com/compozed/ops_manager_cli/tree/v0.7.2) (2017-11-03)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.1...v0.7.2)
 
