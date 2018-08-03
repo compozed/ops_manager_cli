@@ -72,7 +72,6 @@ describe OpsManager::Appliance::AWS do
       expect(server.subnet_id).to eq(config[:opts][:subnet_id])
       expect(server.key_name).to eq(config[:opts][:ssh_keypair_name])
       expect(server.private_ip_address).to eq(config[:ip])
-      expect(server.associate_public_ip).to eq(false)
       expect(server.availability_zone).to eq(config[:opts][:availability_zone])
       expect(server.image_id).to eq('ami-a26bacd8')
       disk = connection.volumes.get(server.block_device_mapping[0]["volumeId"])

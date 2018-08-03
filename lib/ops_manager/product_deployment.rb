@@ -62,7 +62,7 @@ class OpsManager
       upgrade_product_installation(installation.guid, config[:desired_version])
       merge_product_installation_settings
       if config[:single_tile_deploy]
-        OpsManager::InstallationRunner.trigger!("deploy_products" => [installation.guid]).wait_for_result
+        OpsManager::InstallationRunner.trigger!([installation.guid]).wait_for_result
       else
         OpsManager::InstallationRunner.trigger!.wait_for_result
       end
@@ -82,7 +82,7 @@ class OpsManager
       add_to_installation
       merge_product_installation_settings
       if config[:single_tile_deploy]
-        OpsManager::InstallationRunner.trigger!("deploy_products" => [installation.guid]).wait_for_result
+        OpsManager::InstallationRunner.trigger!([installation.guid]).wait_for_result
       else
         OpsManager::InstallationRunner.trigger!.wait_for_result
       end

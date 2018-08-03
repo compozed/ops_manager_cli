@@ -7,20 +7,23 @@ describe OpsManager::InstallationRunner do
   let(:errand_name){ "errand#{rand(9999)}" }
   let(:installation_response){ double('installation_response', body: "{\"install\":{\"id\":#{installation_id}}}" ) }
   let(:product_guid){ "product_1_guid" }
+  let(:product2_guid){ "product_2_guid" }
   let(:opsman_api){ double.as_null_object }
   let(:get_staged_products_response){ double(body: '[]') }
   let(:staged_products_errands_response){ double(body: '{ "errands": []}') }
+  let(:staged_products2_errands_response){ double(body: '{ "errands": []}') }
 
   before do
     allow(OpsManager::Api::Opsman).to receive(:new).and_return(opsman_api)
     allow(opsman_api).to receive(:trigger_installation).and_return(installation_response)
     allow(opsman_api).to receive(:get_staged_products).and_return(get_staged_products_response)
     allow(opsman_api).to receive(:get_staged_products_errands).with(product_guid).and_return(staged_products_errands_response)
+    allow(opsman_api).to receive(:get_staged_products_errands).with(product2_guid).and_return(staged_products2_errands_response)
   end
 
   describe '#trigger' do
     subject(:trigger){ installation_runner.trigger! }
-    let(:get_staged_products_response){ double( body: [ { "guid" =>  product_guid }].to_json, code: 200) }
+    let(:get_staged_products_response){ double( body: [ { "guid" =>  product_guid }, { "guid" => product2_guid }].to_json, code: 200) }
     let(:staged_products_errands_response) do
       double(
         code: '200',
@@ -35,10 +38,50 @@ describe OpsManager::InstallationRunner do
             "pre_delete" => true
           }]}.to_json )
     end
+    let(:staged_products2_errands_response) do
+      double(
+        code: '200',
+        body: {
+          "errands" => [{
+            "name" => "product2-#{errand_name}",
+            "post_deploy" => true,
+            "pre_delete" => false
+          }]
+        }.to_json )
+    end
 
     it 'should trigger_installation' do
       expect(opsman_api).to receive(:trigger_installation)
       installation_runner.trigger!
+    end
+    it 'should trigger a no-product-deploy deployment if requested + no errands' do
+      expect(opsman_api).to receive(:trigger_installation).with(
+        headers: {"Content-Type" => "application/json"},
+        body: {
+          "errands"=> {},
+          "ignore_warnings"=> true,
+          "deploy_products" => "none"
+        }.to_json
+      )
+      installation_runner.trigger!("none")
+    end
+
+    it "should trigger an install of a specific product, with only that product's errands" do
+      expect(opsman_api).to receive(:trigger_installation).with(
+        headers: {"Content-Type" => "application/json"},
+        body: {
+          "errands"=> {
+            "product_2_guid"=> {
+              "run_post_deploy"=> {
+              "product2-#{errand_name}" => true
+              }
+            }
+          },
+          "ignore_warnings"=> true,
+          "deploy_products" => [ product2_guid ]
+        }.to_json 
+      )
+      installation_runner.trigger!([product2_guid])
     end
 
     it 'should set installation.id' do
@@ -57,6 +100,11 @@ describe OpsManager::InstallationRunner do
                 "run_post_deploy"=> {
                 errand_name => true
                 }
+              },
+              "product_2_guid"=> {
+                "run_post_deploy"=> {
+                "product2-#{errand_name}" => true
+                }
               }
           },
         "ignore_warnings"=> true
@@ -66,6 +114,7 @@ describe OpsManager::InstallationRunner do
 
     describe 'when product errands do not exist' do
       let(:staged_products_errands_response){ double(body: '', code: 404) }
+      let(:staged_products2_errands_response){ double(body: '', code: 404) }
 
       it 'should not return any errands' do
         expect(opsman_api).to receive(:trigger_installation)

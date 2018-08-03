@@ -152,7 +152,7 @@ describe OpsManager::ProductDeployment do
 
     it 'should trigger installation with specific deployments' do
       config[:single_tile_deploy] = true
-      expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => [guid]})
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with([guid])
       deploy
     end
 
@@ -207,7 +207,7 @@ describe OpsManager::ProductDeployment do
 
       it 'should trigger installation with specific deployments' do
         config[:single_tile_deploy] = true
-        expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => [guid]})
+        expect(OpsManager::InstallationRunner).to receive(:trigger!).with([guid])
         upgrade
       end
 

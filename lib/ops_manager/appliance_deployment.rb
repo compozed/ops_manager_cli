@@ -39,7 +39,7 @@ class OpsManager::ApplianceDeployment
       if pending_changes?
         puts "OpsManager at #{config[:ip]} version has pending changes. Applying changes...".green
         if config[:single_tile_deploy]
-          OpsManager::InstallationRunner.trigger!("deploy_products" => "none").wait_for_result
+          OpsManager::InstallationRunner.trigger!("none").wait_for_result
         else
           OpsManager::InstallationRunner.trigger!.wait_for_result
         end
@@ -80,7 +80,7 @@ class OpsManager::ApplianceDeployment
     wait_for_uaa
     provision_stemcells
     if config[:single_tile_deploy]
-      OpsManager::InstallationRunner.trigger!("deploy_products" => "none").wait_for_result
+      OpsManager::InstallationRunner.trigger!("none").wait_for_result
     else
       OpsManager::InstallationRunner.trigger!.wait_for_result
     end
