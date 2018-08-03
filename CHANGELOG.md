@@ -1,7 +1,7 @@
 # Change Log
 
-## [v0.7.7](https://github.com/compozed/ops_manager_cli/tree/v0.7.7) (2018-06-18)
-[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.6...v0.7.7)
+## [v0.7.8]://github.com/compozed/ops_manager_cli/tree/v0.7.8) (2018-06-18)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.6...v0.7.8)
 
 - `ops_manager` now supports single-product deployments via the `deploy_products` key in the
   Ops Manager API (requires Ops Manager 2.2+). Just add `single_tile_deploy: true` to the deploy
