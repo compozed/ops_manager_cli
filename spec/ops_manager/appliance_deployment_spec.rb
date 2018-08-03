@@ -124,7 +124,13 @@ describe OpsManager::ApplianceDeployment do
     end
 
     it 'should trigger installation' do
-      expect(OpsManager::InstallationRunner).to receive(:trigger!)
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+      upgrade
+    end
+
+    it 'should trigger installation with specific deployments' do
+      config[:single_tile_deploy] = true
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => "none"})
       upgrade
     end
 
@@ -435,7 +441,14 @@ describe OpsManager::ApplianceDeployment do
         let(:pending_changes_response){ {"product_changes": [{ "guid": "cf" }]} }
 
         it 'should apply changes' do
-          expect(OpsManager::InstallationRunner).to receive(:trigger!)
+          expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+          expect do
+            run
+          end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout
+        end
+        it 'should apply changes to the director only' do
+          config[:single_tile_deploy] = true
+          expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => "none"})
           expect do
             run
           end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout

@@ -26,7 +26,7 @@ describe OpsManager::ProductDeployment do
       desired_version: desired_version,
       filepath: filepath,
       stemcell: 'stemcell.tgz',
-      installation_settings_file: installation_settings_file
+      installation_settings_file: installation_settings_file,
     }
   end
 
@@ -145,6 +145,16 @@ describe OpsManager::ProductDeployment do
       deploy
     end
 
+    it 'should trigger installation' do
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+      deploy
+    end
+
+    it 'should trigger installation with specific deployments' do
+      config[:single_tile_deploy] = true
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => [guid]})
+      deploy
+    end
 
     it 'should wait for installation' do
       expect(installation).to receive(:wait_for_result)
@@ -191,9 +201,16 @@ describe OpsManager::ProductDeployment do
       end
 
       it 'should trigger installation' do
-        expect(OpsManager::InstallationRunner).to receive(:trigger!)
+        expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
         upgrade
       end
+
+      it 'should trigger installation with specific deployments' do
+        config[:single_tile_deploy] = true
+        expect(OpsManager::InstallationRunner).to receive(:trigger!).with({"deploy_products" => [guid]})
+        upgrade
+      end
+
 
       it 'should wait for installation' do
         expect(installation).to receive(:wait_for_result)
