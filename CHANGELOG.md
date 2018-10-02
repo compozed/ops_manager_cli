@@ -1,5 +1,10 @@
 # Change Log
 
+## [v0.7.9]://github.com/compozed/ops_manager_cli/tree/v0.7.9) (2018-06-18)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.8...v0.7.9)
+
+- Adds error checking when ovftool fails to deploy the OVA to VCenter.
+
 ## [v0.7.8]://github.com/compozed/ops_manager_cli/tree/v0.7.8) (2018-06-18)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.6...v0.7.8)
 
