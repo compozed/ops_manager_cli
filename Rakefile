@@ -5,7 +5,7 @@ require 'github_changelog_generator/task'
 RSpec::Core::RakeTask.new(:spec)
 
 GitHubChangelogGenerator::RakeTask.new :changelog do |config|
-  config.max_issues = 50
+  config.max_issues = 5
 end
 
 task :default => :spec
