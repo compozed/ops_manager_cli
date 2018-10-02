@@ -12,11 +12,19 @@ class OpsManager
 
       def deploy_vm
         print '====> Deploying ova ...'.green
-        vcenter_target= "vi://#{vcenter_username}:#{vcenter_password}@#{config[:opts][:vcenter][:host]}/#{config[:opts][:vcenter][:datacenter]}/host/#{config[:opts][:vcenter][:cluster]}"
-        cmd = "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{config[:opts][:portgroup]}\" --name=#{vm_name} -ds=#{config[:opts][:datastore]} --prop:ip0=#{config[:ip]} --prop:netmask0=#{config[:opts][:netmask]}  --prop:gateway=#{config[:opts][:gateway]} --prop:DNS=#{config[:opts][:dns]} --prop:ntp_servers=#{config[:opts][:ntp_servers].join(',')} --prop:admin_password=#{config[:password]} #{config[:opts][:ova_path]} #{vcenter_target}"
         logger.info "Running: #{cmd}"
         logger.info `#{cmd}`
+        if ! $?.success?
+          puts 'FAILED. Your old ops manager is offline, and a new one was not provisioned.'.red
+          puts 'You may want to re-run with DEBUG=true set to figure out what failed...'
+          raise "Failure in ovftool"
+        end
         puts 'done'.green
+      end
+
+      def cmd
+        vcenter_target= "vi://#{vcenter_username}:#{vcenter_password}@#{config[:opts][:vcenter][:host]}/#{config[:opts][:vcenter][:datacenter]}/host/#{config[:opts][:vcenter][:cluster]}"
+        "echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{config[:opts][:portgroup]}\" --name=#{vm_name} -ds=#{config[:opts][:datastore]} --prop:ip0=#{config[:ip]} --prop:netmask0=#{config[:opts][:netmask]}  --prop:gateway=#{config[:opts][:gateway]} --prop:DNS=#{config[:opts][:dns]} --prop:ntp_servers=#{config[:opts][:ntp_servers].join(',')} --prop:admin_password=#{config[:password]} #{config[:opts][:ova_path]} #{vcenter_target}"
       end
 
       def stop_current_vm(name)

@@ -48,8 +48,23 @@ describe OpsManager::Appliance::Vsphere do
     let(:vcenter_target){"vi://VM_VCENTER_USER:VM_VCENTER_PASSWORD@1.2.3.2/VM_DATACENTER/host/VM_CLUSTER"}
 
     it 'should run ovftools successfully' do
-      expect(vsphere).to receive(:`).with("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{config[:opts][:portgroup]}\" --name=ops-manager-1.4.11.0 -ds=#{config[:opts][:datastore]} --prop:ip0=1.2.3.4 --prop:netmask0=#{config[:opts][:netmask]}  --prop:gateway=#{config[:opts][:gateway]} --prop:DNS=#{config[:opts][:dns]} --prop:ntp_servers=#{config[:opts][:ntp_servers].join(',')} --prop:admin_password=#{config[:password]} #{config[:opts][:ova_path]} #{vcenter_target}") 
+      allow(vsphere).to receive(:cmd).and_return("(exit 0)")
       deploy_vm
+    end
+
+    it 'should run ovftools and handle errors' do
+      # expect to fail?
+      expect {deploy_vm}.to raise_error("Failure in ovftool")
+    end
+
+  end
+
+  describe 'cmd' do
+    subject(:cmd){ vsphere.cmd }
+    let(:vcenter_target){"vi://VM_VCENTER_USER:VM_VCENTER_PASSWORD@1.2.3.2/VM_DATACENTER/host/VM_CLUSTER"}
+    it 'returns the right command' do
+      cmd = vsphere.cmd
+      expect(cmd).to eq("echo yes | ovftool --acceptAllEulas --noSSLVerify --powerOn --X:waitForIp --net:\"Network 1=#{config[:opts][:portgroup]}\" --name=ops-manager-1.4.11.0 -ds=#{config[:opts][:datastore]} --prop:ip0=1.2.3.4 --prop:netmask0=#{config[:opts][:netmask]}  --prop:gateway=#{config[:opts][:gateway]} --prop:DNS=#{config[:opts][:dns]} --prop:ntp_servers=#{config[:opts][:ntp_servers].join(',')} --prop:admin_password=#{config[:password]} #{config[:opts][:ova_path]} #{vcenter_target}")
     end
 
     %i{username password}.each do |m|
@@ -58,8 +73,8 @@ describe OpsManager::Appliance::Vsphere do
         
 
         it "should URL encode the #{m}" do
-          expect(vsphere).to receive(:`).with(/domain\\%5Cvcenter_\\\+\\\)#{m}/)
-          deploy_vm
+          cmd = vsphere.cmd
+          expect(cmd).to match(/domain\\%5Cvcenter_\\\+\\\)#{m}/)
         end
       end
     end
