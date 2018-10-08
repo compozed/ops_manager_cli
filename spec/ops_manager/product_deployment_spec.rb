@@ -278,8 +278,14 @@ describe OpsManager::ProductDeployment do
       run
     end
 
-    it 'should provision stemcell' do
+    it 'should provision stemcell to all products without single tile deployment set' do
       expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz')
+      run
+    end
+
+    it 'should provision stemcell to specific products when single tile deployment is set' do
+      config[:single_tile_deploy] = true
+      expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz', [guid])
       run
     end
 

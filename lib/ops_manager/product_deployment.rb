@@ -26,7 +26,11 @@ class OpsManager
 
     def run
       OpsManager.target_and_login(config[:target], config[:username], config[:password])
-      import_stemcell(config[:stemcell])
+      if config[:single_tile_deploy]
+        import_stemcell(config[:stemcell], [installation.guid])
+      else
+        import_stemcell(config[:stemcell])
+      end
 
       case
       when installation.nil? || forced_deployment?

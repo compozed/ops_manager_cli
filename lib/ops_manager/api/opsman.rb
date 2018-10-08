@@ -129,13 +129,18 @@ class OpsManager
         nil
       end
 
-      def import_stemcell(filepath)
+      def import_stemcell(filepath, products = "all")
         return unless filepath
         tar = UploadIO.new(filepath, 'multipart/form-data')
         print_green "====> Uploading stemcell: #{filepath} ..."
-        opts = { "stemcell[file]" => tar }
-        res = nil
 
+        opts = { "stemcell[file]" => tar }
+        # if we specify specific products, don't update stemcell associations everywhere
+        if products != "all"
+          opts["stemcell[floating]"] = false
+       end
+
+        res = nil
         3.times do
           res = authenticated_multipart_post("/api/v0/stemcells", opts)
           case res.code
@@ -143,8 +148,8 @@ class OpsManager
             when '503' ; sleep(60)
           end
         end
-
         raise OpsManager::StemcellUploadError.new(res.body) unless res.code == '200'
+
         say_green 'done'
         res
       end

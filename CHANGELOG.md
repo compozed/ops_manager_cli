@@ -1,5 +1,11 @@
 # Change Log
 
+## [v0.7.9]://github.com/compozed/ops_manager_cli/tree/v0.7.9) (2018-10-8)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.9...v0.7.10)
+
+- Fixes a bug uploading stemcells when using single-tile-deployments causing all tiles to
+  be assigned a stemcell, instead of the deployment targeted with single-tile-deployments
+
 ## [v0.7.9]://github.com/compozed/ops_manager_cli/tree/v0.7.9) (2018-06-18)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.8...v0.7.9)
 
