@@ -73,8 +73,6 @@ class OpsManager
           @connection ||= Fog::Compute.new({
             provider: config[:provider],
             use_iam_profile: config[:opts][:use_iam_profile],
-            aws_access_key_id: "",
-            aws_secret_access_key: "",
           })
         else
           @connection ||= Fog::Compute.new({

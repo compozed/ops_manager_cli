@@ -29,6 +29,5 @@ RUN wget -q -O /usr/local/bin/jq --no-check-certificate https://github.com/stedo
 
 # ================== Installs ops_manager_cli gem ==============
 COPY pkg/${GEM_NAME}-${GEM_VERSION}.gem /tmp/
-RUN echo ':ssl_verify_mode: 0' > ~/.gemrc
-RUN gem install /tmp/${GEM_NAME}-${GEM_VERSION}.gem
-
+RUN echo ':ssl_verify_mode: 0' > ~/.gemrc \
+ && gem install /tmp/${GEM_NAME}-${GEM_VERSION}.gem

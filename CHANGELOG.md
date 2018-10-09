@@ -6,6 +6,7 @@
 - Fixes a bug uploading stemcells when using single-tile-deployments causing all tiles to
   be assigned a stemcell, instead of the deployment targeted with single-tile-deployments
 - Support handling CF::UAA::HTTPException when checking for existing Ops Managers
+- Re-resolve bug related to deploying to AWS using instance profiles based on new Fog code
 
 ## [v0.7.9]://github.com/compozed/ops_manager_cli/tree/v0.7.9) (2018-06-18)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.8...v0.7.9)
