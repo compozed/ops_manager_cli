@@ -100,13 +100,13 @@ describe OpsManager::Appliance::AWS do
 
     it 'should use instance profile roles rather than a keypair, if provided' do
       config[:opts][:use_iam_profile] = true
-      config[:opts][:access_key] = ""
-      config[:opts][:secret_key] = ""
-      expect do
-        aws.deploy_vm
-      end.to change{ connection.servers.count}. from(connection.servers.count).to(connection.servers.count + 1)
+      skip "The mock requires data that live aws cannot receive: https://github.com/fog/fog-aws/issues/482" do
+        expect do
+          aws.deploy_vm
+        end.to change{ connection.servers.count}. from(connection.servers.count).to(connection.servers.count + 1)
 
-      expect(aws.instance_eval { @connection.instance_eval { @use_iam_profile }}).to eq(true)
+        expect(aws.instance_eval { @connection.instance_eval { @use_iam_profile }}).to eq(true)
+      end
     end
   end
 
