@@ -29,15 +29,9 @@ describe OpsManager::DirectorTemplateGenerator do
   let(:installation_settings) do
     {
       'guid' => 'ab0acc994a1bc5f6f4a3',
-      'infrastructure' => {},
+      'infrastructure' => { 'vm_extensions' => [ {"name" => "test_extension"}]},
       'ip_assignments' => '192.168.1.1',
       'installation_schema_version' => '1.7',
-      'products' => [
-        { 'prepared' => true,
-          'identifier' => 'example_product' },
-          { 'prepared' => true,
-            'identifier' =>'p-bosh' }
-      ]
     }
   end
   let(:director_template) do
@@ -109,6 +103,10 @@ describe OpsManager::DirectorTemplateGenerator do
 
     it 'should remove uaa_admin_client_credentials' do
       expect(generated_template['products'][1]).not_to have_key('uaa_admin_client_credentials')
+    end
+
+    it 'should remove the vm_extensions' do
+      expect(generated_template['infrastructure']).not_to have_key('vm_extensions')
     end
   end
 end

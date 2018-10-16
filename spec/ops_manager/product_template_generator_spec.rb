@@ -36,6 +36,7 @@ describe OpsManager::ProductTemplateGenerator do
           { 'identifier' => 'example-job' ,
             'guid' => 'job-guid-example' ,
             'partitions' => 'some partition info' ,
+            'additional_vm_extensions' => ['text_extension'],
             'properties' => [
               {
                 'deployed' => false,
@@ -156,6 +157,10 @@ describe OpsManager::ProductTemplateGenerator do
 
     it 'should remove stemcell metadata' do
       expect(generated_template['products'].first).not_to have_key('stemcell')
+    end
+
+    it 'should remove the additional_vm_extensions key' do
+      expect(generated_template['products'][0]['jobs'][0]).not_to have_key('additional_vm_extensions')
     end
 
   end

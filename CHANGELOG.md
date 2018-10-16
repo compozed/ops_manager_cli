@@ -1,6 +1,13 @@
 # Change Log
 
-## [v0.7.9]://github.com/compozed/ops_manager_cli/tree/v0.7.9) (2018-10-8)
+## [v0.7.11]://github.com/compozed/ops_manager_cli/tree/v0.7.11) (2018-10-16)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.10...v0.7.11)
+
+- Hides VM extensions from get-director-template and get-product-template commands, so
+  that they can be managed via the `resource_config` + `vm_extensions` apis in Ops Manager
+  separately.
+
+## [v0.7.10]://github.com/compozed/ops_manager_cli/tree/v0.7.10) (2018-10-8)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.9...v0.7.10)
 
 - Fixes a bug uploading stemcells when using single-tile-deployments causing all tiles to

@@ -15,7 +15,7 @@ class OpsManager
         delete_from_product(property_name)
       end
 
-      %w{ partitions vm_credentials guid }.each do |property_name|
+      %w{ partitions additional_vm_extensions vm_credentials guid }.each do |property_name|
       delete_from_jobs(property_name)
       end
 

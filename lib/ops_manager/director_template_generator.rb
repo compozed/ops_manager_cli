@@ -10,6 +10,8 @@ class OpsManager
     %w{ uaa_credentials uaa_admin_user_credentials uaa_admin_client_credentials }.each do |property_name|
       product_template["products"].select {|p| p["identifier"] == "p-bosh"}.first.delete(property_name)
     end
+    
+      installation_settings['infrastructure'].delete("vm_extensions")
 
       add_merging_strategy_for_networks
 
