@@ -4,6 +4,7 @@ ENV GEM_NAME ops_manager_cli
 ENV GEM_VERSION 0.7.11
 ENV SPRUCE_VERSION 1.17.0
 ENV JQ_VERSION 1.5
+ENV OM_VERSION 0.42.0
 ENV OVFTOOL_VERSION 4.3.0-7948156
 ENV OVFTOOL_INSTALLER VMware-ovftool-${OVFTOOL_VERSION}-lin.x86_64.bundle
 ARG DOWNLOAD_URL
@@ -26,6 +27,10 @@ RUN wget -q -O /usr/local/bin/spruce --no-check-certificate https://github.com/g
 # ================== Installs JQ ==============
 RUN wget -q -O /usr/local/bin/jq --no-check-certificate https://github.com/stedolan/jq/releases/download/jq-${JQ_VERSION}/jq-linux64 \
  && chmod +x /usr/local/bin/jq
+
+#============ Installs Om ============
+RUN wget -q -O /usr/local/bin/om --no-check-certificate https://github.com/pivotal-cf/om/releases/download/${OM_VERSION}/om-linux \
+  && chmod +x /usr/local/bin/om
 
 # ================== Installs ops_manager_cli gem ==============
 COPY pkg/${GEM_NAME}-${GEM_VERSION}.gem /tmp/
