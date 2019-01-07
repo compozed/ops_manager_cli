@@ -88,7 +88,7 @@ class OpsManager::ApplianceDeployment
 
   def list_current_stemcells
     JSON.parse(installation_settings).fetch('products').inject([]) do |a, p|
-      product_name = "stemcells"
+      product_name = "stemcells-ubuntu-xenial"
       if p['stemcell'].fetch('os') =~ /windows/i
         product_name = "stemcells-windows-server"
       end
