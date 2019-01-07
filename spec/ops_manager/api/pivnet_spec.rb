@@ -19,7 +19,7 @@ describe OpsManager::Api::Pivnet do
     end
 
     describe 'when correct product_slug is passed' do
-      let(:product_slug){ 'stemcells-ubuntu-xenial' }
+      let(:product_slug){ 'stemcells' }
 
       it 'should run successfully' do
         get_product_releases
@@ -38,7 +38,7 @@ describe OpsManager::Api::Pivnet do
     end
 
     describe 'when correct product_slug and release_id is passed' do
-      let(:product_slug){ 'stemcells-ubuntu-xenial' }
+      let(:product_slug){ 'stemcells' }
       let(:release_id){ 1 }
 
       it 'should run successfully' do
@@ -58,7 +58,7 @@ describe OpsManager::Api::Pivnet do
     end
 
     describe 'when correct product_slug and release_id is passed' do
-      let(:product_slug){ 'stemcells-ubuntu-xenial' }
+      let(:product_slug){ 'stemcells' }
       let(:release_id){ 1 }
 
       it 'should run successfully' do
@@ -78,7 +78,7 @@ describe OpsManager::Api::Pivnet do
     end
 
     describe 'when correct product slug, release_id and file_id is passed' do
-      let(:product_slug){ 'stemcells-ubuntu-xenial' }
+      let(:product_slug){ 'stemcells' }
       let(:release_id){ 1 }
       let(:file_id){ 1 }
 

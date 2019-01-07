@@ -146,6 +146,7 @@ describe OpsManager::ApplianceDeployment do
     let(:version){ "3062" }
     let(:other_version){ "3063" }
     let(:windows_version){ "1200" }
+    let(:xenial_version){ "97" }
     let(:installation_settings) do
       {
         "products" => [
@@ -154,6 +155,7 @@ describe OpsManager::ApplianceDeployment do
           { "stemcell": { "version" => version,         "os" => "ubuntu-trusty"} },
           { "stemcell": { "version" => version,         "os" => "ubuntu-trusty"} },
           { "stemcell": { "version" => windows_version, "os" => "windowsR2012"} },
+          { "stemcell": { "version" => xenial_version,  "os" => "stemcells-ubuntu-xenial"} },
         ]
       }
     end
@@ -167,9 +169,10 @@ describe OpsManager::ApplianceDeployment do
     describe 'when installation_settings are present' do
       it 'should return uniqued list of current stemcells, with version and their corresponding product' do
         expect(list_current_stemcells).to eq([
-          {version: version,         product: "stemcells-ubuntu-xenial"},
-          {version: other_version,   product: "stemcells-ubuntu-xenial"},
+          {version: version,         product: "stemcells"},
+          {version: other_version,   product: "stemcells"},
           {version: windows_version, product: "stemcells-windows-server" },
+          {version: xenial_version, product:  "stemcells-ubuntu-xenial" },
         ])
       end
     end
@@ -253,21 +256,24 @@ describe OpsManager::ApplianceDeployment do
   describe '#download_current_stemcells' do
     subject(:download_current_stemcells){ appliance_deployment.download_current_stemcells }
     let(:current_stemcells){ [
-      {version: "97.43", product: "stemcells-ubuntu-xenial"},
-      {version: "97.42", product: "stemcells-ubuntu-xenial"},
+      {version: "3062.0", product: "stemcells"},
+      {version: "3063.0", product: "stemcells"},
       {version: "1200.12", product: "stemcells-windows-server"},
+      {version: "97.42", product: "stemcells-ubuntu-xenial"},
     ]}
     let(:release_id){ rand(1000..9999) }
     let(:file_id)   { rand(1000..9999) }
     let(:stemcell_filepath){ "bosh-stemcell-3062.0-vcloud-esxi-ubuntu-trusty-go_agent.tgz" }
     let(:windows_filepath){ "light-bosh-stemcell-1200.12-vsphere-xen-hvm-windows2012R2-go_agent.tgz" }
+    let(:xenial_filepath){ "light-bosh-stemcell-97.43-vsphere-xen-hvm-ubuntu-xenial-go_agent.tgz" }
 
     before do
       allow(appliance_deployment).tap do |ad|
         ad.to receive(:list_current_stemcells).and_return(current_stemcells)
         ad.to receive(:find_stemcell_release).and_return(release_id)
-        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells-ubuntu-xenial").and_return([file_id, stemcell_filepath])
+        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells").and_return([file_id, stemcell_filepath])
         ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells-windows-server").and_return([file_id, windows_filepath])
+        ad.to receive(:find_stemcell_file).with(release_id, /vsphere/, "stemcells-ubuntu-xenial").and_return([file_id, xenial_filepath])
         ad.to receive(:accept_product_release_eula)
         ad.to receive(:download_product_release_file)
       end
@@ -275,13 +281,17 @@ describe OpsManager::ApplianceDeployment do
 
     it 'should download all stemcells from the appropriate products' do
       expect(appliance_deployment).to receive(:download_product_release_file)
-        .with('stemcells-ubuntu-xenial', release_id, file_id, write_to: "/tmp/current_stemcells/#{stemcell_filepath}" ).twice
+        .with('stemcells', release_id, file_id, write_to: "/tmp/current_stemcells/#{stemcell_filepath}" ).twice
       expect(appliance_deployment).to receive(:download_product_release_file)
         .with('stemcells-windows-server', release_id, file_id, write_to: "/tmp/current_stemcells/#{windows_filepath}" )
+      expect(appliance_deployment).to receive(:download_product_release_file)
+        .with('stemcells-ubuntu-xenial', release_id, file_id, write_to: "/tmp/current_stemcells/#{xenial_filepath}" )
       download_current_stemcells
     end
 
     it 'should accept product release eulas' do
+      expect(appliance_deployment).to receive(:accept_product_release_eula).with('stemcells', release_id)
+      expect(appliance_deployment).to receive(:accept_product_release_eula).with('stemcells-windows-server', release_id)
       expect(appliance_deployment).to receive(:accept_product_release_eula).with('stemcells-ubuntu-xenial', release_id)
       download_current_stemcells
     end
