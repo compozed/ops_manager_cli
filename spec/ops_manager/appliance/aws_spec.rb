@@ -20,7 +20,7 @@ describe OpsManager::Appliance::AWS do
       opts: {
         region: 'us-east-1',
         availability_zone: 'us-east-1b',
-        ami_mapping_file: 'ami/*.yml',
+        image_id: 'ami-provided-by-config',
         instance_type: 'm4.medium',
         ssh_keypair_name: keypair_name,
         security_groups: ['sec-group-1','sec-group-2'],
@@ -73,7 +73,7 @@ describe OpsManager::Appliance::AWS do
       expect(server.key_name).to eq(config[:opts][:ssh_keypair_name])
       expect(server.private_ip_address).to eq(config[:ip])
       expect(server.availability_zone).to eq(config[:opts][:availability_zone])
-      expect(server.image_id).to eq('ami-a26bacd8')
+      expect(server.image_id).to eq('ami-provided-by-config')
       disk = connection.volumes.get(server.block_device_mapping[0]["volumeId"])
       expect(disk.size).to eq(config[:opts][:disk_size_in_gb])
 
@@ -117,7 +117,7 @@ describe OpsManager::Appliance::AWS do
       expect(server).not_to be_nil
     end
     it 'should stop a vm, image it, and then destroy it, to free up the IP' do
-      expect do 
+      expect do
         aws.stop_current_vm('ops-manager-aws-1.4.11.0')
       end.to change{
         connection.images.all().count

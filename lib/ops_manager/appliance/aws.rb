@@ -6,8 +6,6 @@ class OpsManager
     class AWS < Base
 
       def deploy_vm
-        image_id = ::YAML.load_file(ami_mapping_file)[config[:opts][:region]]
-
         server = connection.servers.create(
           block_device_mapping: [{
             'DeviceName'     => '/dev/xvda',
@@ -16,7 +14,7 @@ class OpsManager
           key_name: config[:opts][:ssh_keypair_name],
           flavor_id: config[:opts][:instance_type],
           subnet_id: config[:opts][:subnet_id],
-          image_id: image_id,
+          image_id: config[:opts][:image_id],
           private_ip_address: config[:ip],
           security_group_ids: security_group_ids,
           availability_zone: config[:opts][:availability_zone],

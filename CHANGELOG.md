@@ -1,6 +1,14 @@
 # Change Log
 
 
+## [v0.7.14](https://github.com/compozed/ops_manager_cli/tree/v0.7.14 (2019-01-21)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.13...v0.7.14)
+
+AWS appliance deployments no longer require the `ami_mapping_file`. Instead you must do
+the mapping lookup (if needed) prior to calling opsman, and pass it an explicit `image_id`
+option, pointing `ops_manager_cli` at a custom AMI. This allows it to easily support deploying
+OpsManager using an encrypted AMI.
+
 ## [v0.7.13](https://github.com/compozed/ops_manager_cli/tree/v0.7.13 (2019-01-08)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.12...v0.7.13)
 
