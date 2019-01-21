@@ -124,13 +124,19 @@ describe OpsManager::ApplianceDeployment do
     end
 
     it 'should trigger installation' do
-      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with("all")
       upgrade
     end
 
     it 'should trigger installation with specific deployments' do
       config[:single_tile_deploy] = true
       expect(OpsManager::InstallationRunner).to receive(:trigger!).with("none")
+      upgrade
+    end
+
+    it 'should trigger installation with selected deployments' do
+      config[:selected_deployments] = ["product-guid-1", "product-guid-2"]
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(["product-guid-1", "product-guid-2"])
       upgrade
     end
 
@@ -441,7 +447,7 @@ describe OpsManager::ApplianceDeployment do
         let(:pending_changes_response){ {"product_changes": [{ "guid": "cf" }]} }
 
         it 'should apply changes' do
-          expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+          expect(OpsManager::InstallationRunner).to receive(:trigger!).with("all")
           expect do
             run
           end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout
@@ -449,6 +455,13 @@ describe OpsManager::ApplianceDeployment do
         it 'should apply changes to the director only' do
           config[:single_tile_deploy] = true
           expect(OpsManager::InstallationRunner).to receive(:trigger!).with("none")
+          expect do
+            run
+          end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout
+        end
+        it 'should apply changes to the selected deployments' do
+          config[:selected_deployments] = ["product-guid-1", "product-guid-2"]
+          expect(OpsManager::InstallationRunner).to receive(:trigger!).with(["product-guid-1", "product-guid-2"])
           expect do
             run
           end.to output(/OpsManager at #{target} version has pending changes. Applying changes.../).to_stdout

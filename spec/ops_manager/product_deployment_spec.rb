@@ -146,13 +146,19 @@ describe OpsManager::ProductDeployment do
     end
 
     it 'should trigger installation' do
-      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with("all")
       deploy
     end
 
     it 'should trigger installation with specific deployments' do
       config[:single_tile_deploy] = true
       expect(OpsManager::InstallationRunner).to receive(:trigger!).with([guid])
+      deploy
+    end
+
+    it 'should trigger installation with selected deployments' do
+      config[:selected_deployments] = ["product-guid-1", "product-guid-2"]
+      expect(OpsManager::InstallationRunner).to receive(:trigger!).with(["product-guid-1", "product-guid-2"])
       deploy
     end
 
@@ -201,7 +207,7 @@ describe OpsManager::ProductDeployment do
       end
 
       it 'should trigger installation' do
-        expect(OpsManager::InstallationRunner).to receive(:trigger!).with(no_args)
+        expect(OpsManager::InstallationRunner).to receive(:trigger!).with("all")
         upgrade
       end
 
@@ -211,6 +217,11 @@ describe OpsManager::ProductDeployment do
         upgrade
       end
 
+      it 'should trigger installation with selected deployments' do
+        config[:selected_deployments] = ["product-guid-1", "product-guid-2"]
+        expect(OpsManager::InstallationRunner).to receive(:trigger!).with(["product-guid-1", "product-guid-2"])
+        upgrade
+      end
 
       it 'should wait for installation' do
         expect(installation).to receive(:wait_for_result)
@@ -279,7 +290,7 @@ describe OpsManager::ProductDeployment do
     end
 
     it 'should provision stemcell to all products without single tile deployment set' do
-      expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz')
+      expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz', "all")
       run
     end
 
@@ -288,6 +299,13 @@ describe OpsManager::ProductDeployment do
       expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz', [guid])
       run
     end
+
+    it 'should provision stemcell to specific multiple products when selected_deployments is set' do
+      config[:selected_deployments] = ["product-guid-1", "product-guid-2"]
+      expect(product_deployment).to receive(:import_stemcell).with('stemcell.tgz', ["product-guid-1", "product-guid-2"])
+      run
+    end
+
 
     it 'should execute a product deploy' do
       expect(product_deployment).to receive(:deploy)

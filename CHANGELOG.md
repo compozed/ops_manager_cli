@@ -1,5 +1,20 @@
 # Change Log
 
+## [v0.7.12]://github.com/compozed/ops_manager_cli/tree/v0.7.12) (2018-10-29)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.11...v0.7.12)
+
+- Adds support for deploying multiple tiles (but not all) at once. This is useful for
+  scenarios like deploying PAS at the same time as Isolation Segments or Windows Runtime
+  tiles. Instead of specifying `single_tile_deployment` in your config, specify `selected_deployments`,
+  with its value being a list of all product guids to deploy:
+
+```
+selected_deployments:
+- product-guid-1234
+- other-product-5678
+```
+
+
 ## [v0.7.11]://github.com/compozed/ops_manager_cli/tree/v0.7.11) (2018-10-16)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.10...v0.7.11)
 

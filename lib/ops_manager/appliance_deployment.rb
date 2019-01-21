@@ -38,11 +38,13 @@ class OpsManager::ApplianceDeployment
     when current_version == desired_version then
       if pending_changes?
         puts "OpsManager at #{config[:ip]} version has pending changes. Applying changes...".green
-        if config[:single_tile_deploy]
-          OpsManager::InstallationRunner.trigger!("none").wait_for_result
-        else
-          OpsManager::InstallationRunner.trigger!.wait_for_result
+        products = "all"
+        if config[:selected_deployments]
+          products = config[:selected_deployments]
+        elsif config[:single_tile_deploy]
+          products = "none"
         end
+        OpsManager::InstallationRunner.trigger!(products).wait_for_result
       else
         puts "OpsManager at #{config[:ip]} version is already #{config[:desired_version]}. Skiping ...".green
       end
@@ -79,11 +81,13 @@ class OpsManager::ApplianceDeployment
     upload_installation_assets
     wait_for_uaa
     provision_stemcells
-    if config[:single_tile_deploy]
-      OpsManager::InstallationRunner.trigger!("none").wait_for_result
-    else
-      OpsManager::InstallationRunner.trigger!.wait_for_result
+    products = "all"
+    if config[:selected_deployments]
+      products = config[:selected_deployments]
+    elsif config[:single_tile_deploy]
+      products = "none"
     end
+    OpsManager::InstallationRunner.trigger!(products).wait_for_result
   end
 
   def list_current_stemcells
