@@ -96,6 +96,9 @@ class OpsManager::ApplianceDeployment
       if p['stemcell'].fetch('os') =~ /windows/i
         product_name = "stemcells-windows-server"
       end
+      if p['stemcell'].fetch('os') =~ /ubuntu-xenial/i
+        product_name = "stemcells-ubuntu-xenial"
+      end
       a << { version: p['stemcell'].fetch('version'), product: product_name }
     end.uniq
   end

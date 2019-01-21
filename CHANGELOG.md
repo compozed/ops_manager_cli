@@ -1,5 +1,11 @@
 # Change Log
 
+
+## [v0.7.13](https://github.com/compozed/ops_manager_cli/tree/v0.7.13 (2019-01-08)
+[Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.12...v0.7.13)
+
+Fixes a bug when upgrading an opsmanager VM that has Xenial stemcells on it
+
 ## [v0.7.12]://github.com/compozed/ops_manager_cli/tree/v0.7.12) (2018-10-29)
 [Full Changelog](https://github.com/compozed/ops_manager_cli/compare/v0.7.11...v0.7.12)
 

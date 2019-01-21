@@ -1,8 +1,8 @@
 FROM ruby:2.4.1
 
 ENV GEM_NAME ops_manager_cli
-ENV GEM_VERSION 0.7.12
-ENV SPRUCE_VERSION 1.17.0
+ENV GEM_VERSION 0.7.13
+ENV SPRUCE_VERSION 1.19.1
 ENV JQ_VERSION 1.5
 ENV OM_VERSION 0.42.0
 ENV OVFTOOL_VERSION 4.3.0-7948156
@@ -21,7 +21,7 @@ RUN wget -q --no-check-certificate ${DOWNLOAD_URL} \
  && rm -f ${OVFTOOL_INSTALLER}*
 
 # ================== Installs Spruce ==============
-RUN wget -q -O /usr/local/bin/spruce --no-check-certificate https://github.com/geofffranks/spruce/releases/download/v${SPRUCE_VERSION}/spruce-linux-amd64 \
+RUN wget -v -O /usr/local/bin/spruce --no-check-certificate https://github.com/geofffranks/spruce/releases/download/v${SPRUCE_VERSION}/spruce-linux-amd64 \
  && chmod +x /usr/local/bin/spruce
 
 # ================== Installs JQ ==============
